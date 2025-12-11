@@ -1,0 +1,27 @@
+<addon id="plugin.video.filteredmovies"
+       name="Filtered Movies"
+       version="1.0.1"
+       provider-name="forbxy">
+
+    <requires>
+        <import addon="xbmc.python" version="3.0.0" />
+    </requires>
+
+    <!-- 真正的插件入口定义 -->
+    <extension point="xbmc.python.pluginsource" library="default.py">
+        <provides>video</provides>
+    </extension>
+
+    <!-- 注册 window_handler.py 为脚本模块 -->
+    <extension point="xbmc.python.script" library="window_handler.py">
+        <provides>executable</provides>
+    </extension>
+
+    <!-- 元数据 -->
+    <extension point="xbmc.addon.metadata">
+        <summary>Movies list with UI filters</summary>
+        <description>Provide filtered movie list to custom skin view</description>
+        <platform>all</platform>
+    </extension>
+
+</addon>
