@@ -1,2 +1,3 @@
 __pycache__/
 movie_t9_cache.json
+dist/
