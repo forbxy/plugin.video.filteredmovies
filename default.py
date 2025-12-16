@@ -12,13 +12,30 @@ import xbmcvfs
 import os
 import cache_manager
 
-HANDLE = int(sys.argv[1])
+try:
+    HANDLE = int(sys.argv[1])
+except (IndexError, ValueError):
+    HANDLE = -1
+
 ADDON_PATH = xbmcvfs.translatePath("special://home/addons/plugin.video.filteredmovies/")
 
 def log(msg): xbmc.log(f"[moviefilter] {msg}", xbmc.LOGINFO)
 
-
-
+def open_settings_and_click(window_id, clicks=2):
+    """
+    打开指定窗口，并向下移动指定次数后点击
+    """
+    xbmc.executebuiltin(f'ActivateWindow({window_id})')
+    # 稍微延迟一下，确保窗口打开
+    xbmc.sleep(100)
+    
+    # 移动焦点
+    for _ in range(clicks):
+        xbmc.executebuiltin('Action(Down)')
+        xbmc.sleep(20)
+    
+    # 点击
+    xbmc.executebuiltin('Action(Select)')
 
 def get_skin_filter(key, default=""):
     # 从皮肤变量里读状态：filter.sort / filter.genre / filter.country / filter.letter
@@ -759,6 +776,14 @@ def router(paramstring):
         del w
         return
 
+    if mode == "open_sub_settings":
+        open_settings_and_click('osdsubtitlesettings', clicks=2)
+        return
+
+    if mode == "open_audio_settings":
+        open_settings_and_click('osdaudiosettings', clicks=4)
+        return
+
     if mode == "play":
         play_movie(int(params.get("id", params.get("movieid"))))
     elif mode == "play_musicvideo":
@@ -779,4 +804,9 @@ def router(paramstring):
 if __name__ == "__main__":
     # sys.argv[0] 是 plugin://...; sys.argv[2] 是 '?xxx'
     # log(sys.argv)
-    router(sys.argv[2])
+    if HANDLE != -1 and len(sys.argv) > 2:
+        router(sys.argv[2])
+    elif len(sys.argv) > 1:
+        router(sys.argv[1])
+    else:
+        router("")
