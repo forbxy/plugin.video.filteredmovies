@@ -101,16 +101,9 @@ class T9Window(xbmcgui.WindowXML):
             current_text = self.getProperty("t9_input")
             if current_text and len(current_text) > 0:
                 self.clr_input()
-                self.last_back_time = 0
             else:
-                now = time.time()
-                last = getattr(self, 'last_back_time', 0)
-                if now - last < 2.0:
-                    self.cleanup()
-                    self.close()
-                else:
-                    self.last_back_time = now
-                    # xbmc.executebuiltin("Notification(提示, 再按一次退出, 1000)")
+                self.cleanup()
+                self.close()
             return
 
         # Stop -> 13 (Used for Clear)
