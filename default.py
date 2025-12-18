@@ -31,7 +31,7 @@ def open_settings_and_click(window_id, clicks=2):
     
     # 移动焦点
     for _ in range(clicks):
-        xbmc.executebuiltin('Action(Down)')
+        xbmc.executebuiltin('Action(Up)')
         xbmc.sleep(20)
     
     # 点击
@@ -732,11 +732,11 @@ def play_movie(movieid):
             pass
 
     # 直接用 videodb 路径播放
-    path = f"videodb://movies/titles/{movieid}/"
+    path = f"videodb://movies/titles/{movieid}"
     xbmc.executebuiltin(f"PlayMedia({path})")
 
 def play_musicvideo(mvid):
-    path = f"videodb://musicvideos/titles/{mvid}/"
+    path = f"videodb://musicvideos/titles/{mvid}"
     xbmc.executebuiltin(f"PlayMedia({path})")
 
 def router(paramstring):
@@ -777,11 +777,11 @@ def router(paramstring):
         return
 
     if mode == "open_sub_settings":
-        open_settings_and_click('osdsubtitlesettings', clicks=2)
+        open_settings_and_click('osdsubtitlesettings', clicks=4)
         return
 
     if mode == "open_audio_settings":
-        open_settings_and_click('osdaudiosettings', clicks=4)
+        open_settings_and_click('osdaudiosettings', clicks=3)
         return
 
     if mode == "play":
