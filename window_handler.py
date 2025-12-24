@@ -16,6 +16,7 @@ class T9Window(xbmcgui.WindowXML):
         self.input_queue = queue.Queue()
         self.running = True
         self.worker = threading.Thread(target=self._input_worker)
+        self.worker.daemon = True
         self.worker.start()
 
     def _input_worker(self):

@@ -40,6 +40,8 @@ def zip_addon(addon_id, version):
                     continue
                 if file == 'movie_t9_cache.json': # Explicitly requested exclusion
                     continue
+                if file == 'skip_intro_data.json': # Explicitly requested exclusion
+                    continue
                 if file.endswith('.pyc') or file.endswith('.DS_Store'):
                     continue
                 

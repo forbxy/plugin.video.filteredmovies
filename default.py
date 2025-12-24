@@ -11,6 +11,7 @@ import xbmcplugin
 import xbmcvfs
 import os
 import cache_manager
+import progress_helper
 
 try:
     HANDLE = int(sys.argv[1])
@@ -18,9 +19,125 @@ except (IndexError, ValueError):
     HANDLE = -1
 
 ADDON_PATH = xbmcvfs.translatePath("special://home/addons/plugin.video.filteredmovies/")
+SKIP_DATA_FILE = os.path.join(ADDON_PATH, 'skip_intro_data.json')
 
 def log(msg): xbmc.log(f"[moviefilter] {msg}", xbmc.LOGINFO)
 
+def load_skip_data():
+    if not os.path.exists(SKIP_DATA_FILE):
+        return {}
+    try:
+        with open(SKIP_DATA_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        log(f"Error loading skip data: {e}")
+        return {}
+
+def save_skip_data(data):
+    try:
+        with open(SKIP_DATA_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+    except Exception as e:
+        log(f"Error saving skip data: {e}")
+
+def get_current_tvshow_info():
+    try:
+        # Use JSON-RPC to get reliable ID and Title
+        json_query = {
+            "jsonrpc": "2.0",
+            "method": "Player.GetItem",
+            "params": {
+                "properties": ["tvshowid", "showtitle", "season"],
+                "playerid": 1
+            },
+            "id": 1
+        }
+        json_response = xbmc.executeJSONRPC(json.dumps(json_query))
+        response = json.loads(json_response)
+        
+        if 'result' in response and 'item' in response['result']:
+            item = response['result']['item']
+            tvshow_id = item.get('tvshowid')
+            show_title = item.get('showtitle')
+            season = item.get('season', -1)
+            
+            # Check if it's a valid TV show
+            if tvshow_id and tvshow_id != -1 and show_title:
+                return str(tvshow_id), show_title, str(season)
+    except Exception as e:
+        log(f"Error getting TV show info: {e}")
+    return None, None, None
+
+def record_skip_point():
+    tvshow_id, show_title, season = get_current_tvshow_info()
+    if not tvshow_id:
+        xbmc.executebuiltin("Notification(跳过片头, 不适用于非剧集, 2000)")
+        return
+
+    try:
+        current_time = xbmc.Player().getTime()
+        data = load_skip_data()
+        
+        # Structure: data[tvshow_id] = {"title": "Show Name", "seasons": {"1": 120, "2": 130}}
+        # Backward compatibility: if data[tvshow_id] has "time", migrate it to season "1" or default
+        
+        if tvshow_id not in data:
+            data[tvshow_id] = {"title": show_title, "seasons": {}}
+        elif "time" in data[tvshow_id]:
+            # Migrate old format
+            old_time = data[tvshow_id]["time"]
+            data[tvshow_id] = {"title": show_title, "seasons": {"1": old_time}} # Default to season 1 for migration
+        
+        # Ensure seasons dict exists
+        if "seasons" not in data[tvshow_id]:
+            data[tvshow_id]["seasons"] = {}
+            
+        data[tvshow_id]["title"] = show_title # Update title just in case
+        data[tvshow_id]["seasons"][season] = current_time
+        
+        save_skip_data(data)
+        
+        # Format time for display
+        m, s = divmod(int(current_time), 60)
+        time_str = f"{m:02d}:{s:02d}"
+        xbmc.executebuiltin(f"Notification(跳过片头, 已记录第 {season} 季: {time_str}, 2000)")
+        log(f"Recorded skip point for {show_title} Season {season} (ID: {tvshow_id}) at {current_time}")
+        
+    except Exception as e:
+        log(f"Error recording skip point: {e}")
+        xbmc.executebuiltin("Notification(跳过片头, 记录错误, 2000)")
+
+def skip_intro():
+    tvshow_id, show_title, season = get_current_tvshow_info()
+    if not tvshow_id:
+        # Not a TV show or error
+        return
+
+    data = load_skip_data()
+    if tvshow_id in data:
+        record = data[tvshow_id]
+        
+        # Check for new format "seasons"
+        skip_time = 0
+        if "seasons" in record:
+            # Try specific season first
+            if season in record["seasons"]:
+                skip_time = record["seasons"][season]
+            # Fallback to season 1 if current season not found (optional, maybe risky?)
+            # For now, let's be strict: only skip if this season is recorded.
+        elif "time" in record:
+            # Old format fallback
+            skip_time = record["time"]
+            
+        if skip_time > 0:
+            xbmc.Player().seekTime(skip_time)
+            xbmc.executebuiltin(f"Notification(跳过片头, 跳过成功 (第 {season} 季), 1000)")
+            log(f"Skipped intro for {show_title} Season {season} to {skip_time}")
+        else:
+             # No record for this season
+             pass
+    else:
+        xbmc.executebuiltin("Notification(跳过片头, 未找到记录, 1000)")
 def open_settings_and_click(window_id, clicks=2):
     """
     打开指定窗口，并向下移动指定次数后点击
@@ -178,6 +295,8 @@ def build_sort():
         return {"order": "descending", "method": "rating"}
     elif sort_key == "dateadded":
         return {"order": "descending", "method": "dateadded"}
+    elif sort_key == "lastplayed":
+        return {"order": "descending", "method": "lastplayed"}
     elif sort_key == "random":
         return {"method": "random"}
     else:
@@ -185,15 +304,15 @@ def build_sort():
         return {"order": "descending", "method": "playcount"}
 
 def get_method_and_params(media_type):
-    base_props = ["title", "thumbnail", "art", "plot", "dateadded", "rating", "playcount", "year", "genre"]
+    base_props = ["title", "thumbnail", "art", "plot", "dateadded", "rating", "playcount", "year", "genre", "lastplayed"]
     
     if media_type == "movie" or media_type == "documentary" or media_type == "musicvideo":
-        return "VideoLibrary.GetMovies", base_props + ["tagline"], "movies", "movieid"
+        return "VideoLibrary.GetMovies", base_props + ["tagline", "resume", "runtime"], "movies", "movieid"
     elif media_type == "tvshow":
-        return "VideoLibrary.GetTVShows", base_props + ["studio", "mpaa", "episode"], "tvshows", "tvshowid"
+        return "VideoLibrary.GetTVShows", base_props + ["studio", "mpaa", "episode", "watchedepisodes"], "tvshows", "tvshowid"
     elif media_type == "set":
         return "VideoLibrary.GetMovieSets", ["title", "thumbnail", "art", "plot", "playcount"], "sets", "setid"
-    return "VideoLibrary.GetMovies", base_props, "movies", "movieid"
+    return "VideoLibrary.GetMovies", base_props + ["resume", "runtime"], "movies", "movieid"
 
 def sort_items_locally(items, sort_obj):
     if not sort_obj:
@@ -218,7 +337,51 @@ def sort_items_locally(items, sort_obj):
         if method == "playcount":
             try: p = int(val)
             except: p = 0
-            return (p, date_val)
+            # Also prioritize resume for playcount (Hot)
+            has_resume = 0
+            resume = m.get("resume") or {}
+            if isinstance(resume, dict) and resume.get("position", 0) > 0:
+                has_resume = 1
+            
+            # Check for TV Show progress
+            if m.get("media_type") == "tvshow":
+                total = m.get("episode", 0)
+                watched = m.get("watchedepisodes", 0)
+                lp = m.get("lastplayed")
+                if total > 0 and watched < total and (watched > 0 or lp):
+                    has_resume = 1
+            
+            # Check for Movie Set progress
+            if m.get("media_type") == "set":
+                total = m.get("total", 0)
+                watched = m.get("watched", 0)
+                if total > 0 and watched < total and watched > 0:
+                    has_resume = 1
+
+            return (has_resume, p, date_val)
+        if method == "lastplayed":
+            # 优先显示有观看进度的 (Continue Watching 逻辑)
+            has_resume = 0
+            resume = m.get("resume") or {}
+            if isinstance(resume, dict) and resume.get("position", 0) > 0:
+                has_resume = 1
+            
+            # Check for TV Show progress
+            if m.get("media_type") == "tvshow":
+                total = m.get("episode", 0)
+                watched = m.get("watchedepisodes", 0)
+                lp = m.get("lastplayed")
+                if total > 0 and watched < total and (watched > 0 or lp):
+                    has_resume = 1
+
+            # Check for Movie Set progress
+            if m.get("media_type") == "set":
+                total = m.get("total", 0)
+                watched = m.get("watched", 0)
+                if total > 0 and watched < total and watched > 0:
+                    has_resume = 1
+
+            return (has_resume, val or "")
         if method == "dateadded":
             return val or ""
         return val or ""
@@ -257,7 +420,7 @@ def get_documentary_items(limit, allowed_ids):
     filter_obj_tv = add_rule(filter_obj_tv, doc_rule)
 
     # Fetch Movies
-    movie_props = ["title", "thumbnail", "art", "plot", "dateadded", "rating", "playcount", "year", "genre", "tagline", "file"]
+    movie_props = ["title", "thumbnail", "art", "plot", "dateadded", "rating", "playcount", "year", "genre", "tagline", "file", "resume", "runtime", "lastplayed"]
     params_movies = {
         "jsonrpc": "2.0", "id": "movies",
         "method": "VideoLibrary.GetMovies",
@@ -270,7 +433,7 @@ def get_documentary_items(limit, allowed_ids):
     }
     
     # Fetch TV Shows
-    tv_props = ["title", "thumbnail", "art", "plot", "dateadded", "rating", "playcount", "year", "genre", "studio", "mpaa", "episode", "file"]
+    tv_props = ["title", "thumbnail", "art", "plot", "dateadded", "rating", "playcount", "year", "genre", "studio", "mpaa", "episode", "watchedepisodes", "file", "lastplayed"]
     params_tv = {
         "jsonrpc": "2.0", "id": "tvshows",
         "method": "VideoLibrary.GetTVShows",
@@ -319,7 +482,7 @@ def get_all_items(limit):
     sort_obj = build_sort()
     
     # Fetch Movies
-    movie_props = ["title", "thumbnail", "art", "plot", "dateadded", "rating", "playcount", "year", "genre", "tagline", "file"]
+    movie_props = ["title", "thumbnail", "art", "plot", "dateadded", "rating", "playcount", "year", "genre", "tagline", "file", "resume", "runtime", "lastplayed"]
     params_movies = {
         "jsonrpc": "2.0", "id": "movies",
         "method": "VideoLibrary.GetMovies",
@@ -333,7 +496,7 @@ def get_all_items(limit):
         params_movies["params"]["filter"] = filter_obj_movie
     
     # Fetch TV Shows
-    tv_props = ["title", "thumbnail", "art", "plot", "dateadded", "rating", "playcount", "year", "genre", "studio", "mpaa", "episode", "file"]
+    tv_props = ["title", "thumbnail", "art", "plot", "dateadded", "rating", "playcount", "year", "genre", "studio", "mpaa", "episode", "watchedepisodes", "file", "lastplayed"]
     params_tv = {
         "jsonrpc": "2.0", "id": "tvshows",
         "method": "VideoLibrary.GetTVShows",
@@ -447,8 +610,8 @@ def jsonrpc_get_items(limit=500, allowed_ids=None):
         items_to_fetch = allowed_ids[:limit]
         
         # Define properties for each type
-        movie_props = ["title", "thumbnail", "art", "plot", "dateadded", "rating", "playcount", "year", "genre", "tagline"]
-        tv_props = ["title", "thumbnail", "art", "plot", "dateadded", "rating", "playcount", "year", "genre", "studio", "mpaa", "episode"]
+        movie_props = ["title", "thumbnail", "art", "plot", "dateadded", "rating", "playcount", "year", "genre", "tagline", "resume", "runtime", "lastplayed"]
+        tv_props = ["title", "thumbnail", "art", "plot", "dateadded", "rating", "playcount", "year", "genre", "studio", "mpaa", "episode", "watchedepisodes", "lastplayed"]
         set_props = ["title", "thumbnail", "art", "plot", "playcount"]
         
         for i, item_data in enumerate(items_to_fetch):
@@ -499,6 +662,11 @@ def jsonrpc_get_items(limit=500, allowed_ids=None):
         
         items = []
         
+        # Fetch partial progress for TV shows
+        partial_progress_map = {}
+        if any(cmd.get("method") == "VideoLibrary.GetTVShowDetails" for cmd in batch_cmds):
+             partial_progress_map = progress_helper.get_inprogress_episodes_map()
+
         if isinstance(results, list):
             for res in results:
                 if "result" in res:
@@ -510,6 +678,10 @@ def jsonrpc_get_items(limit=500, allowed_ids=None):
                     elif "tvshowdetails" in res_val:
                         item = res_val["tvshowdetails"]
                         item["media_type"] = "tvshow"
+                        # Attach partial progress
+                        tid = item.get("tvshowid")
+                        if tid:
+                            item["partial_progress"] = partial_progress_map.get(tid, 0.0)
                         items.append(item)
                     elif "setdetails" in res_val:
                         item = res_val["setdetails"]
@@ -549,6 +721,14 @@ def jsonrpc_get_items(limit=500, allowed_ids=None):
     data = json.loads(resp)
     items = data.get("result", {}).get(result_key, [])
     
+    # If fetching TV shows, enrich with partial progress
+    if media_type == "tvshow":
+        partial_progress_map = progress_helper.get_inprogress_episodes_map()
+        for item in items:
+            tid = item.get("tvshowid")
+            if tid:
+                item["partial_progress"] = partial_progress_map.get(tid, 0.0)
+    
     # Strict filtering for musicvideo (Concert) - must ONLY have "Music" or "音乐" genre
     if media_type == "musicvideo":
         filtered_items = []
@@ -562,6 +742,9 @@ def jsonrpc_get_items(limit=500, allowed_ids=None):
     for item in items:
         item["media_type"] = media_type
         
+    # Apply local sort to enforce custom logic (e.g. resume priority)
+    items = sort_items_locally(items, sort_obj)
+
     log(f"returned {len(items)} items")
     return items
 
@@ -632,8 +815,6 @@ def enrich_sets_with_art(items):
     return items
 
 def list_videos():
-    log("调用list_movies")
-    
     # 记录列表加载时间，用于防止自动播放
     xbmcgui.Window(10000).setProperty("MovieFilter_LastListTime", str(time.time()))
 
@@ -693,13 +874,67 @@ def list_videos():
         if not item_id:
             continue
 
-        li.setProperty("IsPlayable", "true" if mode in ["play", "play_musicvideo"] else "false")
+        # Set IsPlayable to false to avoid double resume dialogs (plugin handles playback via PlayMedia)
+        li.setProperty("IsPlayable", "false")
         info_tag = li.getVideoInfoTag()
         info_tag.setTitle(m["title"])
         info_tag.setYear(m.get("year", 0))
         info_tag.setGenres(m.get("genre", []))
         info_tag.setPlot(m.get("plot", ""))
         info_tag.setRating(m.get("rating", 0.0))
+        
+        # Set resume point if available
+        resume = m.get("resume", {})
+        
+        if media_type == "tvshow":
+            total_episodes = m.get("episode", 0)
+            watched_episodes = m.get("watchedepisodes", 0)
+            last_played = m.get("lastplayed", "")
+            
+            # Since GetTVShows doesn't return resume, we use lastplayed as a proxy
+            # If watchedepisodes is 0 but lastplayed is set, it implies user has started watching.
+            has_partial = 0
+            if watched_episodes == 0 and last_played:
+                has_partial = 1
+            
+            if total_episodes > 0:
+                # Calculate percentage
+                # Use watched count + partial progress from in-progress episodes
+                partial = m.get("partial_progress", 0.0)
+                val = float(watched_episodes) + partial
+                
+                pct = int((val / total_episodes) * 100)
+                if pct > 100: pct = 100
+                # Ensure at least 1% if we think it's started (has partial or lastplayed)
+                if (partial > 0 or (watched_episodes == 0 and last_played)) and pct == 0: 
+                    pct = 1
+                
+                li.setProperty("SkinPercentPlayed", str(pct))
+        
+        elif media_type == "set":
+            total_movies = m.get("total", 0)
+            watched_movies = m.get("watched", 0)
+            
+            if total_movies > 0:
+                # For sets, we don't have lastplayed easily, so we just use watched count
+                val = float(watched_movies)
+                pct = int((val / total_movies) * 100)
+                if pct > 100: pct = 100
+                li.setProperty("SkinPercentPlayed", str(pct))
+
+        elif resume and "position" in resume and resume["position"] > 0:
+            total = resume.get("total", 0)
+            if total == 0:
+                total = m.get("runtime", 0)
+            
+            if total > 0:
+                # info_tag.setResumePoint(resume["position"], total)
+                # Also set property for skin visibility checks if needed
+                pct = int((resume["position"] / total) * 100)
+                li.setProperty("SkinPercentPlayed", str(pct))
+            else:
+                # info_tag.setResumePoint(resume["position"])
+                pass
         
         # Set MediaType for skin to show correct icons/info
         info_tag.setMediaType(media_type if media_type not in ["documentary", "musicvideo"] else "movie")
@@ -739,9 +974,38 @@ def play_musicvideo(mvid):
     path = f"videodb://musicvideos/titles/{mvid}"
     xbmc.executebuiltin(f"PlayMedia({path})")
 
+def open_playing_tvshow():
+    # Close any open dialogs (OSD, SeekBar, Info, etc.)
+    xbmc.executebuiltin("Dialog.Close(all,true)")
+    xbmc.sleep(200)
+    
+    try:
+        json_query = {
+            "jsonrpc": "2.0",
+            "method": "Player.GetItem",
+            "params": {
+                "properties": ["tvshowid"],
+                "playerid": 1
+            },
+            "id": 1
+        }
+        json_response = xbmc.executeJSONRPC(json.dumps(json_query))
+        response = json.loads(json_response)
+        
+        if 'result' in response and 'item' in response['result']:
+            item = response['result']['item']
+            tvshow_id = item.get('tvshowid')
+            
+            if tvshow_id and tvshow_id != -1:
+                log(f"Opening TVShow ID: {tvshow_id}")
+                path = f"videodb://tvshows/titles/{tvshow_id}/"
+                xbmc.executebuiltin(f"ActivateWindow(Videos,{path},return)")
+            else:
+                log("Current playing item has no TV show ID")
+    except Exception as e:
+        log(f"Error opening playing tvshow: {e}")
+
 def router(paramstring):
-    log("\n\n              <----------------------")
-    log("调用router, paramstring=" + paramstring)
     if not paramstring:
         # 列表模式
         list_videos()
@@ -750,7 +1014,6 @@ def router(paramstring):
     # 解析路径，例如 plugin://..../?mode=play&movieid=1
     params = dict(urllib.parse.parse_qsl(paramstring.lstrip('?')))
     mode = params.get("mode")
-    log(f"解析后参数 {params}")
     
     if mode == "record_click":
         # 记录点击时间
@@ -759,7 +1022,6 @@ def router(paramstring):
 
     if mode == "clear":
         # 清空列表
-        log(f"调用清空")
         xbmcplugin.endOfDirectory(HANDLE, cacheToDisc=False)
         return
 
@@ -773,6 +1035,7 @@ def router(paramstring):
         # 创建并显示窗口
         w = window_handler.T9Window('Custom_1111_MovieFilter.xml', skin_path, 'Default', '1111')
         w.doModal()
+        w.cleanup()
         del w
         return
 
@@ -782,6 +1045,36 @@ def router(paramstring):
 
     if mode == "open_audio_settings":
         open_settings_and_click('osdaudiosettings', clicks=3)
+        return
+
+    if mode == "open_playing_tvshow":
+        open_playing_tvshow()
+        return
+
+    if mode == "record_intro":
+        record_skip_point()
+        return
+
+    if mode == "skip_intro":
+        skip_intro()
+        return
+
+    if mode == "force_prev":
+        # 强制播放上一集（忽略播放进度）
+        pl = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+        pos = pl.getposition()
+        if pos > 0:
+            # 使用 JSON-RPC Player.GoTo 跳转
+            json_query = {
+                "jsonrpc": "2.0",
+                "method": "Player.GoTo",
+                "params": {
+                    "playerid": 1,
+                    "to": pos - 1
+                },
+                "id": 1
+            }
+            xbmc.executeJSONRPC(json.dumps(json_query))
         return
 
     if mode == "play":

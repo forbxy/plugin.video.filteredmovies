@@ -1,6 +1,6 @@
 <addon id="plugin.video.filteredmovies"
        name="Filtered Movies"
-       version="1.0.4"
+       version="1.0.5"
        provider-name="forbxy">
 
     <requires>

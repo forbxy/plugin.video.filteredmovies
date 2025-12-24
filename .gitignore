@@ -1,3 +1,4 @@
 __pycache__/
 movie_t9_cache.json
+skip_intro_data.json
 dist/
