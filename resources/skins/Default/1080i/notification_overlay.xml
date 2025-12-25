@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window type="dialog">
+    <zorder>3</zorder>
+    <controls>
+        <control type="group">
+            <top>40</top>
+            <right>0</right>
+            <width>480</width>
+            <height>80</height>
+            <control type="image">
+                <left>0</left>
+                <top>0</top>
+                <width>480</width>
+                <height>80</height>
+                <texture>dialogs/dialog-bg-nobo.png</texture>
+                <colordiffuse>A0FFFFFF</colordiffuse>
+                <bordertexture border="21" infill="false">overlays/shadow.png</bordertexture>
+                <bordersize>20</bordersize>
+            </control>
+            <control type="label" id="100">
+                <left>15</left>
+                <top>0</top>
+                <width>440</width>
+                <height>80</height>
+                <align>center</align>
+                <aligny>center</aligny>
+                <font>font13</font>
+                <textcolor>white</textcolor>
+                <label></label>
+            </control>
+        </control>
+    </controls>
+</window>

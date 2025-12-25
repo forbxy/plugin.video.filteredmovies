@@ -71,73 +71,129 @@ def get_current_tvshow_info():
 def record_skip_point():
     tvshow_id, show_title, season = get_current_tvshow_info()
     if not tvshow_id:
-        xbmc.executebuiltin("Notification(跳过片头, 不适用于非剧集, 2000)")
+        xbmc.executebuiltin("Notification(跳过设置, 不适用于非剧集, 2000)")
         return
 
     try:
-        current_time = xbmc.Player().getTime()
-        data = load_skip_data()
+        player = xbmc.Player()
+        current_time = player.getTime()
+        total_time = player.getTotalTime()
         
-        # Structure: data[tvshow_id] = {"title": "Show Name", "seasons": {"1": 120, "2": 130}}
-        # Backward compatibility: if data[tvshow_id] has "time", migrate it to season "1" or default
+        if total_time <= 0:
+            return
+
+        percentage = (current_time / total_time) * 100
+        data = load_skip_data()
         
         if tvshow_id not in data:
             data[tvshow_id] = {"title": show_title, "seasons": {}}
         elif "time" in data[tvshow_id]:
             # Migrate old format
             old_time = data[tvshow_id]["time"]
-            data[tvshow_id] = {"title": show_title, "seasons": {"1": old_time}} # Default to season 1 for migration
+            data[tvshow_id] = {"title": show_title, "seasons": {"1": {"intro": old_time}}}
+            del data[tvshow_id]["time"]
         
-        # Ensure seasons dict exists
         if "seasons" not in data[tvshow_id]:
             data[tvshow_id]["seasons"] = {}
             
-        data[tvshow_id]["title"] = show_title # Update title just in case
-        data[tvshow_id]["seasons"][season] = current_time
+        data[tvshow_id]["title"] = show_title 
         
+        # Get existing season data
+        season_data = data[tvshow_id]["seasons"].get(season, {})
+        # Handle legacy format (if it was just a number)
+        if isinstance(season_data, (int, float)):
+            season_data = {"intro": season_data}
+            
+        msg = ""
+        if percentage < 20:
+            season_data["intro"] = current_time
+            m, s = divmod(int(current_time), 60)
+            msg = f"已记录片头: {m:02d}:{s:02d}"
+        elif percentage > 80:
+            # 记录片尾时长 (总时长 - 当前时间)
+            outro_duration = total_time - current_time
+            season_data["outro"] = outro_duration
+            m, s = divmod(int(outro_duration), 60)
+            msg = f"已记录片尾时长: {m:02d}:{s:02d}"
+        else:
+            xbmc.executebuiltin("Notification(记录失败, 请在开头或结尾20%处调用, 2000)")
+            return
+
+        data[tvshow_id]["seasons"][season] = season_data
         save_skip_data(data)
         
-        # Format time for display
-        m, s = divmod(int(current_time), 60)
-        time_str = f"{m:02d}:{s:02d}"
-        xbmc.executebuiltin(f"Notification(跳过片头, 已记录第 {season} 季: {time_str}, 2000)")
-        log(f"Recorded skip point for {show_title} Season {season} (ID: {tvshow_id}) at {current_time}")
+        # 通知 service 重新加载数据
+        xbmcgui.Window(10000).setProperty("FilteredMovies.Reload", "true")
+        
+        xbmc.executebuiltin(f"Notification(跳过设置, {msg} (第 {season} 季), 2000)")
+        log(f"Recorded skip point for {show_title} Season {season}: {season_data}")
         
     except Exception as e:
         log(f"Error recording skip point: {e}")
-        xbmc.executebuiltin("Notification(跳过片头, 记录错误, 2000)")
+        xbmc.executebuiltin("Notification(跳过设置, 记录错误, 2000)")
 
-def skip_intro():
+def delete_skip_point():
     tvshow_id, show_title, season = get_current_tvshow_info()
     if not tvshow_id:
-        # Not a TV show or error
+        xbmc.executebuiltin("Notification(跳过设置, 不适用于非剧集, 2000)")
         return
 
-    data = load_skip_data()
-    if tvshow_id in data:
-        record = data[tvshow_id]
+    try:
+        player = xbmc.Player()
+        current_time = player.getTime()
+        total_time = player.getTotalTime()
         
-        # Check for new format "seasons"
-        skip_time = 0
-        if "seasons" in record:
-            # Try specific season first
-            if season in record["seasons"]:
-                skip_time = record["seasons"][season]
-            # Fallback to season 1 if current season not found (optional, maybe risky?)
-            # For now, let's be strict: only skip if this season is recorded.
-        elif "time" in record:
-            # Old format fallback
-            skip_time = record["time"]
-            
-        if skip_time > 0:
-            xbmc.Player().seekTime(skip_time)
-            xbmc.executebuiltin(f"Notification(跳过片头, 跳过成功 (第 {season} 季), 1000)")
-            log(f"Skipped intro for {show_title} Season {season} to {skip_time}")
+        if total_time <= 0:
+            return
+
+        percentage = (current_time / total_time) * 100
+        data = load_skip_data()
+        
+        if tvshow_id not in data or "seasons" not in data[tvshow_id] or season not in data[tvshow_id]["seasons"]:
+            xbmc.executebuiltin("Notification(跳过设置, 当前无记录, 2000)")
+            return
+
+        season_data = data[tvshow_id]["seasons"][season]
+        if isinstance(season_data, (int, float)):
+             season_data = {"intro": season_data}
+
+        msg = ""
+        if percentage < 20:
+            if "intro" in season_data:
+                del season_data["intro"]
+                msg = "已删除片头记录"
+            else:
+                msg = "当前无片头记录"
+        elif percentage > 80:
+            if "outro" in season_data:
+                del season_data["outro"]
+                msg = "已删除片尾记录"
+            else:
+                msg = "当前无片尾记录"
         else:
-             # No record for this season
-             pass
-    else:
-        xbmc.executebuiltin("Notification(跳过片头, 未找到记录, 1000)")
+            xbmc.executebuiltin("Notification(删除失败, 请在开头或结尾20%处调用, 2000)")
+            return
+
+        # Clean up empty dicts
+        if not season_data:
+            del data[tvshow_id]["seasons"][season]
+        else:
+            data[tvshow_id]["seasons"][season] = season_data
+            
+        if not data[tvshow_id]["seasons"]:
+            del data[tvshow_id]
+
+        save_skip_data(data)
+        
+        # 通知 service 重新加载数据
+        xbmcgui.Window(10000).setProperty("FilteredMovies.Reload", "true")
+        
+        xbmc.executebuiltin(f"Notification(跳过设置, {msg}, 2000)")
+        
+    except Exception as e:
+        log(f"Error deleting skip point: {e}")
+        xbmc.executebuiltin("Notification(跳过设置, 删除错误, 2000)")
+
 def open_settings_and_click(window_id, clicks=2):
     """
     打开指定窗口，并向下移动指定次数后点击
@@ -1051,12 +1107,12 @@ def router(paramstring):
         open_playing_tvshow()
         return
 
-    if mode == "record_intro":
+    if mode == "record_skip_point":
         record_skip_point()
         return
 
-    if mode == "skip_intro":
-        skip_intro()
+    if mode == "delete_skip_point":
+        delete_skip_point()
         return
 
     if mode == "force_prev":

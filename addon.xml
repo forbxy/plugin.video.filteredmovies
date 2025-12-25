@@ -1,6 +1,6 @@
 <addon id="plugin.video.filteredmovies"
        name="Filtered Movies"
-       version="1.0.5"
+       version="1.0.6"
        provider-name="forbxy">
 
     <requires>
@@ -16,6 +16,9 @@
     <extension point="xbmc.python.script" library="window_handler.py">
         <provides>executable</provides>
     </extension>
+
+    <!-- 注册后台服务，用于自动跳过片头 -->
+    <extension point="xbmc.service" library="service.py" />
 
     <!-- 元数据 -->
     <extension point="xbmc.addon.metadata">
