@@ -10,8 +10,11 @@ import itertools
 # Path to addon data
 ADDON_ID = "plugin.video.filteredmovies"
 ADDON_PATH = xbmcvfs.translatePath(f"special://home/addons/{ADDON_ID}/")
-# USERDATA_PATH = xbmcvfs.translatePath(f"special://profile/addon_data/{ADDON_ID}/")
-CACHE_FILE = os.path.join(ADDON_PATH, "movie_t9_cache.json")
+ADDON_DATA_PATH = xbmcvfs.translatePath(f"special://profile/addon_data/{ADDON_ID}/")
+if not os.path.exists(ADDON_DATA_PATH):
+    os.makedirs(ADDON_DATA_PATH)
+
+CACHE_FILE = os.path.join(ADDON_DATA_PATH, "movie_t9_cache.json")
 # xbmc.log(f"Cache file path: {CACHE_FILE}", xbmc.LOGINFO)
 CHAR_MAP_FILE = os.path.join(ADDON_PATH, "char_map.json")
 

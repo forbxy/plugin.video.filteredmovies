@@ -158,3 +158,88 @@ class T9Window(xbmcgui.WindowXML):
                     self.num_input(label)
             except:
                 pass
+
+class DialogSelectWindow(xbmcgui.WindowXMLDialog):
+    def __init__(self, strXMLname, strFallbackPath, strDefaultName, forceFallback=0):
+        super(DialogSelectWindow, self).__init__(strXMLname, strFallbackPath, strDefaultName, forceFallback)
+        self.items = []
+        self.selected_index = -1
+        self.callback = None
+        self.title = "列表"
+
+    def setItems(self, items):
+        self.items = items
+        
+    def setTitle(self, title):
+        self.title = title
+        
+    def setCallback(self, callback):
+        self.callback = callback
+
+    def onInit(self):
+        self.setProperty("DialogTitle", self.title)
+        self.list_control = self.getControl(100)
+        focus_index = 0
+        for i, item in enumerate(self.items):
+            # item is now a dict: {"label": "...", "index": ..., "is_active": bool}
+            li = xbmcgui.ListItem(label=item["label"])
+            if item["is_active"]:
+                li.setProperty("IsActive", "true")
+                focus_index = i
+            self.list_control.addItem(li)
+        
+        # Set focus to the active item
+        self.list_control.selectItem(focus_index)
+        self.setFocus(self.list_control)
+
+    def onClick(self, controlId):
+        if controlId == 100:
+            self.selected_index = self.list_control.getSelectedPosition()
+            if self.callback and self.selected_index >= 0 and self.selected_index < len(self.items):
+                self.callback(self.items[self.selected_index])
+            self.close()
+
+class OSDListWindow(xbmcgui.WindowXMLDialog):
+    def __init__(self, strXMLname, strFallbackPath, strDefaultName, forceFallback=0):
+        super(OSDListWindow, self).__init__(strXMLname, strFallbackPath, strDefaultName, forceFallback)
+        self.items = []
+        self.callback = None
+
+    def setItems(self, items):
+        self.items = items
+        
+    def setCallback(self, callback):
+        self.callback = callback
+
+    def onInit(self):
+        self.list_control = self.getControl(80000)
+        focus_index = 0
+        for i, item in enumerate(self.items):
+            li = xbmcgui.ListItem(label=item["label"])
+            if item["is_active"]:
+                li.setProperty("IsActive", "true")
+                focus_index = i
+            self.list_control.addItem(li)
+        
+        self.list_control.selectItem(focus_index)
+        self.setFocus(self.list_control)
+
+    def onClick(self, controlId):
+        if controlId == 80000:
+            idx = self.list_control.getSelectedPosition()
+            if self.callback and idx >= 0 and idx < len(self.items):
+                self.callback(self.items[idx])
+                # Don't close, just update
+                self.close() # Actually close to return focus to OSD button? Or stay open?
+                # Standard OSD behavior: clicking usually selects and keeps menu open or closes?
+                # Let's close it to be safe and return focus to the button
+            else:
+                self.close()
+
+    def onAction(self, action):
+        # Handle Back/Escape
+        if action.getId() in [92, 10]:
+            self.close()
+        # Pass through other actions if needed, or let base handle
+        super(OSDListWindow, self).onAction(action)
+

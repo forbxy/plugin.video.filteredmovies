@@ -1,6 +1,6 @@
 <addon id="plugin.video.filteredmovies"
        name="Filtered Movies"
-       version="1.0.6"
+       version="1.0.7"
        provider-name="forbxy">
 
     <requires>
@@ -19,6 +19,16 @@
 
     <!-- 注册后台服务，用于自动跳过片头 -->
     <extension point="xbmc.service" library="service.py" />
+
+    <!-- 上下文菜单项 -->
+    <extension point="kodi.context.item">
+        <menu id="kodi.core.main">
+            <item library="context_menu.py">
+                <label>设置全局背景</label>
+                <visible>!String.IsEmpty(ListItem.Art(fanart))</visible>
+            </item>
+        </menu>
+    </extension>
 
     <!-- 元数据 -->
     <extension point="xbmc.addon.metadata">

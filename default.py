@@ -10,8 +10,8 @@ import xbmcgui
 import xbmcplugin
 import xbmcvfs
 import os
-import cache_manager
-import progress_helper
+# import cache_manager
+# import progress_helper
 
 try:
     HANDLE = int(sys.argv[1])
@@ -19,7 +19,11 @@ except (IndexError, ValueError):
     HANDLE = -1
 
 ADDON_PATH = xbmcvfs.translatePath("special://home/addons/plugin.video.filteredmovies/")
-SKIP_DATA_FILE = os.path.join(ADDON_PATH, 'skip_intro_data.json')
+ADDON_DATA_PATH = xbmcvfs.translatePath("special://profile/addon_data/plugin.video.filteredmovies/")
+if not os.path.exists(ADDON_DATA_PATH):
+    os.makedirs(ADDON_DATA_PATH)
+
+SKIP_DATA_FILE = os.path.join(ADDON_DATA_PATH, 'skip_intro_data.json')
 
 def log(msg): xbmc.log(f"[moviefilter] {msg}", xbmc.LOGINFO)
 
@@ -42,7 +46,7 @@ def save_skip_data(data):
 
 def get_current_tvshow_info():
     try:
-        # Use JSON-RPC to get reliable ID and Title
+        # 使用 JSON-RPC 获取可靠的 ID 和标题
         json_query = {
             "jsonrpc": "2.0",
             "method": "Player.GetItem",
@@ -61,7 +65,7 @@ def get_current_tvshow_info():
             show_title = item.get('showtitle')
             season = item.get('season', -1)
             
-            # Check if it's a valid TV show
+            # 检查是否为有效的电视剧
             if tvshow_id and tvshow_id != -1 and show_title:
                 return str(tvshow_id), show_title, str(season)
     except Exception as e:
@@ -88,7 +92,7 @@ def record_skip_point():
         if tvshow_id not in data:
             data[tvshow_id] = {"title": show_title, "seasons": {}}
         elif "time" in data[tvshow_id]:
-            # Migrate old format
+            # 迁移旧格式
             old_time = data[tvshow_id]["time"]
             data[tvshow_id] = {"title": show_title, "seasons": {"1": {"intro": old_time}}}
             del data[tvshow_id]["time"]
@@ -98,9 +102,9 @@ def record_skip_point():
             
         data[tvshow_id]["title"] = show_title 
         
-        # Get existing season data
+        # 获取现有的季数据
         season_data = data[tvshow_id]["seasons"].get(season, {})
-        # Handle legacy format (if it was just a number)
+        # 处理旧格式（如果只是一个数字）
         if isinstance(season_data, (int, float)):
             season_data = {"intro": season_data}
             
@@ -598,6 +602,7 @@ def get_all_items(limit):
     return items[:limit]
 
 def jsonrpc_get_items(limit=500, allowed_ids=None):
+    import progress_helper
     media_type = get_skin_filter("filter.mediatype", "all")
     
     if media_type == "all":
@@ -871,6 +876,7 @@ def enrich_sets_with_art(items):
     return items
 
 def list_videos():
+    import cache_manager
     # 记录列表加载时间，用于防止自动播放
     xbmcgui.Window(10000).setProperty("MovieFilter_LastListTime", str(time.time()))
 
@@ -1061,7 +1067,542 @@ def open_playing_tvshow():
     except Exception as e:
         log(f"Error opening playing tvshow: {e}")
 
+def set_subtitle(index_str):
+    log(f"set_subtitle called with index: {index_str}")
+    try:
+        if index_str is None:
+            log("Error: index is None")
+            return
+            
+        index = int(index_str)
+        log(f"Setting subtitle to index: {index}")
+        player = xbmc.Player()
+        if not player.isPlaying(): 
+            log("Player not playing, aborting")
+            return
+        
+        # Get current state to decide toggle
+        current_index = -1
+        is_enabled = False
+        
+        try:
+            r = json.loads(xbmc.executeJSONRPC(json.dumps({
+                "jsonrpc": "2.0", "method": "Player.GetProperties", 
+                "params": {"playerid": 1, "properties": ["subtitleenabled", "currentsubtitle"]}, "id": 1
+            })))
+            if 'result' in r:
+                is_enabled = r['result'].get('subtitleenabled', False)
+                current_stream = r['result'].get('currentsubtitle', {})
+                current_index = current_stream.get('index', -1)
+        except: pass
+        
+        if is_enabled and index == current_index:
+             player.showSubtitles(False)
+             xbmcgui.Dialog().notification("字幕", "字幕已关闭")
+        else:
+             player.setSubtitleStream(index)
+             player.showSubtitles(True)
+        xbmcgui.Dialog().notification("字幕", "字幕已切换")
+
+        # Refresh the list to update selection state
+        populate_subtitle_list()
+             
+    except Exception as e:
+        log(f"Error setting subtitle: {e}")
+
+def get_subtitle_items(suppress_warning=False):
+    log("get_subtitle_items function started")
+    player = xbmc.Player()
+    if not player.isPlaying():
+        log("Player is not playing")
+        return None, None, None, None
+
+    try:
+        log("Fetching subtitle info via JSON-RPC")
+        
+        streams = []
+        current_stream = {}
+        is_enabled = False
+        
+        # Combined request for all properties
+        try:
+            req_str = json.dumps({
+                "jsonrpc": "2.0", "method": "Player.GetProperties", 
+                "params": {"playerid": 1, "properties": ["subtitles", "subtitleenabled", "currentsubtitle"]}, "id": 1
+            })
+            resp_str = xbmc.executeJSONRPC(req_str)
+            r = json.loads(resp_str)
+            
+            if 'result' in r: 
+                result = r['result']
+                streams = result.get('subtitles', [])
+                current_stream = result.get('currentsubtitle', {})
+                is_enabled = result.get('subtitleenabled', False)
+            else:
+                log(f"JSON-RPC subtitles failed. Response: {resp_str}")
+                raise Exception("subtitles property failed")
+        except:
+            log("JSON-RPC subtitles exception, using fallback for streams")
+            # Fallback for streams list
+            avail_streams = player.getAvailableSubtitleStreams()
+            for i, name in enumerate(avail_streams):
+                streams.append({
+                    "index": i,
+                    "name": name,
+                    "language": "unk"
+                })
+        
+        if not streams:
+            if not suppress_warning:
+                xbmcgui.Dialog().notification("字幕", "没有可用的字幕流")
+            return None, None, None, None
+
+        # Prepare items
+        display_items = []
+        
+        current_index = current_stream.get('index') if is_enabled else -1
+        
+        # First pass: Collect all items with metadata
+        raw_items = []
+        for s in streams:
+            idx = s.get('index')
+            lang_code = s.get('language', 'unk')
+            name = s.get('name', '')
+            
+            # Language translation
+            lang_map = {
+                'eng': '英语', 'en': '英语',
+                'chi': '中文', 'zho': '中文', 'zh': '中文', 'chn': '中文',
+                'jpn': '日语', 'ja': '日语',
+                'kor': '韩语', 'ko': '韩语',
+                'rus': '俄语', 'ru': '俄语',
+                'fre': '法语', 'fra': '法语', 'fr': '法语',
+                'ger': '德语', 'deu': '德语', 'de': '德语',
+                'spa': '西班牙语', 'es': '西班牙语',
+                'ita': '意大利语', 'it': '意大利语',
+                'por': '葡萄牙语', 'pt': '葡萄牙语',
+                'tha': '泰语', 'th': '泰语',
+                'vie': '越南语', 'vi': '越南语',
+                'ind': '印尼语', 'id': '印尼语',
+                'dan': '丹麦语', 'da': '丹麦语',
+                'fin': '芬兰语', 'fi': '芬兰语',
+                'dut': '荷兰语', 'nld': '荷兰语', 'nl': '荷兰语',
+                'nor': '挪威语', 'no': '挪威语',
+                'swe': '瑞典语', 'sv': '瑞典语',
+                'unk': '未知', '': '未知'
+            }
+            
+            lang_name = lang_map.get(lang_code.lower())
+            if not lang_name:
+                try:
+                    lang_name = xbmc.convertLanguage(lang_code, xbmc.ENGLISH_NAME)
+                except:
+                    lang_name = lang_code
+            
+            if not lang_name: lang_name = "未知"
+            
+            # Build label
+            label = f"{idx + 1}. {lang_name}"
+            
+            if name and name.lower() != lang_name.lower() and name.lower() != lang_code.lower():
+                label += f" - {name}"
+            
+            # Add flags
+            flags = []
+            if s.get('isforced'): flags.append("强制")
+            if s.get('isimpaired'): flags.append("解说")
+            if s.get('isdefault'): flags.append("默认")
+            
+            if name and ('commentary' in name.lower() or '解说' in name or 'description' in name.lower()):
+                flags.append("解说字幕")
+            
+            if flags:
+                label += f" ({', '.join(flags)})"
+            
+            # Determine sort properties
+            is_chinese = lang_code.lower() in ['chi', 'zho', 'zh', 'chn']
+            # Check for external subtitles based on name
+            is_external = '（外挂）' in name
+            
+            raw_items.append({
+                "label": label,
+                "index": idx,
+                "is_active": (is_enabled and idx == current_index),
+                "is_chinese": is_chinese,
+                "is_external": is_external,
+                "original_order": idx
+            })
+
+        # Sort items: External first, then Chinese, then others. Stable sort preserves original order within groups.
+        # Key: (not is_external, not is_chinese, original_order)
+        # False < True, so 'not True' (False) comes first.
+        raw_items.sort(key=lambda x: (not x['is_external'], not x['is_chinese'], x['original_order']))
+        
+        # Convert to display items
+        display_items = [{"label": item["label"], "index": item["index"], "is_active": item["is_active"]} for item in raw_items]
+        
+        return display_items, current_index, is_enabled, player
+
+    except Exception as e:
+        log(f"Error in get_subtitle_items: {e}")
+        xbmcgui.Dialog().notification("错误", f"获取字幕出错: {e}")
+        return None, None, None, None
+
+def populate_subtitle_list():
+    log("populate_subtitle_list function started")
+    display_items, current_index, is_enabled, player = get_subtitle_items(suppress_warning=True)
+    
+    # Try to find the control in VideoOSD (12901)
+    potential_windows = [12901, 2901]
+    current_dialog = xbmcgui.getCurrentWindowDialogId()
+    if current_dialog:
+        potential_windows.insert(0, current_dialog)
+        
+    log(f"Debug Window IDs - Window: {xbmcgui.getCurrentWindowId()}, Dialog: {xbmcgui.getCurrentWindowDialogId()}")
+    for win_id in potential_windows:
+        try:
+            win = xbmcgui.Window(win_id)
+            try:
+                ctrl = win.getControl(80000)
+                log(f"Found OSD control 80000 in window {win_id}")
+                log("Populating OSD list 80000")
+                ctrl.reset()
+                
+                if not display_items:
+                    return
+
+                active_pos = -1
+                for i, item in enumerate(display_items):
+                    li = xbmcgui.ListItem(label=item['label'])
+                    li.setProperty("index", str(item['index'])) # Real index
+                    if item['is_active']:
+                        li.setProperty("IsActive", "true")
+                        li.select(True)
+                        active_pos = i
+                    ctrl.addItem(li)
+                
+                if active_pos != -1:
+                    ctrl.selectItem(active_pos)
+
+                xbmcgui.Window(10000).setProperty("OSDSubtitleListOpen", "false")
+                return
+            except:
+                pass
+        except:
+            pass
+    log("OSD control 80000 not found in windows 12901")
+
+def select_subtitle():
+    log("select_subtitle function started")
+    display_items, current_index, is_enabled, player = get_subtitle_items()
+    
+    if not display_items:
+        return
+
+    # Use custom window
+    log("Opening custom window")
+    import window_handler
+    w = window_handler.DialogSelectWindow('Custom_1112_SubtitleSelect.xml', ADDON_PATH, 'Default', '1112')
+    w.setItems(display_items)
+    w.doModal()
+    log("Window closed")
+    
+    ret_index = w.selected_index
+    del w
+    
+    if ret_index == -1:
+        log("Selection cancelled")
+        return # Cancelled
+        
+    # Find the selected item in our list
+    # The window returns the index in the list, so we map it back
+    if ret_index < len(display_items):
+        selected_item = display_items[ret_index]
+        real_index = selected_item["index"]
+        log(f"Selected index: {real_index}")
+        
+        # Toggle off if clicking the currently active subtitle
+        if is_enabled and real_index == current_index:
+            player.showSubtitles(False)
+            xbmcgui.Dialog().notification("字幕", "字幕已关闭")
+        else:
+            player.setSubtitleStream(real_index)
+            player.showSubtitles(True)
+            xbmcgui.Dialog().notification("字幕", f"已切换至: {selected_item['label']}")
+
+
+
+
+
+def open_osd_subtitle_list():
+    display_items, current_index, is_enabled, player = get_subtitle_items()
+    if not display_items:
+        return
+
+    import window_handler
+    # Use the new XML
+    w = window_handler.OSDListWindow('Custom_1113_OSDSubtitleList.xml', ADDON_PATH, 'Default', '1113')
+    w.setItems(display_items)
+    
+    def on_select(item):
+        real_index = item["index"]
+        # Call set_subtitle logic directly here to avoid circular dependency or re-opening
+        try:
+            player = xbmc.Player()
+            if is_enabled and real_index == current_index:
+                 player.showSubtitles(False)
+                 xbmcgui.Dialog().notification("字幕", "字幕已关闭")
+            else:
+                 player.setSubtitleStream(real_index)
+                 player.showSubtitles(True)
+                 xbmcgui.Dialog().notification("字幕", f"已切换至: {item['label']}")
+            
+            # Close VideoOSD to hide the list and return to video
+            # xbmc.executebuiltin('Dialog.Close(VideoOSD)')
+            xbmcgui.Window(10000).setProperty("OSDSubtitleListOpen", "true")
+        except:
+            pass
+
+    w.setCallback(on_select)
+    
+    # Set property to hide OSD list
+    xbmcgui.Window(10000).setProperty("OSDSubtitleListOpen", "true")
+    # Also try to clear the OSD list visually
+    # try:
+    #     xbmcgui.Window(12901).getControl(80000).reset()
+    # except:
+    #     pass
+
+    w.doModal()
+    
+    # Clear property when closed
+    # xbmcgui.Window(10000).clearProperty("OSDSubtitleListOpen")
+    del w
+
+def get_audio_items(suppress_warning=False):
+    try:
+        json_query = {
+            "jsonrpc": "2.0",
+            "method": "Player.GetProperties",
+            "params": {
+                "playerid": 1,
+                "properties": ["audiostreams", "currentaudiostream"]
+            },
+            "id": 1
+        }
+        json_response = xbmc.executeJSONRPC(json.dumps(json_query))
+        response = json.loads(json_response)
+        
+        if 'result' not in response:
+            return None, -1
+
+        streams = response['result'].get('audiostreams', [])
+        current_stream = response['result'].get('currentaudiostream', {})
+        
+        if not streams:
+            if not suppress_warning:
+                xbmcgui.Dialog().notification("音轨", "没有可用的音轨")
+            return None, -1
+
+        # Prepare items
+        display_items = []
+        current_index = current_stream.get('index', -1)
+        
+        for s in streams:
+            idx = s.get('index')
+            lang_code = s.get('language', 'unk')
+            name = s.get('name', '')
+            channels = s.get('channels', 0)
+            codec = s.get('codec', '')
+            
+            # Language translation (reuse map or simplify)
+            lang_map = {
+                'eng': '英语', 'en': '英语',
+                'chi': '中文', 'zho': '中文', 'zh': '中文', 'chn': '中文',
+                'jpn': '日语', 'ja': '日语',
+                'kor': '韩语', 'ko': '韩语',
+                'rus': '俄语', 'ru': '俄语',
+                'fre': '法语', 'fra': '法语', 'fr': '法语',
+                'ger': '德语', 'deu': '德语', 'de': '德语',
+                'spa': '西班牙语', 'es': '西班牙语',
+                'ita': '意大利语', 'it': '意大利语',
+                'por': '葡萄牙语', 'pt': '葡萄牙语',
+                'tha': '泰语', 'th': '泰语',
+                'vie': '越南语', 'vi': '越南语',
+                'ind': '印尼语', 'id': '印尼语',
+                'dan': '丹麦语', 'da': '丹麦语',
+                'fin': '芬兰语', 'fi': '芬兰语',
+                'dut': '荷兰语', 'nld': '荷兰语', 'nl': '荷兰语',
+                'nor': '挪威语', 'no': '挪威语',
+                'swe': '瑞典语', 'sv': '瑞典语',
+                'unk': '未知', '': '未知'
+            }
+            
+            lang_name = lang_map.get(lang_code.lower())
+            if not lang_name:
+                try:
+                    lang_name = xbmc.convertLanguage(lang_code, xbmc.ENGLISH_NAME)
+                except:
+                    lang_name = lang_code
+            if not lang_name: lang_name = "未知"
+
+            # Format label: "1. 英语 - DTS-HD MA 5.1"
+            
+            # Simplify codec name for display if needed
+            display_codec = codec.upper()
+            if 'AC3' in name.upper(): display_codec = 'AC3'
+            elif 'DTS' in name.upper(): display_codec = 'DTS'
+            elif 'AAC' in name.upper(): display_codec = 'AAC'
+            
+            # Channel layout
+            ch_str = f"{channels}ch"
+            if channels == 6: ch_str = "5.1"
+            elif channels == 2: ch_str = "2.0"
+            elif channels == 8: ch_str = "7.1"
+            
+            label = f"{idx + 1}. {lang_name}"
+            details = []
+            if name:
+                details.append(name)
+            else:
+                details.append(f"{display_codec} {ch_str}")
+                
+            if s.get('isdefault'): details.append("默认")
+            if s.get('isimpaired'): details.append("解说")
+            
+            if details:
+                label += f" - {' '.join(details)}"
+
+            # Determine sort priority
+            # 0: Chinese, 1: English, 2: Others
+            sort_priority = 2
+            if lang_code.lower() in ['chi', 'zho', 'zh', 'chn']:
+                sort_priority = 0
+            elif lang_code.lower() in ['eng', 'en']:
+                sort_priority = 1
+
+            display_items.append({
+                "label": label,
+                "index": idx,
+                "is_active": (idx == current_index),
+                "sort_priority": sort_priority,
+                "original_order": idx
+            })
+            
+        # Sort items: Chinese first, then English, then others. Stable sort preserves original order within groups.
+        display_items.sort(key=lambda x: (x['sort_priority'], x['original_order']))
+        
+        return display_items, current_index
+    except Exception as e:
+        log(f"Error in get_audio_items: {e}")
+        if not suppress_warning:
+            xbmcgui.Dialog().notification("错误", f"获取音轨出错: {e}")
+        return None, -1
+
+def select_audio():
+    display_items, current_index = get_audio_items()
+    
+    if not display_items:
+        return
+
+    # Use custom window
+    import window_handler
+    w = window_handler.DialogSelectWindow('Custom_1114_AudioSelect.xml', ADDON_PATH, 'Default', '1114')
+    w.setTitle("音轨")
+    w.setItems(display_items)
+    w.doModal()
+    
+    ret_index = w.selected_index
+    del w
+    
+    if ret_index == -1:
+        return
+        
+    if ret_index < len(display_items):
+        selected_item = display_items[ret_index]
+        real_index = selected_item["index"]
+        
+        if real_index == current_index:
+            xbmcgui.Dialog().notification("音轨", "已是当前音轨")
+        else:
+            xbmc.Player().setAudioStream(real_index)
+            xbmcgui.Dialog().notification("音轨", f"已切换至: {selected_item['label']}")
+
+def populate_audio_list():
+    log("populate_audio_list function started")
+    display_items, current_index = get_audio_items(suppress_warning=True)
+    
+    # Try to find the control in VideoOSD (12901)
+    potential_windows = [12901, 2901]
+    current_dialog = xbmcgui.getCurrentWindowDialogId()
+    if current_dialog:
+        potential_windows.insert(0, current_dialog)
+        
+    for win_id in potential_windows:
+        try:
+            win = xbmcgui.Window(win_id)
+            try:
+                # Use control 80001 for audio list
+                ctrl = win.getControl(80001)
+                log(f"Found OSD control 80001 in window {win_id}")
+                ctrl.reset()
+                
+                if not display_items:
+                    return
+
+                active_pos = -1
+                for i, item in enumerate(display_items):
+                    li = xbmcgui.ListItem(label=item['label'])
+                    li.setProperty("index", str(item['index'])) # Real index
+                    if item['is_active']:
+                        li.setProperty("IsActive", "true")
+                        li.select(True)
+                        active_pos = i
+                    ctrl.addItem(li)
+                
+                if active_pos != -1:
+                    ctrl.selectItem(active_pos)
+
+                xbmcgui.Window(10000).setProperty("OSDAudioListOpen", "false")
+                return
+            except:
+                pass
+        except:
+            pass
+    log("OSD control 80001 not found in windows 12901")
+
+def open_osd_audio_list():
+    display_items, current_index = get_audio_items()
+    if not display_items:
+        return
+
+    import window_handler
+    # Use new XML for audio list
+    w = window_handler.OSDListWindow('Custom_1115_OSDAudioList.xml', ADDON_PATH, 'Default', '1115')
+    w.setItems(display_items)
+    
+    def on_select(item):
+        real_index = item["index"]
+        try:
+            player = xbmc.Player()
+            if real_index == current_index:
+                 xbmcgui.Dialog().notification("音轨", "已是当前音轨")
+            else:
+                 player.setAudioStream(real_index)
+                 xbmcgui.Dialog().notification("音轨", f"已切换至: {item['label']}")
+            
+            xbmcgui.Window(10000).setProperty("OSDAudioListOpen", "true")
+        except:
+            pass
+
+    w.setCallback(on_select)
+    
+    xbmcgui.Window(10000).setProperty("OSDAudioListOpen", "true")
+    w.doModal()
+    del w
+
 def router(paramstring):
+    log(f"Router called with: {paramstring}")
     if not paramstring:
         # 列表模式
         list_videos()
@@ -1070,7 +1611,20 @@ def router(paramstring):
     # 解析路径，例如 plugin://..../?mode=play&movieid=1
     params = dict(urllib.parse.parse_qsl(paramstring.lstrip('?')))
     mode = params.get("mode")
+    log(f"Router mode: {mode}")
     
+    if mode == "select_audio":
+        select_audio()
+        return
+
+    if mode == "populate_audio_list":
+        populate_audio_list()
+        return
+
+    if mode == "open_osd_audio_list":
+        open_osd_audio_list()
+        return
+
     if mode == "record_click":
         # 记录点击时间
         xbmcgui.Window(10000).setProperty("MovieClickTime", str(time.time()))
@@ -1079,6 +1633,26 @@ def router(paramstring):
     if mode == "clear":
         # 清空列表
         xbmcplugin.endOfDirectory(HANDLE, cacheToDisc=False)
+        return
+
+    if mode == "set_home_background":
+        image = params.get("image", "")
+        
+        # Show dialog
+        dialog = xbmcgui.Dialog()
+        options = ["设为全局背景", "重置背景"] # Set as Global Background, Reset Background
+        # Use contextmenu instead of select for a smaller dialog
+        ret = dialog.contextmenu(options)
+        
+        if ret == 0:
+            if image:
+                xbmc.executebuiltin(f'Skin.SetString(CustomHomeBackground,{image})')
+                xbmc.executebuiltin('Notification(背景已设置, 全局背景已更新)')
+            else:
+                xbmc.executebuiltin('Notification(错误, 无法获取当前背景图片)')
+        elif ret == 1:
+            xbmc.executebuiltin('Skin.SetString(CustomHomeBackground,)')
+            xbmc.executebuiltin('Notification(背景已重置, 全局背景已恢复默认)')
         return
 
     if mode == "launch_t9":
@@ -1115,18 +1689,41 @@ def router(paramstring):
         delete_skip_point()
         return
 
+    if mode == "select_subtitle":
+        log("Entering select_subtitle mode")
+        select_subtitle()
+        return
+
+    if mode == "open_osd_subtitle_list":
+        open_osd_subtitle_list()
+        return
+
+    if mode == "populate_subtitle_list":
+        log("Entering populate_subtitle_list mode")
+        populate_subtitle_list()
+        return
+
+    if mode == "osd_click_handler":
+        osd_click_handler()
+        return
+
+    if mode == "set_subtitle":
+        index = params.get("index")
+        set_subtitle(index)
+        return
+
     if mode == "force_prev":
-        # 强制播放上一集（忽略播放进度）
+        # 重新播放当前视频
         pl = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
         pos = pl.getposition()
-        if pos > 0:
-            # 使用 JSON-RPC Player.GoTo 跳转
+        if pos >= 0:
+            # 使用 JSON-RPC Player.GoTo 跳转到当前位置，实现重播
             json_query = {
                 "jsonrpc": "2.0",
                 "method": "Player.GoTo",
                 "params": {
                     "playerid": 1,
-                    "to": pos - 1
+                    "to": pos
                 },
                 "id": 1
             }
@@ -1149,6 +1746,25 @@ def router(paramstring):
         list_videos()
     
     log("---------------------->\n\n")
+
+def osd_click_handler():
+    # 检查 VideoOSD 是否打开
+    if not xbmc.getCondVisibility('Window.IsActive(videoosd)'):
+        return
+
+    window = xbmcgui.Window(12901) # VideoOSD
+    try:
+        focus_id = window.getFocusId()
+        # 检查焦点是否在字幕列表 (80000)
+        if focus_id == 80000:
+            ctrl = window.getControl(80000)
+            pos = ctrl.getSelectedPosition()
+            item = ctrl.getListItem(pos)
+            real_index = item.getProperty("index")
+            if real_index:
+                set_subtitle(real_index)
+    except Exception as e:
+        log(f"Error in osd_click_handler: {e}")
 
 if __name__ == "__main__":
     # sys.argv[0] 是 plugin://...; sys.argv[2] 是 '?xxx'

@@ -11,7 +11,11 @@ import threading
 
 ADDON_ID = 'plugin.video.filteredmovies'
 ADDON_PATH = xbmcvfs.translatePath(f"special://home/addons/{ADDON_ID}/")
-SKIP_DATA_FILE = os.path.join(ADDON_PATH, 'skip_intro_data.json')
+ADDON_DATA_PATH = xbmcvfs.translatePath(f"special://profile/addon_data/{ADDON_ID}/")
+if not os.path.exists(ADDON_DATA_PATH):
+    os.makedirs(ADDON_DATA_PATH)
+
+SKIP_DATA_FILE = os.path.join(ADDON_DATA_PATH, 'skip_intro_data.json')
 
 def log(msg):
     xbmc.log(f"[FilteredMoviesService] {msg}", xbmc.LOGINFO)
@@ -214,8 +218,8 @@ if __name__ == '__main__':
                     # 在片尾范围之前：重置所有状态，允许再次触发
                     if player.cancel_skip: 
                         player.cancel_skip = False
-                    if player.outro_triggered: 
-                        player.outro_triggered = False
+                    # if player.outro_triggered: 
+                    #     player.outro_triggered = False
                     
                     if countdown_active:
                         countdown_active = False
@@ -228,6 +232,9 @@ if __name__ == '__main__':
                         countdown_thread = None
 
                 elif not player.outro_triggered and not player.cancel_skip:
+                    # 检查冷却时间 (防止重复触发)
+
+
                     # 在片尾范围内，且未触发/未取消：执行倒计时
                     
                     # 如果倒计时未激活，则初始化

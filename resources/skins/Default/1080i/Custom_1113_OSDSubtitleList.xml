@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window type="dialog" id="1113">
+    <defaultcontrol always="true">80000</defaultcontrol>
+    <controls>
+        <control type="group">
+            <right>0</right>
+            <bottom>130</bottom>
+            <width>390</width>
+            <height>320</height>
+            <animation effect="fade" start="100" end="0" time="200">WindowClose</animation>
+            
+            <!-- Background -->
+            <control type="image">
+                <width>100%</width>
+                <height>100%</height>
+                <texture colordiffuse="80000000">colors/white.png</texture>
+            </control>
+            
+            <!-- Title -->
+            <control type="label">
+                <left>20</left>
+                <top>10</top>
+                <width>350</width>
+                <height>40</height>
+                <label>字幕</label>
+                <font>font12_title</font>
+                <textcolor>grey</textcolor>
+                <align>center</align>
+            </control>
+
+            <!-- List -->
+            <control type="list" id="80000">
+                <left>10</left>
+                <top>60</top>
+                <width>370</width>
+                <height>250</height>
+                <onleft>Action(Close)</onleft>
+                <onright>Action(Close)</onright>
+                <viewtype label="list">list</viewtype>
+                <pagecontrol>60</pagecontrol>
+                <scrolltime>0</scrolltime>
+                <itemlayout height="50">
+                    <control type="label">
+                        <left>10</left>
+                        <top>0</top>
+                        <width>350</width>
+                        <height>50</height>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>grey</textcolor>
+                        <selectedcolor>button_focus</selectedcolor>
+                        <align>left</align>
+                        <aligny>center</aligny>
+                        <visible>!String.IsEqual(ListItem.Property(IsActive),true)</visible>
+                    </control>
+                    <control type="label">
+                        <left>10</left>
+                        <top>0</top>
+                        <width>350</width>
+                        <height>50</height>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>FFEB9E17</textcolor>
+                        <selectedcolor>button_focus</selectedcolor>
+                        <align>left</align>
+                        <aligny>center</aligny>
+                        <visible>String.IsEqual(ListItem.Property(IsActive),true)</visible>
+                    </control>
+                </itemlayout>
+                <focusedlayout height="50">
+                    <control type="image">
+                        <width>100%</width>
+                        <height>100%</height>
+                        <texture colordiffuse="button_focus">colors/white.png</texture>
+                    </control>
+                    <control type="label">
+                        <left>10</left>
+                        <top>0</top>
+                        <width>350</width>
+                        <height>50</height>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>white</textcolor>
+                        <selectedcolor>white</selectedcolor>
+                        <align>left</align>
+                        <aligny>center</aligny>
+                    </control>
+                </focusedlayout>
+            </control>
+        </control>
+    </controls>
+</window>
