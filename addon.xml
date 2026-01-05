@@ -1,6 +1,6 @@
 <addon id="plugin.video.filteredmovies"
        name="Filtered Movies"
-       version="1.0.7"
+       version="1.0.8"
        provider-name="forbxy">
 
     <requires>
@@ -12,8 +12,8 @@
         <provides>video</provides>
     </extension>
 
-    <!-- 注册 window_handler.py 为脚本模块 -->
-    <extension point="xbmc.python.script" library="window_handler.py">
+    <!-- 注册 default.py 为脚本模块，以便 RunScript 调用 -->
+    <extension point="xbmc.python.script" library="default.py">
         <provides>executable</provides>
     </extension>
 
@@ -23,7 +23,7 @@
     <!-- 上下文菜单项 -->
     <extension point="kodi.context.item">
         <menu id="kodi.core.main">
-            <item library="context_menu.py">
+            <item library="default_context_menu_hook.py">
                 <label>设置全局背景</label>
                 <visible>!String.IsEmpty(ListItem.Art(fanart))</visible>
             </item>
@@ -35,6 +35,11 @@
         <summary>Movies list with UI filters</summary>
         <description>Provide filtered movie list to custom skin view</description>
         <platform>all</platform>
+        <assets>
+            <icon>icon.png</icon>
+            <fanart>resources/filter.jpg</fanart>
+            <screenshot>resources/filter.jpg</screenshot>
+        </assets>
     </extension>
 
 </addon>

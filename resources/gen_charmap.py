@@ -137,7 +137,7 @@ if __name__ == "__main__":
     dictionary = generate_char_map()
     
     # 2. 保存到文件 (使用紧凑格式，减小文件体积)
-    output_file = "char_map.json"
+    output_file = "resources/char_map.json"
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(dictionary, f, ensure_ascii=False, separators=(',', ':'))
         

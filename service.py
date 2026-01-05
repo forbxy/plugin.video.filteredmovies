@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
+from common import get_skin_name
 import xbmc
-import xbmcaddon
 import xbmcgui
 import xbmcvfs
 import json
@@ -19,6 +19,21 @@ SKIP_DATA_FILE = os.path.join(ADDON_DATA_PATH, 'skip_intro_data.json')
 
 def log(msg):
     xbmc.log(f"[FilteredMoviesService] {msg}", xbmc.LOGINFO)
+
+def warmup_xml_cache():
+    try:
+        # 预读取 XML 文件以利用文件系统缓存
+        xml_dir = os.path.join(ADDON_PATH, 'resources', 'skins', 'Default', '1080i')
+        target_files = ['Custom_5111_MovieFilter.xml', 'Custom_5111_MovieFilter_Horizon.xml']
+        
+        for f_name in target_files:
+            f_path = os.path.join(xml_dir, f_name)
+            if os.path.exists(f_path):
+                with open(f_path, 'rb') as f:
+                    _ = f.read()
+                log(f"Warmed up cache for {f_name}")
+    except Exception as e:
+        log(f"-----Error warming up XML cache: {e}")
 
 def load_skip_data():
     if not os.path.exists(SKIP_DATA_FILE):
@@ -68,6 +83,7 @@ class PlayerMonitor(xbmc.Player):
         # 视频开始播放（包括切集）时触发
         # 稍微延迟一下，确保元数据已加载
         xbmc.sleep(1000)
+        
         self.check_intro()
         self.update_outro_info()
 
@@ -133,7 +149,7 @@ class PlayerMonitor(xbmc.Player):
                 if current_time < skip_time:
                     log(f"Auto skipping intro for {show_title} S{season}. Current: {current_time}, Target: {skip_time}")
                     self.seekTime(skip_time)
-                    xbmc.executebuiltin(f"Notification(自动跳过片头, 已跳转至 {int(skip_time)}秒, 2000)")
+                    xbmc.executebuiltin(f'Notification(FilteredMovies, 自动跳过片头 已跳转至 {int(skip_time)}秒, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
             except Exception as e:
                 log(f"Error during skip: {e}")
 
@@ -180,8 +196,48 @@ class SkipCountdownWindow(xbmcgui.WindowXMLDialog):
         except:
             pass
 
+def init_skin_properties():
+    # Skin detection logic
+    skin_name = get_skin_name()
+    # 1. Set Rounded Posters Property
+    if skin_name in ["horizon", "fuse", "zephyr"]:
+        xbmc.executebuiltin('SetProperty(MovieFilter.UseRounded,true,home)')
+    else:
+        xbmc.executebuiltin('ClearProperty(MovieFilter.UseRounded,home)')
+
+    # 2. Set Progress Bar Color Property
+    if skin_name == "estuary":
+            xbmc.executebuiltin('SetProperty(MovieFilter.ProgressBarColor,button_focus,home)')
+            xbmc.executebuiltin('SetProperty(MovieFilter.FocusColor,button_focus,home)')
+            xbmc.executebuiltin('ClearProperty(MovieFilter.CenterWindow,home)')
+    else:
+            xbmc.executebuiltin('SetProperty(MovieFilter.ProgressBarColor,FF0097E1,home)')
+            xbmc.executebuiltin('SetProperty(MovieFilter.FocusColor,FF0097E1,home)')
+            xbmc.executebuiltin('SetProperty(MovieFilter.CenterWindow,true,home)')
+    
+    # 3. Initialize Return Targets for Navigation Memory
+    # UP Targets (Default Down)
+    xbmc.executebuiltin('SetProperty(Return_1013,6001,home)')
+    xbmc.executebuiltin('SetProperty(Return_6004,2005,home)')
+    xbmc.executebuiltin('SetProperty(Return_6006,2007,home)')
+    xbmc.executebuiltin('SetProperty(Return_4003,5003,home)')
+    xbmc.executebuiltin('SetProperty(Return_4004,5005,home)')
+    xbmc.executebuiltin('SetProperty(Return_3004,2005,home)')
+    xbmc.executebuiltin('SetProperty(Return_Key6,6001,home)')
+    xbmc.executebuiltin('SetProperty(Return_KeyClr,4001,home)')
+    
+    # DOWN Targets (Default Up)
+    xbmc.executebuiltin('SetProperty(Return_4005,3006,home)')
+    xbmc.executebuiltin('SetProperty(Return_4007,3008,home)')
+    xbmc.executebuiltin('SetProperty(Return_4010,3012,home)')
+
 if __name__ == '__main__':
     log("Service started")
+    
+    # Start prefetch thread
+    threading.Thread(target=warmup_xml_cache).start()
+
+    init_skin_properties()
     monitor = xbmc.Monitor()
     player = PlayerMonitor()
     
@@ -193,7 +249,17 @@ if __name__ == '__main__':
     countdown_remaining = 0.0
     last_tick_time = time.time()
     
+    # 记录上一次的皮肤 ID，用于检测皮肤切换
+    last_skin = get_skin_name()
+
     while not monitor.abortRequested():
+        # 1. 检测皮肤切换
+        current_skin = get_skin_name()
+        if current_skin != last_skin:
+            log(f"Skin changed from {last_skin} to {current_skin}. Re-initializing properties.")
+            last_skin = current_skin
+            init_skin_properties()
+
         current_tick_time = time.time()
         dt = current_tick_time - last_tick_time
         last_tick_time = current_tick_time
@@ -261,7 +327,7 @@ if __name__ == '__main__':
                     # 检查是否被用户取消
                     if countdown_window.cancelled:
                         player.cancel_skip = True
-                        xbmc.executebuiltin("Notification(自动跳过片尾, 已取消, 1000)")
+                        xbmc.executebuiltin(f'Notification(FilteredMovies, 自动跳过片尾 已取消, 1000, {os.path.join(ADDON_PATH, "icon.png")})')
                         # 清理窗口
                         if countdown_thread and countdown_thread.is_alive():
                             countdown_thread.join()
@@ -303,5 +369,5 @@ if __name__ == '__main__':
                 countdown_thread = None
             countdown_active = False
         
-        if monitor.waitForAbort(0.1):
+        if monitor.waitForAbort(0.3):
             break

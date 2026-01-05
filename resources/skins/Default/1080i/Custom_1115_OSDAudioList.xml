@@ -13,7 +13,7 @@
             <control type="image">
                 <width>100%</width>
                 <height>100%</height>
-                <texture colordiffuse="80000000">colors/white.png</texture>
+                <texture colordiffuse="80000000">colors/fm_white.png</texture>
             </control>
             
             <!-- Title -->
@@ -24,7 +24,7 @@
                 <height>40</height>
                 <label>音轨</label>
                 <font>font12_title</font>
-                <textcolor>grey</textcolor>
+                <textcolor>white</textcolor>
                 <align>center</align>
             </control>
 
@@ -69,7 +69,7 @@
                     <control type="image">
                         <width>100%</width>
                         <height>100%</height>
-                        <texture colordiffuse="button_focus">colors/white.png</texture>
+                        <texture colordiffuse="button_focus">colors/fm_white.png</texture>
                     </control>
                     <control type="label">
                         <left>10</left>
@@ -81,6 +81,7 @@
                         <selectedcolor>white</selectedcolor>
                         <align>left</align>
                         <aligny>center</aligny>
+                        <scroll>true</scroll>
                     </control>
                 </focusedlayout>
             </control>

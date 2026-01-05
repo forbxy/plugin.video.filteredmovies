@@ -1,39 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<window type="dialog" id="1113">
-    <defaultcontrol always="true">80000</defaultcontrol>
+<window type="dialog" id="1116">
+    <defaultcontrol>100</defaultcontrol>
     <controls>
         <control type="group">
-            <right>0</right>
-            <bottom>130</bottom>
-            <width>390</width>
-            <height>320</height>
+            <centerleft>50%</centerleft>
+            <centertop>50%</centertop>
+            <width>260</width>
+            <height>310</height>
+            <animation effect="fade" start="0" end="100" time="200">WindowOpen</animation>
             <animation effect="fade" start="100" end="0" time="200">WindowClose</animation>
             
             <!-- Background -->
             <control type="image">
+                <visible>!String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
                 <width>100%</width>
                 <height>100%</height>
                 <texture colordiffuse="80000000">colors/fm_white.png</texture>
+            </control>
+            <control type="image">
+                <visible>String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                <width>100%</width>
+                <height>100%</height>
+                <texture colordiffuse="80000000" border="10">diffuse/poster_mask.png</texture>
             </control>
             
             <!-- Title -->
             <control type="label">
                 <left>20</left>
                 <top>10</top>
-                <width>350</width>
+                <width>220</width>
                 <height>40</height>
-                <label>字幕</label>
+                <label>播放速度</label>
                 <font>font12_title</font>
                 <textcolor>white</textcolor>
                 <align>center</align>
             </control>
 
             <!-- List -->
-            <control type="list" id="80000">
+            <control type="list" id="100">
                 <left>10</left>
                 <top>60</top>
-                <width>370</width>
-                <height>250</height>
+                <width>240</width>
+                <height>240</height>
                 <onleft>Action(Close)</onleft>
                 <onright>Action(Close)</onright>
                 <viewtype label="list">list</viewtype>
@@ -43,44 +51,38 @@
                     <control type="label">
                         <left>10</left>
                         <top>0</top>
-                        <width>350</width>
+                        <width>220</width>
                         <height>50</height>
                         <label>$INFO[ListItem.Label]</label>
-                        <textcolor>grey</textcolor>
-                        <selectedcolor>button_focus</selectedcolor>
-                        <align>left</align>
                         <aligny>center</aligny>
+                        <textcolor>grey</textcolor>
                         <visible>!String.IsEqual(ListItem.Property(IsActive),true)</visible>
                     </control>
                     <control type="label">
                         <left>10</left>
                         <top>0</top>
-                        <width>350</width>
+                        <width>220</width>
                         <height>50</height>
                         <label>$INFO[ListItem.Label]</label>
-                        <textcolor>FFEB9E17</textcolor>
-                        <selectedcolor>button_focus</selectedcolor>
-                        <align>left</align>
                         <aligny>center</aligny>
+                        <textcolor>FFEB9E17</textcolor> <!-- Yellow for active -->
                         <visible>String.IsEqual(ListItem.Property(IsActive),true)</visible>
                     </control>
                 </itemlayout>
                 <focusedlayout height="50">
                     <control type="image">
-                        <width>100%</width>
-                        <height>100%</height>
-                        <texture colordiffuse="button_focus">colors/fm_white.png</texture>
+                        <width>240</width>
+                        <height>50</height>
+                        <texture colordiffuse="$INFO[Window(home).Property(MovieFilter.FocusColor)]">colors/fm_white.png</texture>
                     </control>
                     <control type="label">
                         <left>10</left>
                         <top>0</top>
-                        <width>350</width>
+                        <width>220</width>
                         <height>50</height>
                         <label>$INFO[ListItem.Label]</label>
-                        <textcolor>white</textcolor>
-                        <selectedcolor>white</selectedcolor>
-                        <align>left</align>
                         <aligny>center</aligny>
+                        <textcolor>white</textcolor>
                         <scroll>true</scroll>
                     </control>
                 </focusedlayout>

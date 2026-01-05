@@ -29,8 +29,7 @@ def zip_addon(addon_id, version):
     with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for root, dirs, files in os.walk(cwd):
             # Exclude directories
-            # .git is intentionally NOT excluded to match the previous request's requirement
-            dirs[:] = [d for d in dirs if d not in ['dist', '.idea', '.vscode', '__pycache__']]
+            dirs[:] = [d for d in dirs if d not in ['dist', '.idea', '.vscode', '__pycache__', '.git']]
             
             for file in files:
                 # Exclude specific files
@@ -41,6 +40,8 @@ def zip_addon(addon_id, version):
                 if file == 'movie_t9_cache.json': # Explicitly requested exclusion
                     continue
                 if file == 'skip_intro_data.json': # Explicitly requested exclusion
+                    continue
+                if file == 'Custom_5111_MovieFilter_Horizon.xml': # Generated file
                     continue
                 if file.endswith('.pyc') or file.endswith('.DS_Store'):
                     continue

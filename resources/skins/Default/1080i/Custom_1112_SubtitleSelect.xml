@@ -9,12 +9,20 @@
             <height>320</height>
             <animation effect="fade" start="0" end="100" time="200">WindowOpen</animation>
             <animation effect="fade" start="100" end="0" time="200">WindowClose</animation>
+            <animation effect="slide" end="-765,-250" time="0" condition="String.IsEqual(Window(Home).Property(MovieFilter.CenterWindow),true)">Conditional</animation>
             
             <!-- Background -->
             <control type="image">
+                <visible>!String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
                 <width>100%</width>
                 <height>100%</height>
-                <texture colordiffuse="80000000">colors/white.png</texture>
+                <texture colordiffuse="80000000">colors/fm_white.png</texture>
+            </control>
+            <control type="image">
+                <visible>String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                <width>100%</width>
+                <height>100%</height>
+                <texture colordiffuse="80000000" border="10">diffuse/poster_mask.png</texture>
             </control>
             
             <!-- Title -->
@@ -25,7 +33,7 @@
                 <height>40</height>
                 <label>字幕</label>
                 <font>font12_title</font>
-                <textcolor>grey</textcolor>
+                <textcolor>white</textcolor>
                 <align>center</align>
             </control>
 
@@ -66,7 +74,7 @@
                     <control type="image">
                         <width>370</width>
                         <height>50</height>
-                        <texture colordiffuse="button_focus">colors/white.png</texture>
+                        <texture colordiffuse="$INFO[Window(home).Property(MovieFilter.FocusColor)]">colors/fm_white.png</texture>
                     </control>
                     <control type="label">
                         <left>10</left>
@@ -76,6 +84,7 @@
                         <label>$INFO[ListItem.Label]</label>
                         <aligny>center</aligny>
                         <textcolor>white</textcolor>
+                        <scroll>true</scroll>
                     </control>
                 </focusedlayout>
             </control>

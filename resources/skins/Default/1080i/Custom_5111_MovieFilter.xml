@@ -1,0 +1,1565 @@
+<window id="5111">
+    <defaultcontrol>5002</defaultcontrol>
+    <allowoverlay>yes</allowoverlay>
+    <controls>
+        <!-- Fallback background for non-standard skins -->
+        <control type="image">
+            <left>0</left>
+            <top>0</top>
+            <width>100%</width>
+            <height>100%</height>
+            <texture colordiffuse="FF202020">colors/fm_white.png</texture>
+        </control>
+        <!-- 背景，沿用 estuary 的默认 -->
+        <include>DefaultBackground</include>
+        <!-- T9 Keypad Group -->
+        <control type="group" id="6000">
+            <animation type="Conditional" condition="Window.IsVisible(movieinformation) | Window.IsVisible(DialogVideoInfo.xml)" reversible="true">
+                <effect type="fade" start="100" end="0" time="200" />
+            </animation>
+            <left>60</left>
+            <top>30</top>
+            <width>310</width>
+            <height>400</height>
+            <animation type="Conditional" condition="Control.HasFocus(9999) + Integer.IsGreater(Container(9999).CurrentItem,6)" reversible="true">
+                <effect type="slide" end="0,-300" time="500" tween="cubic" easing="inout" />
+                <effect type="fade" start="100" end="0" time="200" />
+            </animation>
+            <!-- Display -->
+            <control type="label">
+                <left>0</left>
+                <top>265</top>
+                <width>310</width>
+                <height>35</height>
+                <label>$INFO[Window(Home).Property(MovieFilter.t9_input)]</label>
+                <align>center</align>
+                <font>font13</font>
+                <textcolor>white</textcolor>
+            </control>
+            <!-- Keypad Panel -->
+            <control type="panel" id="6050">
+                <left>0</left>
+                <top>0</top>
+                <width>310</width>
+                <height>260</height>
+                <onright>9000</onright>
+                <ondown>SetFocus(9999,0)</ondown>
+                <orientation>vertical</orientation>
+                <itemlayout width="91" height="65">
+                    <control type="image">
+                        <visible>!String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                        <width>88</width>
+                        <height>62</height>
+                        <texture colordiffuse="22FFFFFF">colors/fm_white.png</texture>
+                    </control>
+                    <control type="image">
+                        <visible>String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                        <width>88</width>
+                        <height>62</height>
+                        <texture colordiffuse="22FFFFFF">common/t9_btn_88x62.png</texture>
+                    </control>
+                    <control type="label">
+                        <top>8</top>
+                        <width>88</width>
+                        <height>25</height>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <font>font12</font>
+                        <label>$INFO[ListItem.Property(DisplayLabel)]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                        <visible>!String.IsEmpty(ListItem.Label2)</visible>
+                    </control>
+                    <control type="label">
+                        <top>32</top>
+                        <width>88</width>
+                        <height>20</height>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <font>font10</font>
+                        <label>$INFO[ListItem.Label2]</label>
+                        <textcolor>FFAAAAAA</textcolor>
+                        <visible>!String.IsEmpty(ListItem.Label2)</visible>
+                    </control>
+                    <control type="label">
+                        <width>88</width>
+                        <height>62</height>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <font>font12</font>
+                        <label>$INFO[ListItem.Property(DisplayLabel)]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                        <visible>String.IsEmpty(ListItem.Label2)</visible>
+                    </control>
+                </itemlayout>
+                <focusedlayout width="91" height="65">
+                    <control type="image">
+                        <visible>!String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                        <width>88</width>
+                        <height>62</height>
+                        <texture colordiffuse="FF19B5FE">colors/fm_white.png</texture>
+                    </control>
+                    <control type="image">
+                        <visible>String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                        <width>88</width>
+                        <height>62</height>
+                        <texture colordiffuse="FF19B5FE">common/t9_btn_88x62.png</texture>
+                    </control>
+                    <control type="label">
+                        <top>8</top>
+                        <width>88</width>
+                        <height>25</height>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <font>font12</font>
+                        <label>$INFO[ListItem.Property(DisplayLabel)]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                        <visible>!String.IsEmpty(ListItem.Label2)</visible>
+                    </control>
+                    <control type="label">
+                        <top>32</top>
+                        <width>88</width>
+                        <height>20</height>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <font>font10</font>
+                        <label>$INFO[ListItem.Label2]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                        <visible>!String.IsEmpty(ListItem.Label2)</visible>
+                    </control>
+                    <control type="label">
+                        <width>88</width>
+                        <height>62</height>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <font>font12</font>
+                        <label>$INFO[ListItem.Property(DisplayLabel)]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                        <visible>String.IsEmpty(ListItem.Label2)</visible>
+                    </control>
+                </focusedlayout>
+                <content>
+                    <item>
+                        <label>1</label>
+                        <label2>[B][/B]</label2>
+                        <property name="DisplayLabel">[B]1[/B]</property>
+                        <onclick>Action(Number1)</onclick>
+                    </item>
+                    <item>
+                        <label>2</label>
+                        <label2>ABC</label2>
+                        <property name="DisplayLabel">[B]2[/B]</property>
+                        <onclick>Action(Number2)</onclick>
+                    </item>
+                    <item>
+                        <label>3</label>
+                        <label2>DEF</label2>
+                        <property name="DisplayLabel">[B]3[/B]</property>
+                        <onclick>Action(Number3)</onclick>
+                    </item>
+                    <item>
+                        <label>4</label>
+                        <label2>GHI</label2>
+                        <property name="DisplayLabel">[B]4[/B]</property>
+                        <onclick>Action(Number4)</onclick>
+                    </item>
+                    <item>
+                        <label>5</label>
+                        <label2>JKL</label2>
+                        <property name="DisplayLabel">[B]5[/B]</property>
+                        <onclick>Action(Number5)</onclick>
+                    </item>
+                    <item>
+                        <label>6</label>
+                        <label2>MNO</label2>
+                        <property name="DisplayLabel">[B]6[/B]</property>
+                        <onclick>Action(Number6)</onclick>
+                    </item>
+                    <item>
+                        <label>7</label>
+                        <label2>PQRS</label2>
+                        <property name="DisplayLabel">[B]7[/B]</property>
+                        <onclick>Action(Number7)</onclick>
+                    </item>
+                    <item>
+                        <label>8</label>
+                        <label2>TUV</label2>
+                        <property name="DisplayLabel">[B]8[/B]</property>
+                        <onclick>Action(Number8)</onclick>
+                    </item>
+                    <item>
+                        <label>9</label>
+                        <label2>WXYZ</label2>
+                        <property name="DisplayLabel">[B]9[/B]</property>
+                        <onclick>Action(Number9)</onclick>
+                    </item>
+                    <item>
+                        <label>Del</label>
+                        <label2></label2>
+                        <property name="DisplayLabel">Del</property>
+                        <onclick>Action(Delete)</onclick>
+                    </item>
+                    <item>
+                        <label>0</label>
+                        <label2></label2>
+                        <property name="DisplayLabel">[B]0[/B]</property>
+                        <onclick>Action(Number0)</onclick>
+                    </item>
+                    <item>
+                        <label>Clr</label>
+                        <label2></label2>
+                        <property name="DisplayLabel">Clr</property>
+                        <onclick>Action(Stop)</onclick>
+                    </item>
+                </content>
+            </control>
+        </control>
+        <!-- 顶部筛选条整体 group -->
+        <control type="group" id="1000">
+            <animation type="Conditional" condition="Window.IsVisible(movieinformation) | Window.IsVisible(DialogVideoInfo.xml)" reversible="true">
+                <effect type="fade" start="100" end="0" time="200" />
+            </animation>
+            <left>363</left>
+            <top>30</top>
+            <width>1600</width>
+            <height>270</height>
+            <animation type="Conditional" condition="Control.HasFocus(9999) + Integer.IsGreater(Container(9999).CurrentItem,6)" reversible="true">
+                <effect type="slide" end="0,-300" time="500" tween="cubic" easing="inout" />
+                <effect type="fade" start="100" end="0" time="200" />
+            </animation>
+            <!-- 第一行：热度 / 最新 / 影片评分 -->
+            <control type="grouplist" id="1001">
+                <orientation>horizontal</orientation>
+                <itemgap>-10</itemgap>
+                <width>1600</width>
+                <height>32</height>
+                <onleft>SetFocus(6050,2)</onleft>
+                <onright>noop</onright>
+                <ondown>1006</ondown>
+                <align>left</align>
+                <!-- 最新入库 (DateAdded) - Unselected -->
+                <control type="button" id="1013">
+                    <width>150</width>
+                    <height>32</height>
+                    <ondown>SetFocus($INFO[Window(Home).Property(Return_1013)])</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.1013)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>最新入库</label>
+                </control>
+                <!-- 最新入库 (DateAdded) - Selected -->
+                <!-- 最近观看 (LastPlayed) - Unselected -->
+                <control type="button" id="1015">
+                    <width>150</width>
+                    <height>32</height>
+                    <ondown>6003</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.1015)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>最近观看</label>
+                </control>
+                <!-- 最近观看 (LastPlayed) - Selected -->
+                <!-- 随机 (Random) - Unselected -->
+                <control type="button" id="1014">
+                    <width>100</width>
+                    <height>32</height>
+                    <ondown>6004</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.1014)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>随机</label>
+                </control>
+                <!-- 随机 (Random) - Selected -->
+                <!-- 最新上线 (Latest) - Unselected -->
+                <control type="button" id="1011">
+                    <width>150</width>
+                    <height>32</height>
+                    <ondown>6005</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.1011)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>最新上线</label>
+                </control>
+                <!-- 最新上线 (Latest) - Selected -->
+                <!-- 影片评分 (Rating) - Unselected -->
+                <control type="button" id="1012">
+                    <width>150</width>
+                    <height>32</height>
+                    <ondown>6006</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.1012)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>影片评分</label>
+                </control>
+                <!-- 影片评分 (Rating) - Selected -->
+            </control>
+            <!-- 第二行：媒体类型 -->
+            <control type="grouplist" id="1006">
+                <top>45</top>
+                <orientation>horizontal</orientation>
+                <itemgap>-10</itemgap>
+                <width>1600</width>
+                <height>32</height>
+                <onleft>SetFocus(6050,5)</onleft>
+                <onright>noop</onright>
+                <onup>1001</onup>
+                <ondown>1002</ondown>
+                <align>left</align>
+                <!-- 全部 (All) - Unselected -->
+                <control type="button" id="6001">
+                    <width>100</width>
+                    <height>32</height>
+                    <onleft>SetFocus(6050,5)</onleft>
+                    <onfocus>SetProperty(Return_Key6,6001,Home)</onfocus>
+                    <onup>SetProperty(Return_1013,6001,Home)</onup>
+                    <onup>SetFocus(1013)</onup>
+                    <ondown>2001</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.6001)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>全部</label>
+                </control>
+                <!-- 全部 (All) - Selected -->
+                <!-- 电影 (Movie) - Unselected -->
+                <control type="button" id="6002">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>SetProperty(Return_1013,6002,Home)</onup>
+                    <onup>SetFocus(1013)</onup>
+                    <ondown>2002</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.6002)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>电影</label>
+                </control>
+                <!-- 电影 (Movie) - Selected -->
+                <!-- 电影集 (Set) - Unselected -->
+                <control type="button" id="6003">
+                    <width>150</width>
+                    <height>32</height>
+                    <onup>1015</onup>
+                    <ondown>2003</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.6003)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>系列电影</label>
+                </control>
+                <!-- 电影集 (Set) - Selected -->
+                <!-- 电视剧 (TVShow) - Unselected -->
+                <control type="button" id="6004">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>1014</onup>
+                    <ondown>SetFocus($INFO[Window(Home).Property(Return_6004)])</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.6004)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>剧集</label>
+                </control>
+                <!-- 电视剧 (TVShow) - Selected -->
+                <!-- 演唱会 (MusicVideo) - Unselected -->
+                <control type="button" id="6005">
+                    <width>120</width>
+                    <height>32</height>
+                    <onup>1011</onup>
+                    <ondown>2006</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.6005)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>演唱会</label>
+                </control>
+                <!-- 演唱会 (MusicVideo) - Selected -->
+                <!-- 纪录片 (Documentary) - Unselected -->
+                <control type="button" id="6006">
+                    <width>120</width>
+                    <height>32</height>
+                    <onup>1012</onup>
+                    <ondown>SetFocus($INFO[Window(Home).Property(Return_6006)])</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.6006)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>纪录片</label>
+                </control>
+                <!-- 纪录片 (Documentary) - Selected -->
+            </control>
+            <!-- 第二行：类型 -->
+            <control type="grouplist" id="1002">
+                <top>90</top>
+                <orientation>horizontal</orientation>
+                <itemgap>-10</itemgap>
+                <width>1600</width>
+                <height>32</height>
+                <onleft>SetFocus(6050,5)</onleft>
+                <onright>noop</onright>
+                <onup>1006</onup>
+                <ondown>1003</ondown>
+                <align>left</align>
+                <!-- 类型 (Default) - Unselected -->
+                <control type="button" id="2001">
+                    <width>100</width>
+                    <height>32</height>
+                    <onleft>SetFocus(6050,5)</onleft>
+                    <onfocus>SetProperty(Return_Key6,2001,Home)</onfocus>
+                    <onup>6001</onup>
+                    <ondown>3001</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2001)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>类型</label>
+                </control>
+                <!-- 类型 (Default) - Selected -->
+                <!-- 动作 (Action) - Unselected -->
+                <control type="button" id="2002">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>6002</onup>
+                    <ondown>3002</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2002)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>动作</label>
+                </control>
+                <!-- 动作 (Action) - Selected -->
+                <!-- 喜剧 (Comedy) - Unselected -->
+                <control type="button" id="2003">
+                    <width>110</width>
+                    <height>32</height>
+                    <onup>6003</onup>
+                    <ondown>3003</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2003)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>喜剧</label>
+                </control>
+                <!-- 喜剧 (Comedy) - Selected -->
+                <!-- 爱情 (Romance) - Unselected -->
+                <control type="button" id="2004">
+                    <width>95</width>
+                    <height>32</height>
+                    <onup>SetProperty(Return_6004,2004,Home)</onup>
+                    <onup>SetFocus(6004)</onup>
+                    <ondown>SetProperty(Return_3004,2004,Home)</ondown>
+                    <ondown>SetFocus(3004)</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2004)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>爱情</label>
+                </control>
+                <!-- 爱情 (Romance) - Selected -->
+                <!-- 科幻 (SciFi) - Unselected -->
+                <control type="button" id="2005">
+                    <width>105</width>
+                    <height>32</height>
+                    <onup>SetProperty(Return_6004,2005,Home)</onup>
+                    <onup>SetFocus(6004)</onup>
+                    <ondown>SetProperty(Return_3004,2005,Home)</ondown>
+                    <ondown>SetFocus(3004)</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2005)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>科幻</label>
+                </control>
+                <!-- 科幻 (SciFi) - Selected -->
+                <!-- 犯罪 (Crime) - Unselected -->
+                <control type="button" id="2006">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>6005</onup>
+                    <ondown>3005</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2006)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>犯罪</label>
+                </control>
+                <!-- 犯罪 (Crime) - Selected -->
+                <!-- 冒险 (Adventure) - Unselected -->
+                <control type="button" id="2007">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>SetProperty(Return_6006,2007,Home)</onup>
+                    <onup>SetFocus(6006)</onup>
+                    <ondown>3006</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2007)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>冒险</label>
+                </control>
+                <!-- 剧情 (Drama) - Unselected -->
+                <control type="button" id="2014">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>SetProperty(Return_6006,2014,Home)</onup>
+                    <onup>SetFocus(6006)</onup>
+                    <ondown>3007</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2014)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>剧情</label>
+                </control>
+                <!-- 冒险 (Adventure) - Selected -->
+                <!-- 恐怖 (Horror) - Unselected -->
+                <control type="button" id="2008">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>SetProperty(Return_6006,2008,Home)</onup>
+                    <onup>SetFocus(6006)</onup>
+                    <ondown>3008</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2008)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>恐怖</label>
+                </control>
+                <!-- 恐怖 (Horror) - Selected -->
+                <!-- 动画 (Animation) - Unselected -->
+                <control type="button" id="2009">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>SetProperty(Return_6006,2009,Home)</onup>
+                    <onup>SetFocus(6006)</onup>
+                    <ondown>3009</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2009)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>动画</label>
+                </control>
+                <!-- 动画 (Animation) - Selected -->
+                <!-- 战争 (War) - Unselected -->
+                <control type="button" id="2010">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>SetProperty(Return_6006,2010,Home)</onup>
+                    <onup>SetFocus(6006)</onup>
+                    <ondown>3010</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2010)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>战争</label>
+                </control>
+                <!-- 战争 (War) - Selected -->
+                <!-- 悬疑 (Mystery) - Unselected -->
+                <control type="button" id="2011">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>SetProperty(Return_6006,2011,Home)</onup>
+                    <onup>SetFocus(6006)</onup>
+                    <ondown>3011</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2011)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>悬疑</label>
+                </control>
+                <!-- 悬疑 (Mystery) - Selected -->
+                <!-- 历史 (History) - Unselected -->
+                <control type="button" id="2012">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>SetProperty(Return_6006,2012,Home)</onup>
+                    <onup>SetFocus(6006)</onup>
+                    <ondown>3012</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2012)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>历史</label>
+                </control>
+                <!-- 历史 (History) - Selected -->
+                <!-- 音乐 (Music) - Unselected -->
+                <control type="button" id="2013">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>SetProperty(Return_6006,2013,Home)</onup>
+                    <onup>SetFocus(6006)</onup>
+                    <ondown>3014</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2013)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>音乐</label>
+                </control>
+                <!-- 音乐 (Music) - Selected -->
+                <!-- 其他 (Other) - Unselected -->
+                <control type="button" id="2015">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>SetProperty(Return_6006,2015,Home)</onup>
+                    <onup>SetFocus(6006)</onup>
+                    <ondown>3015</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2015)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>其他</label>
+                </control>
+                <!-- 其他 (Other) - Selected -->
+            </control>
+            <!-- 第三行：地区 -->
+            <control type="grouplist" id="1003">
+                <top>135</top>
+                <orientation>horizontal</orientation>
+                <itemgap>-10</itemgap>
+                <width>1600</width>
+                <height>32</height>
+                <onleft>SetFocus(6050,8)</onleft>
+                <onright>noop</onright>
+                <onup>1002</onup>
+                <ondown>1004</ondown>
+                <align>left</align>
+                <!-- 地区 (Default) - Unselected -->
+                <control type="button" id="3001">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>2001</onup>
+                    <ondown>4001</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3001)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>地区</label>
+                </control>
+                <!-- 地区 (Default) - Selected -->
+                <!-- 内地 (China) - Unselected -->
+                <control type="button" id="3002">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>2002</onup>
+                    <ondown>4002</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3002)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>内地</label>
+                </control>
+                <!-- 内地 (China) - Selected -->
+                <!-- 中国香港 (Hong Kong) - Unselected -->
+                <control type="button" id="3003">
+                    <width>150</width>
+                    <height>32</height>
+                    <onup>2003</onup>
+                    <ondown>4003</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3003)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>中国香港</label>
+                </control>
+                <!-- 中国香港 (Hong Kong) - Selected -->
+                <!-- 中国台湾 (Taiwan) - Unselected -->
+                <control type="button" id="3004">
+                    <width>150</width>
+                    <height>32</height>
+                    <onup>SetFocus($INFO[Window(Home).Property(Return_3004)])</onup>
+                    <ondown>4004</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3004)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>中国台湾</label>
+                </control>
+                <!-- 中国台湾 (Taiwan) - Selected -->
+                <!-- 美国 (USA) - Unselected -->
+                <control type="button" id="3005">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>2006</onup>
+                    <ondown>SetProperty(Return_4005,3005,Home)</ondown>
+                    <ondown>SetFocus(4005)</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3005)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>美国</label>
+                </control>
+                <!-- 美国 (USA) - Selected -->
+                <!-- 日本 (Japan) - Unselected -->
+                <control type="button" id="3006">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>2007</onup>
+                    <ondown>SetProperty(Return_4005,3006,Home)</ondown>
+                    <ondown>SetFocus(4005)</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3006)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>日本</label>
+                </control>
+                <!-- 日本 (Japan) - Selected -->
+                <!-- 韩国 (Korea) - Unselected -->
+                <control type="button" id="3007">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>2014</onup>
+                    <ondown>4006</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3007)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>韩国</label>
+                </control>
+                <!-- 韩国 (Korea) - Selected -->
+                <!-- 泰国 (Thailand) - Unselected -->
+                <control type="button" id="3008">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>2008</onup>
+                    <ondown>SetProperty(Return_4007,3008,Home)</ondown>
+                    <ondown>SetFocus(4007)</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3008)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>泰国</label>
+                </control>
+                <!-- 泰国 (Thailand) - Selected -->
+                <!-- 印度 (India) - Unselected -->
+                <control type="button" id="3009">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>2009</onup>
+                    <ondown>SetProperty(Return_4007,3009,Home)</ondown>
+                    <ondown>SetFocus(4007)</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3009)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>印度</label>
+                </control>
+                <!-- 印度 (India) - Selected -->
+                <!-- 英国 (UK) - Unselected -->
+                <control type="button" id="3010">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>2010</onup>
+                    <ondown>4008</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3010)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>英国</label>
+                </control>
+                <!-- 英国 (UK) - Selected -->
+                <!-- 法国 (France) - Unselected -->
+                <control type="button" id="3011">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>2011</onup>
+                    <ondown>4009</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3011)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>法国</label>
+                </control>
+                <!-- 法国 (France) - Selected -->
+                <!-- 德国 (Germany) - Unselected -->
+                <control type="button" id="3012">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>2012</onup>
+                    <ondown>SetProperty(Return_4010,3012,Home)</ondown>
+                    <ondown>SetFocus(4010)</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3012)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>德国</label>
+                </control>
+                <!-- 德国 (Germany) - Selected -->
+                <!-- 俄罗斯 (Russia) - Unselected -->
+                <control type="button" id="3014">
+                    <width>120</width>
+                    <height>32</height>
+                    <onup>2013</onup>
+                    <onup>SetFocus(2015)</onup>
+                    <ondown>SetProperty(Return_4010,3014,Home)</ondown>
+                    <ondown>SetFocus(4010)</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3014)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>俄罗斯</label>
+                </control>
+                <!-- 俄罗斯 (Russia) - Selected -->
+                <!-- 加拿大 (Canada) - Unselected -->
+                <control type="button" id="3015">
+                    <width>120</width>
+                    <height>32</height>
+                    <onup>2015</onup>
+                    <ondown>SetProperty(Return_4010,3015,Home)</ondown>
+                    <ondown>SetFocus(4010)</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3015)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>加拿大</label>
+                </control>
+                <!-- 加拿大 (Canada) - Selected -->
+                <!-- 其他 (Other) - Unselected -->
+                <control type="button" id="3013">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>2015</onup>
+                    <ondown>SetProperty(Return_4010,3013,Home)</ondown>
+                    <ondown>SetFocus(4010)</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3013)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>其他</label>
+                </control>
+                <!-- 其他 (Other) - Selected -->
+            </control>
+            <!-- 第四行：年份 -->
+            <control type="grouplist" id="1004">
+                <top>180</top>
+                <orientation>horizontal</orientation>
+                <itemgap>-10</itemgap>
+                <width>1600</width>
+                <height>32</height>
+                <onleft>SetFocus(6050,11)</onleft>
+                <onright>noop</onright>
+                <onup>1003</onup>
+                <ondown>1005</ondown>
+                <align>left</align>
+                <!-- 年份 (Default) - Unselected -->
+                <control type="button" id="4001">
+                    <width>100</width>
+                    <height>32</height>
+                    <onfocus>SetProperty(Return_KeyClr,4001,Home)</onfocus>
+                    <onleft>SetFocus(6050,9)</onleft>
+                    <onup>3001</onup>
+                    <ondown>5001</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.4001)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>年份</label>
+                </control>
+                <!-- 年份 (Default) - Selected -->
+                <!-- 今年 (ThisYear) - Unselected -->
+                <control type="button" id="4002">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>3002</onup>
+                    <ondown>5002</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.4002)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>今年</label>
+                </control>
+                <!-- 今年 (ThisYear) - Selected -->
+                <!-- 2020年代 - Unselected -->
+                <control type="button" id="4003">
+                    <width>160</width>
+                    <height>32</height>
+                    <onup>3003</onup>
+                    <ondown>SetFocus($INFO[Window(Home).Property(Return_4003)])</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.4003)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>2020年代</label>
+                </control>
+                <!-- 2020年代 - Selected -->
+                <!-- 2010年代 - Unselected -->
+                <control type="button" id="4004">
+                    <width>160</width>
+                    <height>32</height>
+                    <onup>3004</onup>
+                    <ondown>SetFocus($INFO[Window(Home).Property(Return_4004)])</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.4004)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>2010年代</label>
+                </control>
+                <!-- 2010年代 - Selected -->
+                <!-- 2000年代 - Unselected -->
+                <control type="button" id="4005">
+                    <width>160</width>
+                    <height>32</height>
+                    <onup>SetFocus($INFO[Window(Home).Property(Return_4005)])</onup>
+                    <ondown>5006</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.4005)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>2000年代</label>
+                </control>
+                <!-- 2000年代 - Selected -->
+                <!-- 90年代 - Unselected -->
+                <control type="button" id="4006">
+                    <width>130</width>
+                    <height>32</height>
+                    <onup>3007</onup>
+                    <ondown>5006</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.4006)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>90年代</label>
+                </control>
+                <!-- 90年代 - Selected -->
+                <!-- 80年代 - Unselected -->
+                <control type="button" id="4007">
+                    <width>130</width>
+                    <height>32</height>
+                    <onup>SetFocus($INFO[Window(Home).Property(Return_4007)])</onup>
+                    <ondown>5006</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.4007)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>80年代</label>
+                </control>
+                <!-- 80年代 - Selected -->
+                <!-- 70年代 - Unselected -->
+                <control type="button" id="4008">
+                    <width>130</width>
+                    <height>32</height>
+                    <onup>3010</onup>
+                    <ondown>5006</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.4008)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>70年代</label>
+                </control>
+                <!-- 70年代 - Selected -->
+                <!-- 60年代 - Unselected -->
+                <control type="button" id="4009">
+                    <width>130</width>
+                    <height>32</height>
+                    <onup>3011</onup>
+                    <ondown>5006</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.4009)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>60年代</label>
+                </control>
+                <!-- 60年代 - Selected -->
+                <!-- 更早 - Unselected -->
+                <control type="button" id="4010">
+                    <width>100</width>
+                    <height>32</height>
+                    <onup>SetFocus($INFO[Window(Home).Property(Return_4010)])</onup>
+                    <ondown>5006</ondown>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.4010)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>更早</label>
+                </control>
+                <!-- 更早 - Selected -->
+            </control>
+            <!-- 第五行：评分 -->
+            <control type="grouplist" id="1005">
+                <top>225</top>
+                <orientation>horizontal</orientation>
+                <itemgap>-10</itemgap>
+                <width>1600</width>
+                <height>32</height>
+                <onleft>SetFocus(6050,11)</onleft>
+                <onright>noop</onright>
+                <onup>1004</onup>
+                <ondown>9999</ondown>
+                <align>left</align>
+                <!-- 评分 (Default) - Unselected -->
+                <control type="button" id="5001">
+                    <width>100</width>
+                    <height>32</height>
+                    <onfocus>SetProperty(Return_KeyClr,5001,Home)</onfocus>
+                    <onleft>SetFocus(6050,9)</onleft>
+                    <ondown>SetFocus(9999,1)</ondown>
+                    <onup>4001</onup>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.5001)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>评分</label>
+                </control>
+                <!-- 评分 (Default) - Selected -->
+                <!-- 10-9分 - Unselected -->
+                <control type="button" id="5002">
+                    <width>100</width>
+                    <height>32</height>
+                    <ondown>SetFocus(9999,1)</ondown>
+                    <onup>4002</onup>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.5002)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>10-9</label>
+                </control>
+                <!-- 9-8分 - Unselected -->
+                <control type="button" id="5003">
+                    <width>88</width>
+                    <height>32</height>
+                    <ondown>SetFocus(9999,1)</ondown>
+                    <onup>SetProperty(Return_4003,5003,Home)</onup>
+                    <onup>SetFocus(4003)</onup>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.5003)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>9-8</label>
+                </control>
+                <!-- 8-7分 - Unselected -->
+                <control type="button" id="5004">
+                    <width>85</width>
+                    <height>32</height>
+                    <ondown>SetFocus(9999,2)</ondown>
+                    <onup>SetProperty(Return_4003,5004,Home)</onup>
+                    <onup>SetFocus(4003)</onup>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.5004)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>8-7</label>
+                </control>
+                <!-- 7-6分 - Unselected -->
+                <control type="button" id="5005">
+                    <width>90</width>
+                    <height>32</height>
+                    <ondown>SetFocus(9999,2)</ondown>
+                    <onup>SetProperty(Return_4004,5005,Home)</onup>
+                    <onup>SetFocus(4004)</onup>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.5005)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>7-6</label>
+                </control>
+                <!-- 6分以下 - Unselected -->
+                <control type="button" id="5006">
+                    <width>120</width>
+                    <height>32</height>
+                    <ondown>SetFocus(9999,2)</ondown>
+                    <onup>SetProperty(Return_4004,5006,Home)</onup>
+                    <onup>SetFocus(4004)</onup>
+                    <font>font13</font>
+                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.5006)]</textcolor>
+                    <focusedcolor>FF19B5FE</focusedcolor>
+                    <texturefocus></texturefocus>
+                    <texturenofocus></texturenofocus>
+                    <textoffsetx>5</textoffsetx>
+                    <align>left</align>
+                    <label>6分以下</label>
+                </control>
+            </control>
+        </control>
+        <!-- 下方海报墙 -->
+        <control type="panel" id="9999">
+            <left>30</left>
+            <top>320</top>
+            <width>2000</width>
+            <height>1050</height>
+            <animation type="Conditional" condition="Control.HasFocus(9999) + Integer.IsGreater(Container(9999).CurrentItem,6)" reversible="true">
+                <effect type="slide" end="0,-280" time="500" tween="cubic" easing="inout" />
+            </animation>
+            <animation type="Conditional" condition="String.IsEqual(Window(Home).Property(MovieFilter.IsRefreshing),true)" reversible="true">
+                <effect type="fade" start="100" end="0" time="100" />
+            </animation>
+            <onleft>6009</onleft>
+            <onup>9998</onup>
+            <onclick condition="String.IsEqual(ListItem.DBType,tvshow)">ActivateWindow(videos,videodb://tvshows/titles/$INFO[ListItem.DBID]/,return)</onclick>
+            <onclick condition="String.IsEqual(ListItem.DBType,set)">ActivateWindow(videos,videodb://movies/sets/$INFO[ListItem.DBID]/,return)</onclick>
+            <content>plugin://plugin.video.filteredmovies/?mode=filter_list&amp;reload=$INFO[Window(Home).Property(FilteredMovies.ReloadID)]</content>
+            <viewtype label="Posters">panel</viewtype>
+            <animation type="Conditional" condition="Window.IsVisible(movieinformation) | Window.IsVisible(DialogVideoInfo.xml)" reversible="true">
+                <effect type="fade" start="100" end="0" time="200" />
+            </animation>
+            <scrolltime>200</scrolltime>
+            <!-- 每个格子的高度拉高一点，给标题留空间 -->
+            <itemlayout width="310" height="511">
+                <control type="group">
+                    <width>310</width>
+                    <height>511</height>
+                    <!-- Fuse 2 Version (Rounded) -->
+                    <control type="image">
+                        <visible>String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                        <left>10</left>
+                        <top>0</top>
+                        <width>290</width>
+                        <height>435</height>
+                        <texture diffuse="diffuse/poster_mask.png">$INFO[ListItem.Art(poster)]</texture>
+                        <aspectratio scalediffuse="false">scale</aspectratio>
+                        <bordertexture border="21" infill="false">overlays/shadow.png</bordertexture>
+                        <bordersize>20</bordersize>
+                    </control>
+                    <!-- Default Version (Square) -->
+                    <control type="image">
+                        <visible>!String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                        <left>10</left>
+                        <top>0</top>
+                        <width>290</width>
+                        <height>435</height>
+                        <texture>$INFO[ListItem.Art(poster)]</texture>
+                        <aspectratio>scale</aspectratio>
+                        <bordertexture border="21" infill="false">overlays/fm_shadow.png</bordertexture>
+                        <bordersize>20</bordersize>
+                    </control>
+                    <!-- 观看进度条 (Fuse 2 Version) -->
+                    <control type="progress">
+                        <visible>String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true) + Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
+                        <left>40</left>
+                        <top>405</top>
+                        <width>230</width>
+                        <height>5</height>
+                        <info>ListItem.Property(SkinPercentPlayed)</info>
+                        <texturebg colordiffuse="20FFFFFF">colors/fm_white.png</texturebg>
+                        <lefttexture></lefttexture>
+                        <midtexture colordiffuse="$INFO[Window(Home).Property(MovieFilter.ProgressBarColor)]">colors/fm_white.png</midtexture>
+                        <righttexture></righttexture>
+                    </control>
+                    <!-- 观看进度条 (Default Version) -->
+                    <control type="progress">
+                        <visible>!String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true) + Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
+                        <left>30</left>
+                        <top>410</top>
+                        <width>250</width>
+                        <height>5</height>
+                        <info>ListItem.Property(SkinPercentPlayed)</info>
+                        <texturebg colordiffuse="20FFFFFF">colors/fm_white.png</texturebg>
+                        <lefttexture></lefttexture>
+                        <midtexture colordiffuse="$INFO[Window(Home).Property(MovieFilter.ProgressBarColor)]">colors/fm_white.png</midtexture>
+                        <righttexture></righttexture>
+                    </control>
+                    <control type="label">
+                        <left>0</left>
+                        <top>456</top>
+                        <width>310</width>
+                        <height>30</height>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <font>font10</font>
+                        <textcolor>FFCCCCCC</textcolor>
+                        <label>$INFO[ListItem.Year]</label>
+                        <visible>!String.IsEmpty(ListItem.Year)</visible>
+                    </control>
+                    <!-- Watched Icon -->
+                    <control type="image">
+                        <left>208</left>
+                        <top>378</top>
+                        <width>26</width>
+                        <height>26</height>
+                        <texture>common/rounded_watched.png</texture>
+                        <visible>String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true) + Integer.IsGreater(ListItem.PlayCount,0) + !Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
+                    </control>
+                    <control type="image">
+                        <left>206</left>
+                        <top>376</top>
+                        <width>30</width>
+                        <height>30</height>
+                        <texture>common/watched.png</texture>
+                        <visible>!String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true) + Integer.IsGreater(ListItem.PlayCount,0) + !Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
+                    </control>
+
+                    <!-- Rating -->
+                    <control type="label">
+                        <left>13</left>
+                        <top>370</top>
+                        <width>260</width>
+                        <height>40</height>
+                        <align>right</align>
+                        <aligny>center</aligny>
+                        <font>font12</font>
+                        <label>$INFO[ListItem.Rating]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                        <visible>!String.IsEmpty(ListItem.Rating)</visible>
+                    </control>
+                    <control type="label">
+                        <top>415</top>
+                        <width>310</width>
+                        <height>40</height>
+                        <align>center</align>
+                        <aligny>top</aligny>
+                        <wrapmultiline>true</wrapmultiline>
+                        <scroll>false</scroll>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                        <font>font13</font>
+                    </control>
+
+                </control>
+            </itemlayout>
+            <focusedlayout width="310" height="511">
+                <control type="group">
+                    <depth>DepthContentPopout</depth>
+                    <width>310</width>
+                    <height>511</height>
+                    <animation type="Focus">
+                        <effect type="zoom" start="100" end="110" time="200" tween="sine" easing="inout" center="auto" />
+                    </animation>
+                    <animation type="Unfocus">
+                        <effect type="zoom" start="110" end="100" time="200" tween="sine" easing="inout" center="auto" />
+                    </animation>
+                    <control type="group">
+                        <!-- Fuse 2 Version (Rounded) -->
+                        <control type="group">
+                            <visible>String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                            <control type="image">
+                                <left>10</left>
+                                <top>0</top>
+                                <width>290</width>
+                                <height>435</height>
+                                <texture diffuse="diffuse/poster_mask.png">$INFO[ListItem.Art(poster)]</texture>
+                                <aspectratio scalediffuse="false">scale</aspectratio>
+                                <bordertexture border="21" infill="false">overlays/shadow.png</bordertexture>
+                                <bordersize>20</bordersize>
+                            </control>
+                        </control>
+                        <!-- Default Version (Square) -->
+                        <control type="group">
+                            <visible>!String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                            <control type="image">
+                                <left>6</left>
+                                <top>-4</top>
+                                <width>298</width>
+                                <height>443</height>
+                                <texture colordiffuse="button_focus">colors/fm_white.png</texture>
+                                <bordertexture border="21" infill="false">overlays/fm_shadow.png</bordertexture>
+                                <bordersize>20</bordersize>
+                            </control>
+                            <control type="image">
+                                <left>10</left>
+                                <top>0</top>
+                                <width>290</width>
+                                <height>435</height>
+                                <texture>$INFO[ListItem.Art(poster)]</texture>
+                                <aspectratio>scale</aspectratio>
+                                <bordertexture border="21" infill="false">overlays/fm_shadow.png</bordertexture>
+                                <bordersize>20</bordersize>
+                            </control>
+                        </control>
+                    </control>
+                    <!-- 观看进度条 (Fuse 2 Version) -->
+                    <control type="progress">
+                        <visible>String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true) + Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
+                        <left>40</left>
+                        <top>405</top>
+                        <width>230</width>
+                        <height>5</height>
+                        <info>ListItem.Property(SkinPercentPlayed)</info>
+                        <texturebg colordiffuse="20FFFFFF">colors/fm_white.png</texturebg>
+                        <lefttexture></lefttexture>
+                        <midtexture colordiffuse="$INFO[Window(Home).Property(MovieFilter.ProgressBarColor)]">colors/fm_white.png</midtexture>
+                        <righttexture></righttexture>
+                    </control>
+                    <!-- 观看进度条 (Default Version) -->
+                    <control type="progress">
+                        <visible>!String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true) + Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
+                        <left>30</left>
+                        <top>410</top>
+                        <width>250</width>
+                        <height>5</height>
+                        <info>ListItem.Property(SkinPercentPlayed)</info>
+                        <texturebg colordiffuse="20FFFFFF">colors/fm_white.png</texturebg>
+                        <lefttexture></lefttexture>
+                        <midtexture colordiffuse="$INFO[Window(Home).Property(MovieFilter.ProgressBarColor)]">colors/fm_white.png</midtexture>
+                        <righttexture></righttexture>
+                    </control>
+                    <control type="label">
+                        <left>0</left>
+                        <top>456</top>
+                        <width>310</width>
+                        <height>30</height>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <font>font10</font>
+                        <textcolor>FFCCCCCC</textcolor>
+                        <label>$INFO[ListItem.Year]</label>
+                        <visible>!String.IsEmpty(ListItem.Year)</visible>
+                    </control>
+                    <!-- Watched Icon -->
+                    <control type="image">
+                        <left>208</left>
+                        <top>378</top>
+                        <width>26</width>
+                        <height>26</height>
+                        <texture>common/rounded_watched.png</texture>
+                        <visible>String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true) + Integer.IsGreater(ListItem.PlayCount,0) + !Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
+                    </control>
+                    <control type="image">
+                        <left>206</left>
+                        <top>376</top>
+                        <width>30</width>
+                        <height>30</height>
+                        <texture>common/watched.png</texture>
+                        <visible>!String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true) + Integer.IsGreater(ListItem.PlayCount,0) + !Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
+                    </control>
+
+                    <!-- Rating -->
+                    <control type="label">
+                        <left>13</left>
+                        <top>370</top>
+                        <width>260</width>
+                        <height>40</height>
+                        <align>right</align>
+                        <aligny>center</aligny>
+                        <font>font12</font>
+                        <label>$INFO[ListItem.Rating]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                        <visible>!String.IsEmpty(ListItem.Rating)</visible>
+                    </control>
+                    <control type="label">
+                        <top>415</top>
+                        <width>310</width>
+                        <height>40</height>
+                        <align>center</align>
+                        <aligny>top</aligny>
+                        <wrapmultiline>true</wrapmultiline>
+                        <scroll>false</scroll>
+                        <label>$INFO[ListItem.Label]</label>
+                        <textcolor>FFFFFFFF</textcolor>
+                        <font>font13</font>
+                    </control>
+
+                </control>
+            </focusedlayout>
+        </control>
+        <!-- 焦点转发器 -->
+        <control type="button" id="9997">
+            <left>-1000</left>
+            <top>-1000</top>
+            <width>1</width>
+            <height>1</height>
+            <label></label>
+            <onfocus>SetFocus(6050,10)</onfocus>
+        </control>
+        <!-- 隐藏的跳转逻辑按钮 -->
+        <control type="button" id="9998">
+            <left>-1000</left>
+            <top>-1000</top>
+            <width>1</width>
+            <height>1</height>
+            <label></label>
+            <onfocus condition="Integer.IsEqual(Container(9999).CurrentItem,1)">SetFocus(9997)</onfocus>
+            <onfocus condition="Integer.IsEqual(Container(9999).CurrentItem,2)">SetFocus(5002)</onfocus>
+            <onfocus condition="Integer.IsEqual(Container(9999).CurrentItem,3)">SetFocus(5005)</onfocus>
+            <onfocus>SetFocus(1005)</onfocus>
+        </control>
+        <control type="button" id="9000">
+            <left>-1000</left>
+            <top>-1000</top>
+            <width>1</width>
+            <height>1</height>
+            <label></label>
+            <onfocus condition="Integer.IsEqual(Container(6050).CurrentItem,6)">SetFocus($INFO[Window(Home).Property(Return_Key6)])</onfocus>
+            <onfocus condition="Integer.IsEqual(Container(6050).CurrentItem,12)">SetFocus($INFO[Window(Home).Property(Return_KeyClr)])</onfocus>
+            <onfocus condition="Integer.IsEqual(Container(6050).CurrentItem,3)">SetFocus(1013)</onfocus>
+            <onfocus condition="Integer.IsEqual(Container(6050).CurrentItem,9)">SetFocus(3001)</onfocus>
+            <!-- <onfocus condition="Integer.IsGreater(Container(6050).CurrentItem,9)">SetFocus(1004)</onfocus> -->
+            <!-- <onfocus condition="Integer.IsGreater(Container(6050).CurrentItem,6) + Integer.IsLess(Container(6050).CurrentItem,10)">SetFocus(1003)</onfocus> -->
+            <!-- <onfocus condition="Integer.IsGreater(Container(6050).CurrentItem,3) + Integer.IsLess(Container(6050).CurrentItem,7)">SetFocus(1006)</onfocus> -->
+            <!-- <onfocus condition="Integer.IsLess(Container(6050).CurrentItem,4)">SetFocus(1001)</onfocus> -->
+        </control>
+    </controls>
+</window>
