@@ -1388,6 +1388,37 @@
                         <font>font13</font>
                     </control>
 
+                    <!-- Media Type Icon: Movie -->
+                    <control type="image">
+                        <left>30</left>
+                        <top>372</top>
+                        <width>40</width>
+                        <height>40</height>
+                        <texture>common/film.png</texture>
+                        <animation type="Visible" reversible="false">
+                            <effect type="fade" start="0" end="100" time="0" delay="100" />
+                        </animation>
+                        <animation type="Hidden" reversible="false">
+                            <effect type="fade" start="100" end="0" time="0" delay="100" />
+                        </animation>
+                        <visible>[String.IsEqual(Window(Home).Property(MovieFilter.FilterColor.6001),FFEB9E17) | String.IsEqual(Window(Home).Property(MovieFilter.FilterColor.6006),FFEB9E17)] + [String.IsEqual(ListItem.DBType,movie) | String.IsEqual(ListItem.DBType,set)]</visible>
+                    </control>
+                    <!-- Media Type Icon: TVShow -->
+                    <control type="image">
+                        <left>30</left>
+                        <top>372</top>
+                        <width>40</width>
+                        <height>40</height>
+                        <texture>common/tv.png</texture>
+                        <animation type="Visible" reversible="false">
+                            <effect type="fade" start="0" end="100" time="0" delay="100" />
+                        </animation>
+                        <animation type="Hidden" reversible="false">
+                            <effect type="fade" start="100" end="0" time="0" delay="100" />
+                        </animation>
+                        <visible>[String.IsEqual(Window(Home).Property(MovieFilter.FilterColor.6001),FFEB9E17) | String.IsEqual(Window(Home).Property(MovieFilter.FilterColor.6006),FFEB9E17)] + [String.IsEqual(ListItem.DBType,tvshow) | String.IsEqual(ListItem.DBType,season) | String.IsEqual(ListItem.DBType,episode)]</visible>
+                    </control>
+
                 </control>
             </itemlayout>
             <focusedlayout width="310" height="511">
@@ -1522,6 +1553,37 @@
                         <font>font13</font>
                     </control>
 
+                    <!-- Media Type Icon: Movie -->
+                    <control type="image">
+                        <left>30</left>
+                        <top>372</top>
+                        <width>40</width>
+                        <height>40</height>
+                        <texture>common/film.png</texture>
+                        <animation type="Visible" reversible="false">
+                            <effect type="fade" start="0" end="100" time="0" delay="100" />
+                        </animation>
+                        <animation type="Hidden" reversible="false">
+                            <effect type="fade" start="100" end="0" time="0" delay="100" />
+                        </animation>
+                        <visible>[String.IsEqual(Window(Home).Property(MovieFilter.FilterColor.6001),FFEB9E17) | String.IsEqual(Window(Home).Property(MovieFilter.FilterColor.6006),FFEB9E17)] + [String.IsEqual(ListItem.DBType,movie) | String.IsEqual(ListItem.DBType,set)]</visible>
+                    </control>
+                    <!-- Media Type Icon: TVShow -->
+                    <control type="image">
+                        <left>30</left>
+                        <top>372</top>
+                        <width>40</width>
+                        <height>40</height>
+                        <texture>common/tv.png</texture>
+                        <animation type="Visible" reversible="false">
+                            <effect type="fade" start="0" end="100" time="0" delay="100" />
+                        </animation>
+                        <animation type="Hidden" reversible="false">
+                            <effect type="fade" start="100" end="0" time="0" delay="100" />
+                        </animation>
+                        <visible>[String.IsEqual(Window(Home).Property(MovieFilter.FilterColor.6001),FFEB9E17) | String.IsEqual(Window(Home).Property(MovieFilter.FilterColor.6006),FFEB9E17)] + [String.IsEqual(ListItem.DBType,tvshow) | String.IsEqual(ListItem.DBType,season) | String.IsEqual(ListItem.DBType,episode)]</visible>
+                    </control>
+
                 </control>
             </focusedlayout>
         </control>
@@ -1556,10 +1618,6 @@
             <onfocus condition="Integer.IsEqual(Container(6050).CurrentItem,12)">SetFocus($INFO[Window(Home).Property(Return_KeyClr)])</onfocus>
             <onfocus condition="Integer.IsEqual(Container(6050).CurrentItem,3)">SetFocus(1013)</onfocus>
             <onfocus condition="Integer.IsEqual(Container(6050).CurrentItem,9)">SetFocus(3001)</onfocus>
-            <!-- <onfocus condition="Integer.IsGreater(Container(6050).CurrentItem,9)">SetFocus(1004)</onfocus> -->
-            <!-- <onfocus condition="Integer.IsGreater(Container(6050).CurrentItem,6) + Integer.IsLess(Container(6050).CurrentItem,10)">SetFocus(1003)</onfocus> -->
-            <!-- <onfocus condition="Integer.IsGreater(Container(6050).CurrentItem,3) + Integer.IsLess(Container(6050).CurrentItem,7)">SetFocus(1006)</onfocus> -->
-            <!-- <onfocus condition="Integer.IsLess(Container(6050).CurrentItem,4)">SetFocus(1001)</onfocus> -->
         </control>
     </controls>
 </window>
