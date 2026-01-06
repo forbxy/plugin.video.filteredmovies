@@ -870,7 +870,7 @@ def get_documentary_items(filters, limit, allowed_ids=None):
         filter_obj_tv = add_rule(build_filter(filters, media_type="tvshow"), doc_rule)
         
         # Batch fetch
-        movie_props = ["title", "thumbnail", "art", "dateadded", "rating", "year", "file", "resume", "runtime", "lastplayed", "plot"]
+        movie_props = ["title", "thumbnail", "art", "dateadded", "rating", "year", "file", "resume", "runtime", "lastplayed", "plot", "playcount"]
         tv_props = ["title", "thumbnail", "art", "dateadded", "rating", "year", "episode", "watchedepisodes", "file", "lastplayed", "plot"]
         
         batch_cmds = [
@@ -914,7 +914,7 @@ def get_mixed_items(filters, limit, allowed_ids=None):
         filter_obj_movie = build_filter(filters, media_type="movie")
         filter_obj_tv = build_filter(filters, media_type="tvshow")
         
-        movie_props = ["title", "thumbnail", "art", "dateadded", "rating", "year", "file", "resume", "runtime", "lastplayed", "plot"]
+        movie_props = ["title", "thumbnail", "art", "dateadded", "rating", "year", "file", "resume", "runtime", "lastplayed", "plot", "playcount"]
         tv_props = ["title", "thumbnail", "art", "dateadded", "rating", "year", "episode", "watchedepisodes", "file", "lastplayed", "plot"]
         
         batch_cmds = [
