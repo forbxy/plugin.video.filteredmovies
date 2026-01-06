@@ -1,5 +1,9 @@
 # Kodi 电影剧集筛选插件
 
+**圆角皮肤适配(地平线2，导火线2等)**
+<img src="resources/filter2.jpg" width="100%" />
+
+**方角皮肤适配**
 <img src="resources/filter.jpg" width="100%" />
 
 这是一个为 Kodi 设计的高级电影剧集筛选和增强工具插件。
