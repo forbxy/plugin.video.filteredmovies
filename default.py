@@ -38,7 +38,7 @@ def prefetch_data_for_window():
         log("Starting window prefetch...")
         # 1. Load state from Skin
         filter_state = {}
-        blob = xbmc.getInfoLabel('Skin.String(FilteredMovies.State)')
+        blob = xbmc.getInfoLabel('Skin.String(MFG.State)')
         if blob:
             try:
                 decoded = base64.b64decode(blob).decode('utf-8')
@@ -223,7 +223,7 @@ def record_skip_point():
         save_skip_data(data)
         
         # 通知 service 重新加载数据
-        xbmcgui.Window(10000).setProperty("FilteredMovies.Reload", "true")
+        xbmcgui.Window(10000).setProperty("MFG.Reload", "true")
         
         xbmc.executebuiltin(f'Notification(FilteredMovies, {msg} (第{season}季), 2000, {os.path.join(ADDON_PATH, "icon.png")})')
         log(f"Recorded skip point for {show_title} Season {season}: {season_data}")
@@ -286,7 +286,7 @@ def delete_skip_point():
         save_skip_data(data)
         
         # 通知 service 重新加载数据
-        xbmcgui.Window(10000).setProperty("FilteredMovies.Reload", "true")
+        xbmcgui.Window(10000).setProperty("MFG.Reload", "true")
         xbmc.executebuiltin(f'Notification(FilteredMovies, {msg}, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
         
     except Exception as e:
@@ -1005,8 +1005,8 @@ def set_home_background(image):
 def launch_t9():
     # last_close用来处理先关闭窗口，后调用launch_t9(比如地平线，导火线)
     # t9_is_open用来处理先调用launch_t9，后关闭窗口（比如默认皮肤estuary）
-    last_close = xbmcgui.Window(10000).getProperty("FilteredMovies.T9LastClose")
-    t9_is_open = xbmcgui.Window(10000).getProperty("FilteredMovies.T9Open")
+    last_close = xbmcgui.Window(10000).getProperty("MFG.T9LastClose")
+    t9_is_open = xbmcgui.Window(10000).getProperty("MFG.T9Open")
     last_close = float(last_close) if last_close else 0
     log("Launching T9 Input Window {}".format(last_close))
     if (time.time() - last_close < 0.3) or t9_is_open == "true":
@@ -1017,9 +1017,9 @@ def launch_t9():
     threading.Thread(target=prefetch_data_for_window).start()
 
     # Set initial ReloadID to trigger list load immediately with current state
-    xbmcgui.Window(10000).setProperty("FilteredMovies.ReloadID", "first_" + str(time.time()))
+    xbmcgui.Window(10000).setProperty("MFG.ReloadID", "first_" + str(time.time()))
     # 初始状态设为刷新中，以便窗口打开时先隐藏列表，加载完后再淡入
-    # xbmcgui.Window(10000).setProperty("MovieFilter.IsRefreshing", "true")
+    # xbmcgui.Window(10000).setProperty("MFG.IsRefreshing", "true")
 
     skin_name = get_skin_name()
 
@@ -1058,7 +1058,7 @@ def launch_t9():
     w = window_handler.FilterWindow(xml_file, ADDON_PATH, 'Default', '5111')
     w.doModal()
     w.cleanup()
-    xbmcgui.Window(10000).setProperty("FilteredMovies.T9Open", "false")
+    xbmcgui.Window(10000).setProperty("MFG.T9Open", "false")
     del w
 
 def filter_list(reload_param):
@@ -1106,7 +1106,7 @@ def filter_list(reload_param):
     
     # 1. Load state from Skin
     filter_state = {}
-    blob = xbmc.getInfoLabel('Skin.String(FilteredMovies.State)')
+    blob = xbmc.getInfoLabel('Skin.String(MFG.State)')
     if blob:
         try:
             decoded = base64.b64decode(blob).decode('utf-8')
@@ -1128,7 +1128,7 @@ def filter_list(reload_param):
                 filters[group] = val
 
     # 3. T9 Input
-    t9_input = xbmcgui.Window(10000).getProperty("MovieFilter.t9_input")
+    t9_input = xbmcgui.Window(10000).getProperty("MFG.T9Input")
     allowed_ids = None
     if t9_input and len(t9_input) >= 3:
         allowed_ids = t9_helper.helper.search(t9_input)
@@ -1156,7 +1156,7 @@ def filter_list(reload_param):
         # 首次加载要的是快,不使用淡入效果
         # 列表加载完成，触发淡入动画
         xbmc.sleep(100)
-        xbmcgui.Window(10000).setProperty("MovieFilter.IsRefreshing", "false")
+        xbmcgui.Window(10000).setProperty("MFG.IsRefreshing", "false")
     log(f"Filtered list populated with {len(list_items)} items")
 
 def select_playback_speed():

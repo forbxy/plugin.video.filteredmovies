@@ -12,13 +12,13 @@
             
             <!-- Background -->
             <control type="image">
-                <visible>!String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                <visible>!String.IsEqual(Window(Home).Property(MFG.UseRounded),true)</visible>
                 <width>100%</width>
                 <height>100%</height>
                 <texture colordiffuse="80000000">colors/fm_white.png</texture>
             </control>
             <control type="image">
-                <visible>String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                <visible>String.IsEqual(Window(Home).Property(MFG.UseRounded),true)</visible>
                 <width>100%</width>
                 <height>100%</height>
                 <texture colordiffuse="80000000" border="10">diffuse/poster_mask.png</texture>
@@ -73,7 +73,7 @@
                     <control type="image">
                         <width>240</width>
                         <height>50</height>
-                        <texture colordiffuse="$INFO[Window(home).Property(MovieFilter.FocusColor)]">colors/fm_white.png</texture>
+                        <texture colordiffuse="$INFO[Window(home).Property(MFG.FocusColor)]">colors/fm_white.png</texture>
                     </control>
                     <control type="label">
                         <left>10</left>

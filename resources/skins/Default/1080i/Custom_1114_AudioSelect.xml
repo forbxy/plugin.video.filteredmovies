@@ -9,17 +9,17 @@
             <height>320</height>
             <animation effect="fade" start="0" end="100" time="200">WindowOpen</animation>
             <animation effect="fade" start="100" end="0" time="200">WindowClose</animation>
-            <animation effect="slide" end="-570,-250" time="0" condition="String.IsEqual(Window(Home).Property(MovieFilter.CenterWindow),true)">Conditional</animation>
+            <animation effect="slide" end="-570,-250" time="0" condition="String.IsEqual(Window(Home).Property(MFG.CenterWindow),true)">Conditional</animation>
             
             <!-- Background -->
             <control type="image">
-                <visible>!String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                <visible>!String.IsEqual(Window(Home).Property(MFG.UseRounded),true)</visible>
                 <width>100%</width>
                 <height>100%</height>
                 <texture colordiffuse="80000000">colors/fm_white.png</texture>
             </control>
             <control type="image">
-                <visible>String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                <visible>String.IsEqual(Window(Home).Property(MFG.UseRounded),true)</visible>
                 <width>100%</width>
                 <height>100%</height>
                 <texture colordiffuse="80000000" border="10">diffuse/poster_mask.png</texture>
@@ -74,7 +74,7 @@
                     <control type="image">
                         <width>740</width>
                         <height>50</height>
-                        <texture colordiffuse="$INFO[Window(home).Property(MovieFilter.FocusColor)]">colors/fm_white.png</texture>
+                        <texture colordiffuse="$INFO[Window(home).Property(MFG.FocusColor)]">colors/fm_white.png</texture>
                     </control>
                     <control type="label">
                         <left>10</left>

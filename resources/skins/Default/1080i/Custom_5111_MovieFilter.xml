@@ -31,7 +31,7 @@
                 <top>265</top>
                 <width>310</width>
                 <height>35</height>
-                <label>$INFO[Window(Home).Property(MovieFilter.t9_input)]</label>
+                <label>$INFO[Window(Home).Property(MFG.T9Input)]</label>
                 <align>center</align>
                 <font>font13</font>
                 <textcolor>white</textcolor>
@@ -47,13 +47,13 @@
                 <orientation>vertical</orientation>
                 <itemlayout width="91" height="65">
                     <control type="image">
-                        <visible>!String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                        <visible>!String.IsEqual(Window(Home).Property(MFG.UseRounded),true)</visible>
                         <width>88</width>
                         <height>62</height>
                         <texture colordiffuse="22FFFFFF">colors/fm_white.png</texture>
                     </control>
                     <control type="image">
-                        <visible>String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                        <visible>String.IsEqual(Window(Home).Property(MFG.UseRounded),true)</visible>
                         <width>88</width>
                         <height>62</height>
                         <texture colordiffuse="22FFFFFF">common/t9_btn_88x62.png</texture>
@@ -99,13 +99,13 @@
                 </itemlayout>
                 <focusedlayout width="91" height="65">
                     <control type="image">
-                        <visible>!String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                        <visible>!String.IsEqual(Window(Home).Property(MFG.UseRounded),true)</visible>
                         <width>88</width>
                         <height>62</height>
                         <texture colordiffuse="FF19B5FE">colors/fm_white.png</texture>
                     </control>
                     <control type="image">
-                        <visible>String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                        <visible>String.IsEqual(Window(Home).Property(MFG.UseRounded),true)</visible>
                         <width>88</width>
                         <height>62</height>
                         <texture colordiffuse="FF19B5FE">common/t9_btn_88x62.png</texture>
@@ -257,7 +257,7 @@
                     <height>32</height>
                     <ondown>SetFocus($INFO[Window(Home).Property(Return_1013)])</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.1013)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.1013)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -272,7 +272,7 @@
                     <height>32</height>
                     <ondown>6003</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.1015)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.1015)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -287,7 +287,7 @@
                     <height>32</height>
                     <ondown>6004</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.1014)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.1014)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -302,7 +302,7 @@
                     <height>32</height>
                     <ondown>6005</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.1011)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.1011)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -317,7 +317,7 @@
                     <height>32</height>
                     <ondown>6006</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.1012)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.1012)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -349,7 +349,7 @@
                     <onup>SetFocus(1013)</onup>
                     <ondown>2001</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.6001)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.6001)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -366,7 +366,7 @@
                     <onup>SetFocus(1013)</onup>
                     <ondown>2002</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.6002)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.6002)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -382,7 +382,7 @@
                     <onup>1015</onup>
                     <ondown>2003</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.6003)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.6003)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -398,7 +398,7 @@
                     <onup>1014</onup>
                     <ondown>SetFocus($INFO[Window(Home).Property(Return_6004)])</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.6004)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.6004)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -414,7 +414,7 @@
                     <onup>1011</onup>
                     <ondown>2006</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.6005)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.6005)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -430,7 +430,7 @@
                     <onup>1012</onup>
                     <ondown>SetFocus($INFO[Window(Home).Property(Return_6006)])</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.6006)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.6006)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -461,7 +461,7 @@
                     <onup>6001</onup>
                     <ondown>3001</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2001)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.2001)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -477,7 +477,7 @@
                     <onup>6002</onup>
                     <ondown>3002</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2002)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.2002)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -493,7 +493,7 @@
                     <onup>6003</onup>
                     <ondown>3003</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2003)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.2003)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -511,7 +511,7 @@
                     <ondown>SetProperty(Return_3004,2004,Home)</ondown>
                     <ondown>SetFocus(3004)</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2004)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.2004)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -529,7 +529,7 @@
                     <ondown>SetProperty(Return_3004,2005,Home)</ondown>
                     <ondown>SetFocus(3004)</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2005)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.2005)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -545,7 +545,7 @@
                     <onup>6005</onup>
                     <ondown>3005</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2006)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.2006)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -562,7 +562,7 @@
                     <onup>SetFocus(6006)</onup>
                     <ondown>3006</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2007)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.2007)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -578,7 +578,7 @@
                     <onup>SetFocus(6006)</onup>
                     <ondown>3007</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2014)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.2014)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -595,7 +595,7 @@
                     <onup>SetFocus(6006)</onup>
                     <ondown>3008</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2008)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.2008)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -612,7 +612,7 @@
                     <onup>SetFocus(6006)</onup>
                     <ondown>3009</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2009)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.2009)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -629,7 +629,7 @@
                     <onup>SetFocus(6006)</onup>
                     <ondown>3010</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2010)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.2010)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -646,7 +646,7 @@
                     <onup>SetFocus(6006)</onup>
                     <ondown>3011</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2011)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.2011)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -663,7 +663,7 @@
                     <onup>SetFocus(6006)</onup>
                     <ondown>3012</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2012)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.2012)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -680,7 +680,7 @@
                     <onup>SetFocus(6006)</onup>
                     <ondown>3014</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2013)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.2013)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -697,7 +697,7 @@
                     <onup>SetFocus(6006)</onup>
                     <ondown>3015</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.2015)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.2015)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -726,7 +726,7 @@
                     <onup>2001</onup>
                     <ondown>4001</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3001)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.3001)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -742,7 +742,7 @@
                     <onup>2002</onup>
                     <ondown>4002</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3002)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.3002)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -758,7 +758,7 @@
                     <onup>2003</onup>
                     <ondown>4003</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3003)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.3003)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -774,7 +774,7 @@
                     <onup>SetFocus($INFO[Window(Home).Property(Return_3004)])</onup>
                     <ondown>4004</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3004)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.3004)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -791,7 +791,7 @@
                     <ondown>SetProperty(Return_4005,3005,Home)</ondown>
                     <ondown>SetFocus(4005)</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3005)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.3005)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -808,7 +808,7 @@
                     <ondown>SetProperty(Return_4005,3006,Home)</ondown>
                     <ondown>SetFocus(4005)</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3006)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.3006)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -824,7 +824,7 @@
                     <onup>2014</onup>
                     <ondown>4006</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3007)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.3007)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -841,7 +841,7 @@
                     <ondown>SetProperty(Return_4007,3008,Home)</ondown>
                     <ondown>SetFocus(4007)</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3008)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.3008)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -858,7 +858,7 @@
                     <ondown>SetProperty(Return_4007,3009,Home)</ondown>
                     <ondown>SetFocus(4007)</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3009)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.3009)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -874,7 +874,7 @@
                     <onup>2010</onup>
                     <ondown>4008</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3010)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.3010)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -890,7 +890,7 @@
                     <onup>2011</onup>
                     <ondown>4009</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3011)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.3011)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -907,7 +907,7 @@
                     <ondown>SetProperty(Return_4010,3012,Home)</ondown>
                     <ondown>SetFocus(4010)</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3012)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.3012)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -925,7 +925,7 @@
                     <ondown>SetProperty(Return_4010,3014,Home)</ondown>
                     <ondown>SetFocus(4010)</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3014)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.3014)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -942,7 +942,7 @@
                     <ondown>SetProperty(Return_4010,3015,Home)</ondown>
                     <ondown>SetFocus(4010)</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3015)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.3015)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -959,7 +959,7 @@
                     <ondown>SetProperty(Return_4010,3013,Home)</ondown>
                     <ondown>SetFocus(4010)</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.3013)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.3013)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -990,7 +990,7 @@
                     <onup>3001</onup>
                     <ondown>5001</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.4001)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.4001)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -1006,7 +1006,7 @@
                     <onup>3002</onup>
                     <ondown>5002</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.4002)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.4002)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -1022,7 +1022,7 @@
                     <onup>3003</onup>
                     <ondown>SetFocus($INFO[Window(Home).Property(Return_4003)])</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.4003)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.4003)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -1038,7 +1038,7 @@
                     <onup>3004</onup>
                     <ondown>SetFocus($INFO[Window(Home).Property(Return_4004)])</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.4004)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.4004)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -1054,7 +1054,7 @@
                     <onup>SetFocus($INFO[Window(Home).Property(Return_4005)])</onup>
                     <ondown>5006</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.4005)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.4005)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -1070,7 +1070,7 @@
                     <onup>3007</onup>
                     <ondown>5006</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.4006)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.4006)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -1086,7 +1086,7 @@
                     <onup>SetFocus($INFO[Window(Home).Property(Return_4007)])</onup>
                     <ondown>5006</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.4007)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.4007)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -1102,7 +1102,7 @@
                     <onup>3010</onup>
                     <ondown>5006</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.4008)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.4008)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -1118,7 +1118,7 @@
                     <onup>3011</onup>
                     <ondown>5006</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.4009)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.4009)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -1134,7 +1134,7 @@
                     <onup>SetFocus($INFO[Window(Home).Property(Return_4010)])</onup>
                     <ondown>5006</ondown>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.4010)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.4010)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -1165,7 +1165,7 @@
                     <ondown>SetFocus(9999,1)</ondown>
                     <onup>4001</onup>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.5001)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.5001)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -1181,7 +1181,7 @@
                     <ondown>SetFocus(9999,1)</ondown>
                     <onup>4002</onup>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.5002)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.5002)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -1197,7 +1197,7 @@
                     <onup>SetProperty(Return_4003,5003,Home)</onup>
                     <onup>SetFocus(4003)</onup>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.5003)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.5003)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -1213,7 +1213,7 @@
                     <onup>SetProperty(Return_4003,5004,Home)</onup>
                     <onup>SetFocus(4003)</onup>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.5004)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.5004)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -1229,7 +1229,7 @@
                     <onup>SetProperty(Return_4004,5005,Home)</onup>
                     <onup>SetFocus(4004)</onup>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.5005)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.5005)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -1245,7 +1245,7 @@
                     <onup>SetProperty(Return_4004,5006,Home)</onup>
                     <onup>SetFocus(4004)</onup>
                     <font>font13</font>
-                    <textcolor>$INFO[Window(Home).Property(MovieFilter.FilterColor.5006)]</textcolor>
+                    <textcolor>$INFO[Window(Home).Property(MFG.FilterColor.5006)]</textcolor>
                     <focusedcolor>FF19B5FE</focusedcolor>
                     <texturefocus></texturefocus>
                     <texturenofocus></texturenofocus>
@@ -1264,14 +1264,14 @@
             <animation type="Conditional" condition="Control.HasFocus(9999) + Integer.IsGreater(Container(9999).CurrentItem,6)" reversible="true">
                 <effect type="slide" end="0,-280" time="500" tween="cubic" easing="inout" />
             </animation>
-            <animation type="Conditional" condition="String.IsEqual(Window(Home).Property(MovieFilter.IsRefreshing),true)" reversible="true">
+            <animation type="Conditional" condition="String.IsEqual(Window(Home).Property(MFG.IsRefreshing),true)" reversible="true">
                 <effect type="fade" start="100" end="0" time="100" />
             </animation>
             <onleft>6009</onleft>
             <onup>9998</onup>
             <onclick condition="String.IsEqual(ListItem.DBType,tvshow)">ActivateWindow(videos,videodb://tvshows/titles/$INFO[ListItem.DBID]/,return)</onclick>
             <onclick condition="String.IsEqual(ListItem.DBType,set)">ActivateWindow(videos,videodb://movies/sets/$INFO[ListItem.DBID]/,return)</onclick>
-            <content>plugin://plugin.video.filteredmovies/?mode=filter_list&amp;reload=$INFO[Window(Home).Property(FilteredMovies.ReloadID)]</content>
+            <content>plugin://plugin.video.filteredmovies/?mode=filter_list&amp;reload=$INFO[Window(Home).Property(MFG.ReloadID)]</content>
             <viewtype label="Posters">panel</viewtype>
             <animation type="Conditional" condition="Window.IsVisible(movieinformation) | Window.IsVisible(DialogVideoInfo.xml)" reversible="true">
                 <effect type="fade" start="100" end="0" time="200" />
@@ -1284,7 +1284,7 @@
                     <height>511</height>
                     <!-- Fuse 2 Version (Rounded) -->
                     <control type="image">
-                        <visible>String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                        <visible>String.IsEqual(Window(Home).Property(MFG.UseRounded),true)</visible>
                         <left>10</left>
                         <top>0</top>
                         <width>290</width>
@@ -1296,7 +1296,7 @@
                     </control>
                     <!-- Default Version (Square) -->
                     <control type="image">
-                        <visible>!String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                        <visible>!String.IsEqual(Window(Home).Property(MFG.UseRounded),true)</visible>
                         <left>10</left>
                         <top>0</top>
                         <width>290</width>
@@ -1308,7 +1308,7 @@
                     </control>
                     <!-- 观看进度条 (Fuse 2 Version) -->
                     <control type="progress">
-                        <visible>String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true) + Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
+                        <visible>String.IsEqual(Window(Home).Property(MFG.UseRounded),true) + Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
                         <left>40</left>
                         <top>405</top>
                         <width>230</width>
@@ -1316,12 +1316,12 @@
                         <info>ListItem.Property(SkinPercentPlayed)</info>
                         <texturebg colordiffuse="20FFFFFF">colors/fm_white.png</texturebg>
                         <lefttexture></lefttexture>
-                        <midtexture colordiffuse="$INFO[Window(Home).Property(MovieFilter.ProgressBarColor)]">colors/fm_white.png</midtexture>
+                        <midtexture colordiffuse="$INFO[Window(Home).Property(MFG.ProgressBarColor)]">colors/fm_white.png</midtexture>
                         <righttexture></righttexture>
                     </control>
                     <!-- 观看进度条 (Default Version) -->
                     <control type="progress">
-                        <visible>!String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true) + Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
+                        <visible>!String.IsEqual(Window(Home).Property(MFG.UseRounded),true) + Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
                         <left>30</left>
                         <top>410</top>
                         <width>250</width>
@@ -1329,7 +1329,7 @@
                         <info>ListItem.Property(SkinPercentPlayed)</info>
                         <texturebg colordiffuse="20FFFFFF">colors/fm_white.png</texturebg>
                         <lefttexture></lefttexture>
-                        <midtexture colordiffuse="$INFO[Window(Home).Property(MovieFilter.ProgressBarColor)]">colors/fm_white.png</midtexture>
+                        <midtexture colordiffuse="$INFO[Window(Home).Property(MFG.ProgressBarColor)]">colors/fm_white.png</midtexture>
                         <righttexture></righttexture>
                     </control>
                     <control type="label">
@@ -1351,7 +1351,7 @@
                         <width>26</width>
                         <height>26</height>
                         <texture>common/rounded_watched.png</texture>
-                        <visible>String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true) + Integer.IsGreater(ListItem.PlayCount,0) + !Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
+                        <visible>String.IsEqual(Window(Home).Property(MFG.UseRounded),true) + Integer.IsGreater(ListItem.PlayCount,0) + !Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
                     </control>
                     <control type="image">
                         <left>206</left>
@@ -1359,7 +1359,7 @@
                         <width>30</width>
                         <height>30</height>
                         <texture>common/watched.png</texture>
-                        <visible>!String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true) + Integer.IsGreater(ListItem.PlayCount,0) + !Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
+                        <visible>!String.IsEqual(Window(Home).Property(MFG.UseRounded),true) + Integer.IsGreater(ListItem.PlayCount,0) + !Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
                     </control>
 
                     <!-- Rating -->
@@ -1401,7 +1401,7 @@
                         <animation type="Hidden" reversible="false">
                             <effect type="fade" start="100" end="0" time="0" delay="100" />
                         </animation>
-                        <visible>[String.IsEqual(Window(Home).Property(MovieFilter.FilterColor.6001),FFEB9E17) | String.IsEqual(Window(Home).Property(MovieFilter.FilterColor.6006),FFEB9E17)] + [String.IsEqual(ListItem.DBType,movie) | String.IsEqual(ListItem.DBType,set)]</visible>
+                        <visible>[String.IsEqual(Window(Home).Property(MFG.FilterColor.6001),FFEB9E17) | String.IsEqual(Window(Home).Property(MFG.FilterColor.6006),FFEB9E17)] + [String.IsEqual(ListItem.DBType,movie) | String.IsEqual(ListItem.DBType,set)]</visible>
                     </control>
                     <!-- Media Type Icon: TVShow -->
                     <control type="image">
@@ -1416,7 +1416,7 @@
                         <animation type="Hidden" reversible="false">
                             <effect type="fade" start="100" end="0" time="0" delay="100" />
                         </animation>
-                        <visible>[String.IsEqual(Window(Home).Property(MovieFilter.FilterColor.6001),FFEB9E17) | String.IsEqual(Window(Home).Property(MovieFilter.FilterColor.6006),FFEB9E17)] + [String.IsEqual(ListItem.DBType,tvshow) | String.IsEqual(ListItem.DBType,season) | String.IsEqual(ListItem.DBType,episode)]</visible>
+                        <visible>[String.IsEqual(Window(Home).Property(MFG.FilterColor.6001),FFEB9E17) | String.IsEqual(Window(Home).Property(MFG.FilterColor.6006),FFEB9E17)] + [String.IsEqual(ListItem.DBType,tvshow) | String.IsEqual(ListItem.DBType,season) | String.IsEqual(ListItem.DBType,episode)]</visible>
                     </control>
 
                 </control>
@@ -1435,7 +1435,7 @@
                     <control type="group">
                         <!-- Fuse 2 Version (Rounded) -->
                         <control type="group">
-                            <visible>String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                            <visible>String.IsEqual(Window(Home).Property(MFG.UseRounded),true)</visible>
                             <control type="image">
                                 <left>10</left>
                                 <top>0</top>
@@ -1449,7 +1449,7 @@
                         </control>
                         <!-- Default Version (Square) -->
                         <control type="group">
-                            <visible>!String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true)</visible>
+                            <visible>!String.IsEqual(Window(Home).Property(MFG.UseRounded),true)</visible>
                             <control type="image">
                                 <left>6</left>
                                 <top>-4</top>
@@ -1473,7 +1473,7 @@
                     </control>
                     <!-- 观看进度条 (Fuse 2 Version) -->
                     <control type="progress">
-                        <visible>String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true) + Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
+                        <visible>String.IsEqual(Window(Home).Property(MFG.UseRounded),true) + Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
                         <left>40</left>
                         <top>405</top>
                         <width>230</width>
@@ -1481,12 +1481,12 @@
                         <info>ListItem.Property(SkinPercentPlayed)</info>
                         <texturebg colordiffuse="20FFFFFF">colors/fm_white.png</texturebg>
                         <lefttexture></lefttexture>
-                        <midtexture colordiffuse="$INFO[Window(Home).Property(MovieFilter.ProgressBarColor)]">colors/fm_white.png</midtexture>
+                        <midtexture colordiffuse="$INFO[Window(Home).Property(MFG.ProgressBarColor)]">colors/fm_white.png</midtexture>
                         <righttexture></righttexture>
                     </control>
                     <!-- 观看进度条 (Default Version) -->
                     <control type="progress">
-                        <visible>!String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true) + Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
+                        <visible>!String.IsEqual(Window(Home).Property(MFG.UseRounded),true) + Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
                         <left>30</left>
                         <top>410</top>
                         <width>250</width>
@@ -1494,7 +1494,7 @@
                         <info>ListItem.Property(SkinPercentPlayed)</info>
                         <texturebg colordiffuse="20FFFFFF">colors/fm_white.png</texturebg>
                         <lefttexture></lefttexture>
-                        <midtexture colordiffuse="$INFO[Window(Home).Property(MovieFilter.ProgressBarColor)]">colors/fm_white.png</midtexture>
+                        <midtexture colordiffuse="$INFO[Window(Home).Property(MFG.ProgressBarColor)]">colors/fm_white.png</midtexture>
                         <righttexture></righttexture>
                     </control>
                     <control type="label">
@@ -1516,7 +1516,7 @@
                         <width>26</width>
                         <height>26</height>
                         <texture>common/rounded_watched.png</texture>
-                        <visible>String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true) + Integer.IsGreater(ListItem.PlayCount,0) + !Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
+                        <visible>String.IsEqual(Window(Home).Property(MFG.UseRounded),true) + Integer.IsGreater(ListItem.PlayCount,0) + !Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
                     </control>
                     <control type="image">
                         <left>206</left>
@@ -1524,7 +1524,7 @@
                         <width>30</width>
                         <height>30</height>
                         <texture>common/watched.png</texture>
-                        <visible>!String.IsEqual(Window(Home).Property(MovieFilter.UseRounded),true) + Integer.IsGreater(ListItem.PlayCount,0) + !Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
+                        <visible>!String.IsEqual(Window(Home).Property(MFG.UseRounded),true) + Integer.IsGreater(ListItem.PlayCount,0) + !Integer.IsGreater(ListItem.Property(SkinPercentPlayed),0)</visible>
                     </control>
 
                     <!-- Rating -->
@@ -1566,7 +1566,7 @@
                         <animation type="Hidden" reversible="false">
                             <effect type="fade" start="100" end="0" time="0" delay="100" />
                         </animation>
-                        <visible>[String.IsEqual(Window(Home).Property(MovieFilter.FilterColor.6001),FFEB9E17) | String.IsEqual(Window(Home).Property(MovieFilter.FilterColor.6006),FFEB9E17)] + [String.IsEqual(ListItem.DBType,movie) | String.IsEqual(ListItem.DBType,set)]</visible>
+                        <visible>[String.IsEqual(Window(Home).Property(MFG.FilterColor.6001),FFEB9E17) | String.IsEqual(Window(Home).Property(MFG.FilterColor.6006),FFEB9E17)] + [String.IsEqual(ListItem.DBType,movie) | String.IsEqual(ListItem.DBType,set)]</visible>
                     </control>
                     <!-- Media Type Icon: TVShow -->
                     <control type="image">
@@ -1581,7 +1581,7 @@
                         <animation type="Hidden" reversible="false">
                             <effect type="fade" start="100" end="0" time="0" delay="100" />
                         </animation>
-                        <visible>[String.IsEqual(Window(Home).Property(MovieFilter.FilterColor.6001),FFEB9E17) | String.IsEqual(Window(Home).Property(MovieFilter.FilterColor.6006),FFEB9E17)] + [String.IsEqual(ListItem.DBType,tvshow) | String.IsEqual(ListItem.DBType,season) | String.IsEqual(ListItem.DBType,episode)]</visible>
+                        <visible>[String.IsEqual(Window(Home).Property(MFG.FilterColor.6001),FFEB9E17) | String.IsEqual(Window(Home).Property(MFG.FilterColor.6006),FFEB9E17)] + [String.IsEqual(ListItem.DBType,tvshow) | String.IsEqual(ListItem.DBType,season) | String.IsEqual(ListItem.DBType,episode)]</visible>
                     </control>
 
                 </control>

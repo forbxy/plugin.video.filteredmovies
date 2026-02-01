@@ -112,16 +112,16 @@ class FilterWindow(xbmcgui.WindowXML):
     
     def _set_button_state(self, btn_id, is_selected):
         color_val = 'FFEB9E17' if is_selected else 'FFFFFFFF'
-        xbmcgui.Window(10000).setProperty(f'MovieFilter.FilterColor.{btn_id}', color_val)
+        xbmcgui.Window(10000).setProperty(f'MFG.FilterColor.{btn_id}', color_val)
 
     def _load_state_from_skin(self):
         # 临时代码：重置存储的变量，避免旧数据干扰
-        # xbmc.executebuiltin('Skin.SetString(FilteredMovies.State,)')
+        # xbmc.executebuiltin('Skin.SetString(MFG.State,)')
 
         self.filter_state = {}
         
         # 尝试先从单个 blob 加载
-        blob = xbmc.getInfoLabel('Skin.String(FilteredMovies.State)')
+        blob = xbmc.getInfoLabel('Skin.String(MFG.State)')
         if blob:
             try:
                 decoded = base64.b64decode(blob).decode('utf-8')
@@ -151,8 +151,8 @@ class FilterWindow(xbmcgui.WindowXML):
             encoded = base64.b64encode(json_str.encode('utf-8')).decode('utf-8')
             
             # 保存到单个 Skin String
-            xbmc.executebuiltin(f'Skin.SetString(FilteredMovies.State,{encoded})')
-            self.log("Saved state to Skin.String(FilteredMovies.State)")
+            xbmc.executebuiltin(f'Skin.SetString(MFG.State,{encoded})')
+            self.log("Saved state to Skin.String(MFG.State)")
         except Exception as e:
             self.log(f"Error saving state: {e}")
 
@@ -187,7 +187,7 @@ class FilterWindow(xbmcgui.WindowXML):
         # Set property to indicate window is open
         # Clear T9 input
         self.setProperty("t9_input", "")
-        xbmcgui.Window(10000).setProperty("FilteredMovies.T9Open", "true")
+        xbmcgui.Window(10000).setProperty("MFG.T9Open", "true")
         
         # Load state from Skin into Python memory
         self._load_state_from_skin()
@@ -196,7 +196,7 @@ class FilterWindow(xbmcgui.WindowXML):
         self.update_highlights()
         
         # 初始化属性，确保非空
-        xbmcgui.Window(10000).setProperty("MovieFilter.t9_input", "")
+        xbmcgui.Window(10000).setProperty("MFG.T9Input", "")
 
         # 异步检查同步所有的电影剧集的名字拼音T9缓存到内存
         t9_helper.helper.build_memory_cache_async()
@@ -245,7 +245,7 @@ class FilterWindow(xbmcgui.WindowXML):
                     # 超时未收到新事件，说明输入间歇，标记为可阻塞状态
                     empty_trigger = True
                 
-                current_input = xbmcgui.Window(10000).getProperty("MovieFilter.t9_input") or ""
+                current_input = xbmcgui.Window(10000).getProperty("MFG.T9Input") or ""
                 # current_input = last_input
                 # 批量处理所有事件
                 for event in events:
@@ -263,7 +263,7 @@ class FilterWindow(xbmcgui.WindowXML):
                         self.log("close worker")
                         return
                 if events:
-                    xbmcgui.Window(10000).setProperty("MovieFilter.t9_input", current_input)
+                    xbmcgui.Window(10000).setProperty("MFG.T9Input", current_input)
                 # self.log(f"{time.time()} {current_input} {last_input} {events}")
                 if current_input != last_input:
                     if not current_input:
@@ -291,8 +291,8 @@ class FilterWindow(xbmcgui.WindowXML):
         t9_helper.helper.clear_memory_cache()
         
         # 清除全局属性
-        xbmcgui.Window(10000).clearProperty("MovieFilter.t9_input")
-        xbmcgui.Window(10000).setProperty("FilteredMovies.T9LastClose", str(time.time()))
+        xbmcgui.Window(10000).clearProperty("MFG.T9Input")
+        xbmcgui.Window(10000).setProperty("MFG.T9LastClose", str(time.time()))
 
     def onAction(self, action):
         action_id = action.getId()
@@ -305,7 +305,7 @@ class FilterWindow(xbmcgui.WindowXML):
             return
         if action_id == 92:  # NavBack
             # 有输入情况输入，没有输入退出页面
-            current_text = xbmcgui.Window(10000).getProperty("MovieFilter.t9_input")
+            current_text = xbmcgui.Window(10000).getProperty("MFG.T9Input")
             if current_text and len(current_text) > 0:
                 self.input_queue.put(('clear', None))
             else:
@@ -423,7 +423,7 @@ class FilterWindow(xbmcgui.WindowXML):
         # 更新 ReloadID 以触发 XML 中的 content 刷新
         self.log("Refreshing container via ReloadID")
         # 触发刷新动画 (Fade Out)
-        xbmcgui.Window(10000).setProperty("MovieFilter.IsRefreshing", "true")
+        xbmcgui.Window(10000).setProperty("MFG.IsRefreshing", "true")
          # 等待淡出动画完成
 
         # 保存当前状态到 Skin，以便 default.py 读取
@@ -432,10 +432,10 @@ class FilterWindow(xbmcgui.WindowXML):
         # 更新 ReloadID
         import time
         reload_id = str(time.time())
-        xbmcgui.Window(10000).setProperty("FilteredMovies.ReloadID", "clear_" + reload_id)
+        xbmcgui.Window(10000).setProperty("MFG.ReloadID", "clear_" + reload_id)
         xbmc.sleep(100)
         reload_id = str(time.time())
-        xbmcgui.Window(10000).setProperty("FilteredMovies.ReloadID", reload_id)
+        xbmcgui.Window(10000).setProperty("MFG.ReloadID", reload_id)
 
 
 class DialogSelectWindow(xbmcgui.WindowXMLDialog):

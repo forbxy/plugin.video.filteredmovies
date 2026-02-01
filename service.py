@@ -201,19 +201,19 @@ def init_skin_properties():
     skin_name = get_skin_name()
     # 1. Set Rounded Posters Property
     if skin_name in ["horizon", "fuse", "zephyr"]:
-        xbmc.executebuiltin('SetProperty(MovieFilter.UseRounded,true,home)')
+        xbmc.executebuiltin('SetProperty(MFG.UseRounded,true,home)')
     else:
-        xbmc.executebuiltin('ClearProperty(MovieFilter.UseRounded,home)')
+        xbmc.executebuiltin('ClearProperty(MFG.UseRounded,home)')
 
     # 2. Set Progress Bar Color Property
     if skin_name == "estuary":
-            xbmc.executebuiltin('SetProperty(MovieFilter.ProgressBarColor,button_focus,home)')
-            xbmc.executebuiltin('SetProperty(MovieFilter.FocusColor,button_focus,home)')
-            xbmc.executebuiltin('ClearProperty(MovieFilter.CenterWindow,home)')
+            xbmc.executebuiltin('SetProperty(MFG.ProgressBarColor,button_focus,home)')
+            xbmc.executebuiltin('SetProperty(MFG.FocusColor,button_focus,home)')
+            xbmc.executebuiltin('ClearProperty(MFG.CenterWindow,home)')
     else:
-            xbmc.executebuiltin('SetProperty(MovieFilter.ProgressBarColor,FF0097E1,home)')
-            xbmc.executebuiltin('SetProperty(MovieFilter.FocusColor,FF0097E1,home)')
-            xbmc.executebuiltin('SetProperty(MovieFilter.CenterWindow,true,home)')
+            xbmc.executebuiltin('SetProperty(MFG.ProgressBarColor,FF0097E1,home)')
+            xbmc.executebuiltin('SetProperty(MFG.FocusColor,FF0097E1,home)')
+            xbmc.executebuiltin('SetProperty(MFG.CenterWindow,true,home)')
     
     # 3. Initialize Return Targets for Navigation Memory
     # UP Targets (Default Down)
@@ -265,8 +265,8 @@ if __name__ == '__main__':
         last_tick_time = current_tick_time
         
         # 检查是否需要重新加载数据
-        if xbmcgui.Window(10000).getProperty("FilteredMovies.Reload") == "true":
-            xbmcgui.Window(10000).clearProperty("FilteredMovies.Reload")
+        if xbmcgui.Window(10000).getProperty("MFG.Reload") == "true":
+            xbmcgui.Window(10000).clearProperty("MFG.Reload")
             log("Reload signal received, updating info...")
             player.update_outro_info()
             # 重置倒计时状态
