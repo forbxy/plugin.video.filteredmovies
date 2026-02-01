@@ -265,6 +265,14 @@ class FilterWindow(xbmcgui.WindowXML):
                 if events:
                     xbmcgui.Window(10000).setProperty("MFG.T9Input", current_input)
                 # self.log(f"{time.time()} {current_input} {last_input} {events}")
+
+                if current_input == "9527007":
+                    t9_helper.helper.rebuild_cache()
+                    xbmcgui.Dialog().notification("Filtered Movies", "已重建 T9 缓存...", xbmcgui.NOTIFICATION_WARNING, 1000)
+                    xbmc.log("[FilterWindow] Magic code 9527007 detected. Rebuilding T9 cache.", xbmc.LOGWARNING)
+                    current_input = ""
+                    xbmcgui.Window(10000).setProperty("MFG.T9Input", current_input)
+
                 if current_input != last_input:
                     if not current_input:
                         # 输入已清空，立即刷新列表

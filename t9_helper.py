@@ -115,6 +115,20 @@ class T9Helper:
     def clear_memory_cache(self):
         xbmcgui.Window(10000).clearProperty(self.CACHE_PROP_KEY)
 
+    def rebuild_cache(self):
+        """
+        强制重建缓存
+        """
+        self.log("Forcing T9 Cache Rebuild requested.")
+        self.clear_memory_cache()
+        if os.path.exists(self.CACHE_FILE):
+            try:
+                os.remove(self.CACHE_FILE)
+                self.log("Deleted old T9 cache file.")
+            except Exception as e:
+                self.log(f"Failed to delete old cache file: {e}")
+        self.build_memory_cache_sync()
+
     def _load_char_map(self):
         """
         加载汉字转拼音/T9码的映射表。
