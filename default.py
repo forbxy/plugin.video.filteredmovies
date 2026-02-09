@@ -467,6 +467,8 @@ def get_subtitle_items(suppress_warning=False):
             
             # Language translation
             lang_map = {
+                'ukr': '乌克兰语', 'uk': '乌克兰语',
+                'ice': '冰岛语', 'isl': '冰岛语', 'is': '冰岛语',
                 'eng': '英语', 'en': '英语',
                 'chi': '中文', 'zho': '中文', 'zh': '中文', 'chn': '中文',
                 'jpn': '日语', 'ja': '日语',
@@ -551,7 +553,8 @@ def get_subtitle_items(suppress_warning=False):
                     'norwegian': '挪威语', 'swedish': '瑞典语', 'arabic': '阿拉伯语', 'croatian': '克罗地亚语',
                     'czech': '捷克语', 'greek': '希腊语', 'hebrew': '希伯来语', 'hungarian': '匈牙利语',
                     'romanian': '罗马尼亚语', 'turkish': '土耳其语', 'bulgarian': '保加利亚语', 'malay': '马来语',
-                    'polish': '波兰语', 'tagalog': '塔加洛语', 'filipino': '菲律宾语'
+                    'polish': '波兰语', 'tagalog': '塔加洛语', 'filipino': '菲律宾语',
+                    'ukrainian': '乌克兰语', 'icelandic': '冰岛语'
                 })
                 
                 if first_part.lower() in lang_map_extended:
@@ -780,6 +783,8 @@ def get_audio_items(suppress_warning=False):
             
             # Language translation (reuse map or simplify)
             lang_map = {
+                'ukr': '乌克兰语', 'uk': '乌克兰语',
+                'ice': '冰岛语', 'isl': '冰岛语', 'is': '冰岛语',
                 'eng': '英语', 'en': '英语',
                 'chi': '中文', 'zho': '中文', 'zh': '中文', 'chn': '中文',
                 'jpn': '日语', 'ja': '日语',
