@@ -86,6 +86,7 @@ class PlayerMonitor(xbmc.Player):
         
         self.check_intro()
         self.update_outro_info()
+        self.load_iso_subtitles()
 
     def update_outro_info(self):
         self.current_outro_time = None
@@ -152,6 +153,91 @@ class PlayerMonitor(xbmc.Player):
                     xbmc.executebuiltin(f'Notification(FilteredMovies, 自动跳过片头 已跳转至 {int(skip_time)}秒, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
             except Exception as e:
                 log(f"Error during skip: {e}")
+
+    def load_iso_subtitles(self):
+        log("Checking for ISO subtitles...")
+        try:
+            if not self.isPlayingVideo():
+                log("Not playing video, skipping ISO subtitle check.")
+                return
+            
+            # Try to get the file path from Player.GetItem
+            json_query = {
+                "jsonrpc": "2.0",
+                "method": "Player.GetItem",
+                "params": {
+                    "properties": ["file"],
+                    "playerid": 1
+                },
+                "id": "Player.GetItem"
+            }
+            json_response = xbmc.executeJSONRPC(json.dumps(json_query))
+            response = json.loads(json_response)
+            
+            playing_file = None
+            if 'result' in response and 'item' in response['result']:
+                item_file = response['result']['item'].get('file')
+                if item_file:
+                    log(f"Player.GetItem returned file: {item_file}")
+                    playing_file = item_file
+
+            if not playing_file:
+                 log("No playing file found via JSONRPC, skipping ISO subtitle check.")
+                 return
+
+            # Strip query parameters if any
+            if '?' in playing_file:
+                playing_file = playing_file.split('?')[0]
+            
+            # Check if it's an ISO file
+            if not playing_file.lower().endswith('.iso'):
+                # log(f"Not an ISO file {playing_file}, skipping ISO subtitle check.")
+                return
+                
+            log(f"ISO file detected: {playing_file}, checking for external subtitles...")
+            
+            # Get directory and base name
+            # Normalize path separators
+            playing_file = playing_file.replace('\\', '/')
+            last_sep_idx = playing_file.rfind('/')
+            
+            if last_sep_idx == -1:
+                return
+                
+            dir_path = playing_file[:last_sep_idx + 1]
+            file_name = playing_file[last_sep_idx + 1:]
+            base_name = file_name[:-4] # remove .iso
+            
+            # Common subtitle extensions
+            sub_exts = ['.srt', '.ass', '.ssa', '.sub', '.smi', '.vtt']
+            
+            # List directory contents
+            dirs, files = xbmcvfs.listdir(dir_path)
+            
+            # Find matching subtitles
+            subtitles_to_load = []
+            for f in files:
+                f_lower = f.lower()
+                base_lower = base_name.lower()
+                if any(f_lower.endswith(ext) for ext in sub_exts):
+                    if f_lower.startswith(base_lower):
+                        remainder = f_lower[len(base_lower):]
+                        # Check strict matching (either exact match + ext, or followed by separator)
+                        # e.g. movie.srt, movie.en.srt, movie_en.srt
+                        if remainder in sub_exts or remainder.startswith('.') or remainder.startswith('-') or remainder.startswith('_'):
+                            sub_path = dir_path + f
+                            subtitles_to_load.append(sub_path)
+            
+            # Sort subtitles to have deterministic loading order
+            subtitles_to_load.sort()
+            
+            if subtitles_to_load:
+                log(f"Found {len(subtitles_to_load)} external subtitles for ISO: {subtitles_to_load}")
+                for sub in subtitles_to_load:
+                    self.setSubtitles(sub)
+                    log(f"Loaded subtitle: {sub}")
+        except Exception as e:
+            log(f"Error loading ISO subtitles: {e}")
 
 class SkipCountdownWindow(xbmcgui.WindowXMLDialog):
     def __init__(self, *args, **kwargs):
