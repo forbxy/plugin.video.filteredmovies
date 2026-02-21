@@ -137,6 +137,4 @@ RunScript(plugin.video.filteredmovies, ?mode=delete_skip_point)
 ```xml
 RunScript(plugin.video.filteredmovies, ?mode=open_playing_tvshow)
 ```
-### 关于
 
-Kodi插件交流qq群：1055909498
