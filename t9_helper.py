@@ -21,20 +21,27 @@ class T9Helper:
         
         self.CACHE_VERSION = 4
         t = addon_id.replace('.', '_')
-        self.CACHE_PROP_KEY = f"{t}_T9Cache"
         self.char_map = None
 
-    def log(self, msg):
-        xbmc.log(f"[T9Helper] {msg}", xbmc.LOGINFO)
+        self.cached_t9_map = None
+
+        self.synced = False
+
+    def log(self, msg, level=xbmc.LOGINFO):
+        xbmc.log(f"[T9Helper] {msg}", level)
     
     def search(self, input_seq):
         """
         根据输入的数字序列搜索匹配的电影、剧集或系列。
         返回匹配的 ID 列表。
         """
+        if not self.synced:
+            self.build_memory_cache_sync()
+        
         cache = self._get_cached_data()
         if not cache:
             return []
+        
             
         matches = []
         
@@ -75,33 +82,8 @@ class T9Helper:
     def build_memory_cache_sync(self):
         """
         同步构建或更新内存缓存。
-        1. 尝试从内存读取
-        2. 尝试从文件读取
-        3. 与 Kodi 库同步（增量更新）
-        4. 写回内存
         """
-        # 1. 尝试从内存读取
-        window = xbmcgui.Window(10000)
-        prop = window.getProperty(self.CACHE_PROP_KEY)
-        cache = None
-        
-        if prop:
-            try:
-                loaded = json.loads(prop)
-                if loaded.get("version") == self.CACHE_VERSION:
-                    cache = loaded
-            except: pass
-            
-        # 2. 如果内存中没有，尝试从文件读取
-        if cache is None:
-            if os.path.exists(self.CACHE_FILE):
-                try:
-                    with open(self.CACHE_FILE, "r", encoding="utf-8") as f:
-                        loaded = json.load(f)
-                        if loaded.get("version") == self.CACHE_VERSION:
-                            cache = loaded
-                except: pass
-                
+        cache = self._get_cached_data()
         # 3. 如果还是空的，初始化一个新的
         if cache is None:
             cache = {"movies": {}, "tvshows": {}, "sets": {}, "version": self.CACHE_VERSION}
@@ -110,24 +92,23 @@ class T9Helper:
         cache = self._sync_with_library(cache)
         
         # 写回内存属性
-        window.setProperty(self.CACHE_PROP_KEY, json.dumps(cache, ensure_ascii=False))
+        self.cached_t9_map = cache
+        self.synced = True
     
-    def clear_memory_cache(self):
-        xbmcgui.Window(10000).clearProperty(self.CACHE_PROP_KEY)
 
     def rebuild_cache(self):
         """
         强制重建缓存
         """
         self.log("Forcing T9 Cache Rebuild requested.")
-        self.clear_memory_cache()
         if os.path.exists(self.CACHE_FILE):
             try:
                 os.remove(self.CACHE_FILE)
                 self.log("Deleted old T9 cache file.")
             except Exception as e:
-                self.log(f"Failed to delete old cache file: {e}")
+                self.log(f"Error delete old cache file: {e}", xbmc.LOGERROR)
         self.build_memory_cache_sync()
+        self.synced = True
 
     def _load_char_map(self):
         """
@@ -138,8 +119,14 @@ class T9Helper:
                 with open(self.CHAR_MAP_FILE, "r", encoding="utf-8") as f:
                     self.char_map = json.load(f)
             except Exception as e:
-                self.log(f"Failed to load char_map: {e}")
+                self.log(f"ERROR load char_map: {e}", xbmc.LOGERROR)
                 self.char_map = {}
+    
+    def _clear_char_map(self):
+        """
+        清除加载的汉字转拼音/T9码的映射表，释放内存。
+        """
+        self.char_map = None
 
     def _get_t9_map(self):
         """
@@ -251,226 +238,180 @@ class T9Helper:
         result = json.loads(response)
         return result.get('result', {}).get('sets', [])
 
-    def _get_library_signature(self, method, id_key, support_dateadded=True):
-        """
-        获取库的签名信息：总数和最新添加项的 ID。
-        用于快速检测库是否发生变化。
-        """
-        props = []
-        if support_dateadded:
-            props.append("dateadded")
-            
-        params = {
-            "properties": props,
-            "limits": {"start": 0, "end": 1}
-        }
-        if support_dateadded:
-            params["sort"] = {"method": "dateadded", "order": "descending"}
-            
-        json_query = {
-            "jsonrpc": "2.0",
-            "method": method,
-            "params": params,
-            "id": "sig"
-        }
-        json_str = json.dumps(json_query)
-        response = xbmc.executeJSONRPC(json_str)
-        result = json.loads(response)
-        
-        if "error" in result:
-            self.log(f"RPC Error in signature check ({method}): {result['error']}")
-            return None, None
-            
-        total = result.get('result', {}).get('limits', {}).get('total', 0)
-        
-        ret_key = "movies"
-        if "TVShows" in method: ret_key = "tvshows"
-        elif "MovieSets" in method: ret_key = "sets"
-        
-        items = result.get('result', {}).get(ret_key, [])
-        latest_id = 0
-        if items:
-            latest_id = items[0].get(id_key, 0)
-            
-        return total, latest_id
-
     def _get_cached_data(self):
         """
         获取缓存数据，优先从内存获取，其次从文件。
         """
-        window = xbmcgui.Window(10000)
-        prop = window.getProperty(self.CACHE_PROP_KEY)
-        if prop:
-            try:
-                return json.loads(prop)
-            except: pass
+        if self.cached_t9_map is None:
             
-        if os.path.exists(self.CACHE_FILE):
-            try:
-                with open(self.CACHE_FILE, "r", encoding="utf-8") as f:
-                    return json.load(f)
-            except: pass
-            
-        return {"movies": {}, "tvshows": {}, "sets": {}}
+            if os.path.exists(self.CACHE_FILE):
+                try:
+                    with open(self.CACHE_FILE, "r", encoding="utf-8") as f:
+                        self.cached_t9_map = json.load(f)
+                except Exception as e:
+                    self.log(f"ERROR load cache from file: {e}", xbmc.LOGERROR)
+        return self.cached_t9_map
 
-    
+    def _check_needs_update(self, item_type, cache):
+        """
+        Check if cache needs update by comparing count, ID sets, and a random item's T9 codes.
+        Fetches all IDs/Titles first (efficient enough) to avoid unsupported sort-by-id queries.
+        """
+        if item_type == "movies":
+            method = "VideoLibrary.GetMovies"
+            id_key = "movieid"
+            cache_key = "movies"
+        elif item_type == "tvshows":
+            method = "VideoLibrary.GetTVShows"
+            id_key = "tvshowid"
+            cache_key = "tvshows"
+        else:
+            return False
+
+        # 1. Get ALL items (ID + Title) from Remote
+        # Requesting "title" property ensures we have the raw title for T9 generation
+        json_query = {
+            "jsonrpc": "2.0",
+            "method": method,
+            "params": {
+                "properties": ["title"],
+                "sort": {"method": "dateadded", "order": "descending"} # Use a valid sort method or none
+            },
+            "id": "check_all"
+        }
+        res = json.loads(xbmc.executeJSONRPC(json.dumps(json_query)))
+        
+        if "error" in res:
+            self.log(f"Error checking update for {item_type}: {res.get('error')}")
+            return True
+
+        remote_items = res.get("result", {}).get(cache_key, [])
+        total_remote = res.get("result", {}).get("limits", {}).get("total", 0)
+
+        # If limits not in response, use len
+        if not total_remote and remote_items:
+            total_remote = len(remote_items)
+
+        # Local checks
+        local_cache = cache.get(cache_key, {})
+        local_total = len(local_cache)
+
+        if total_remote == 0:
+             return local_total > 0
+
+        if local_total != total_remote:
+            self.log(f"[{item_type}] Count mismatch: Remote={total_remote}, Local={local_total}")
+            return True
+
+        # Check ID Set consistency
+        remote_ids = set(str(item.get(id_key)) for item in remote_items)
+        local_ids = set(local_cache.keys())
+        
+        if remote_ids != local_ids:
+            # Check for differences
+            missing_in_local = remote_ids - local_ids
+            missing_in_remote = local_ids - remote_ids
+            
+            if missing_in_local:
+                 self.log(f"[{item_type}] Local cache missing IDs: {list(missing_in_local)[:5]}...")
+            if missing_in_remote:
+                 self.log(f"[{item_type}] Local cache has extra IDs: {list(missing_in_remote)[:5]}...")
+            
+            return True
+
+        # 2. Check a random item's T9 code
+        if remote_items:
+            import random
+            random_item = random.choice(remote_items)
+            rnd_id = str(random_item.get(id_key))
+            rnd_title = random_item.get("title", "")
+            
+            # We already confirmed ID exists in local with the set check above
+            if rnd_id in local_cache:
+                remote_codes = set(self._generate_t9_codes(rnd_title))
+                local_codes = set(local_cache[rnd_id])
+                
+                if remote_codes != local_codes:
+                    self.log(f"[{item_type}] T9 Code mismatch for Random ID {rnd_id} ({rnd_title})")
+                    return True
+        
+        return False
 
     def _sync_with_library(self, cache):
         """
         将本地缓存与 Kodi 媒体库进行同步。
-        使用总数和最新 ID 进行快速检查，仅在需要时进行全量更新。
+        使用由 _check_needs_update 定义的策略进行检查。
         """
         dirty = False
-        
-        # 检查磁盘上是否存在缓存文件。如果不存在，我们最终必须保存它。
-        # 但 'dirty' 标志控制我们是否写入磁盘。
-        # 如果我们从内存加载但文件丢失，我们应该写入。
+        self._load_char_map()
+
+        # 检查磁盘上是否存在缓存文件。
         if not os.path.exists(self.CACHE_FILE):
-            # self.log("Cache file missing, forcing save/rebuild.")
-            dirty = True
+             dirty = True
         
         if "movies" not in cache: cache["movies"] = {}
         if "tvshows" not in cache: cache["tvshows"] = {}
         if "sets" not in cache: cache["sets"] = {}
-                
-        # 仅在实际需要生成代码时加载字符映射表
-        # self._load_char_map()
-        
+
         # --- 电影 (Movies) ---
         try:
-            remote_total, remote_latest = self._get_library_signature("VideoLibrary.GetMovies", "movieid", support_dateadded=True)
-            
-            if remote_total is None:
-                self.log("Movies signature check failed. Forcing update.")
-                remote_total = -1
-                remote_latest = -1
+            if self._check_needs_update("movies", cache):
+                self.log("Movies cache needs update. Rebuilding all movies and sets...")
                 
-            local_total = len(cache["movies"])
-            local_latest = cache.get("signatures", {}).get("movies", {}).get("latest_id", 0)
-            
-            # 检查是否需要更新
-            if remote_total != local_total or remote_latest != local_latest:
-                self.log(f"Movies changed (Remote: {remote_total}/{remote_latest}, Local: {local_total}/{local_latest}). Updating...")
-                self._load_char_map() # 仅在需要时加载映射表
+                # Full rebuild for movies
                 movies = self._get_all_movies_rpc()
-                new_count = 0
-                
-                # 如果远程总数小于本地总数，说明有删除操作
-                # 优化：仅删除不存在的项，而不是重建
-                if remote_total < local_total:
-                     remote_ids = set(str(m.get("movieid")) for m in movies)
-                     local_ids = list(cache["movies"].keys())
-                     del_count = 0
-                     for mid in local_ids:
-                         if mid not in remote_ids:
-                             del cache["movies"][mid]
-                             del_count += 1
-                     if del_count > 0:
-                         self.log(f"Deleted {del_count} movies from cache")
+                cache["movies"] = {} # Clear existing
                 
                 for m in movies:
                     mid = str(m.get("movieid"))
-                    if mid not in cache["movies"]:
-                        title = m.get("title", "")
-                        if title:
-                            cache["movies"][mid] = self._generate_t9_codes(title)
-                            new_count += 1
+                    title = m.get("title", "")
+                    if title:
+                        cache["movies"][mid] = self._generate_t9_codes(title)
                 
-                if new_count > 0: self.log(f"Added {new_count} new movies")
-                
-                if remote_total != -1:
-                    if "signatures" not in cache: cache["signatures"] = {}
-                    if "movies" not in cache["signatures"]: cache["signatures"]["movies"] = {}
-                    cache["signatures"]["movies"]["latest_id"] = remote_latest
+                self.log(f"Rebuilt {len(cache['movies'])} movies.")
+
+                # Rebuild sets as well since movies update often implies set changes or we just do it to be safe
+                sets = self._get_all_sets_rpc()
+                cache["sets"] = {}
+                for s in sets:
+                    mid = str(s.get("setid"))
+                    title = s.get("title", "")
+                    if title:
+                        cache["sets"][mid] = self._generate_t9_codes(title)
+                self.log(f"Rebuilt {len(cache['sets'])} sets.")
                 
                 dirty = True
+            else:
+                self.log("Movies cache is up-to-date.")
+
         except Exception as e:
             self.log(f"Error updating movies: {e}")
+            import traceback
+            traceback.print_exc()
 
         # --- 剧集 (TV Shows) ---
         try:
-            remote_total, remote_latest = self._get_library_signature("VideoLibrary.GetTVShows", "tvshowid", support_dateadded=True)
-            
-            if remote_total is None:
-                self.log("TVShows signature check failed. Forcing update.")
-                remote_total = -1
-                remote_latest = -1
+            if self._check_needs_update("tvshows", cache):
+                self.log("TVShows cache needs update. Rebuilding all tvshows...")
                 
-            local_total = len(cache["tvshows"])
-            local_latest = cache.get("signatures", {}).get("tvshows", {}).get("latest_id", 0)
-            
-            if remote_total != local_total or remote_latest != local_latest:
-                self.log(f"TVShows changed (Remote: {remote_total}/{remote_latest}, Local: {local_total}/{local_latest}). Updating...")
-                self._load_char_map()
+                # Full rebuild for tvshows
                 tvshows = self._get_all_tvshows_rpc()
-                
-                if remote_total < local_total:
-                     remote_ids = set(str(t.get("tvshowid")) for t in tvshows)
-                     local_ids = list(cache["tvshows"].keys())
-                     del_count = 0
-                     for mid in local_ids:
-                         if mid not in remote_ids:
-                             del cache["tvshows"][mid]
-                             del_count += 1
-                     if del_count > 0:
-                         self.log(f"Deleted {del_count} tvshows from cache")
+                cache["tvshows"] = {} # Clear existing
 
-                new_count = 0
                 for t in tvshows:
                     mid = str(t.get("tvshowid"))
-                    if mid not in cache["tvshows"]:
-                        title = t.get("title", "")
-                        if title:
-                            cache["tvshows"][mid] = self._generate_t9_codes(title)
-                            new_count += 1
-                if new_count > 0: self.log(f"Added {new_count} new tvshows")
+                    title = t.get("title", "")
+                    if title:
+                        cache["tvshows"][mid] = self._generate_t9_codes(title)
                 
-                if remote_total != -1:
-                    if "signatures" not in cache: cache["signatures"] = {}
-                    if "tvshows" not in cache["signatures"]: cache["signatures"]["tvshows"] = {}
-                    cache["signatures"]["tvshows"]["latest_id"] = remote_latest
+                self.log(f"Rebuilt {len(cache['tvshows'])} tvshows.")
                 dirty = True
+            else:
+                 self.log("TVShows cache is up-to-date.")
+
         except Exception as e:
             self.log(f"Error updating tvshows: {e}")
 
-        # --- 系列 (Sets) ---
-        try:
-            remote_total, _ = self._get_library_signature("VideoLibrary.GetMovieSets", "setid", support_dateadded=False)
-            
-            if remote_total is None:
-                remote_total = -1
-                
-            local_total = len(cache["sets"])
-            
-            if remote_total != local_total:
-                self.log(f"Sets count changed ({local_total} -> {remote_total}). Updating...")
-                self._load_char_map()
-                sets = self._get_all_sets_rpc()
-                
-                if remote_total < local_total:
-                     remote_ids = set(str(s.get("setid")) for s in sets)
-                     local_ids = list(cache["sets"].keys())
-                     del_count = 0
-                     for mid in local_ids:
-                         if mid not in remote_ids:
-                             del cache["sets"][mid]
-                             del_count += 1
-                     if del_count > 0:
-                         self.log(f"Deleted {del_count} sets from cache")
-
-                new_count = 0
-                for s in sets:
-                    mid = str(s.get("setid"))
-                    if mid not in cache["sets"]:
-                        title = s.get("title", "")
-                        if title:
-                            cache["sets"][mid] = self._generate_t9_codes(title)
-                            new_count += 1
-                if new_count > 0: self.log(f"Added {new_count} new sets")
-                dirty = True
-        except Exception as e:
-            self.log(f"Error updating sets: {e}")
-        
         if dirty:
             try:
                 with open(self.CACHE_FILE, "w", encoding="utf-8") as f:
@@ -479,7 +420,7 @@ class T9Helper:
                 self.log(f"Cache updated and saved to {self.CACHE_FILE}")
             except Exception as e:
                 self.log(f"Error saving cache: {e}")
-            
+        self._clear_char_map() # Clear char map from memory after use
         return cache
 
 

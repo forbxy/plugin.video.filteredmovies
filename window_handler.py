@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from common import get_skin_name
 import xbmc
 import xbmcgui
 import time
@@ -115,8 +114,6 @@ class FilterWindow(xbmcgui.WindowXML):
         xbmcgui.Window(10000).setProperty(f'MFG.FilterColor.{btn_id}', color_val)
 
     def _load_state_from_skin(self):
-        # 临时代码：重置存储的变量，避免旧数据干扰
-        # xbmc.executebuiltin('Skin.SetString(MFG.State,)')
 
         self.filter_state = {}
         
@@ -197,9 +194,6 @@ class FilterWindow(xbmcgui.WindowXML):
         
         # 初始化属性，确保非空
         xbmcgui.Window(10000).setProperty("MFG.T9Input", "")
-
-        # 异步检查同步所有的电影剧集的名字拼音T9缓存到内存
-        t9_helper.helper.build_memory_cache_async()
         
         # self.refresh_container()
 
@@ -294,9 +288,6 @@ class FilterWindow(xbmcgui.WindowXML):
         if hasattr(self, 'worker') and self.worker.is_alive():
             self.worker.join(timeout=1.0)
         self._save_state_to_skin()
-        
-        # 退出时清除内存缓存以释放资源
-        t9_helper.helper.clear_memory_cache()
         
         # 清除全局属性
         xbmcgui.Window(10000).clearProperty("MFG.T9Input")
@@ -397,23 +388,6 @@ class FilterWindow(xbmcgui.WindowXML):
         return True
 
     def onClick(self, controlId):
-        # 拦截点击事件
-        
-        # if controlId == 6050:
-        #     # 获取列表控件
-        #     try:
-        #         list_control = self.getControl(6050)
-        #         selected_item = list_control.getSelectedItem()
-        #         label = selected_item.getLabel()
-        #         # 根据 label 判断操作
-        #         if label == 'Del':
-        #             self.input_queue.put(('delete', None))
-        #         elif label == 'Clr':
-        #             self.input_queue.put(('clear', None))
-        #         elif label.isdigit():
-        #             self.input_queue.put(('input', label))
-        #     except Exception as e:
-        #         self.log(f"Error handling T9 click: {e}")
         
         # 检查是否为筛选按钮 (ID 1000-6999，排除 T9 组 6000/6050)
         if 1000 <= controlId <= 6999:
@@ -519,7 +493,7 @@ class OSDListWindow(xbmcgui.WindowXMLDialog):
             if self.callback and idx >= 0 and idx < len(self.items):
                 self.callback(self.items[idx])
                 # 不要关闭，仅更新
-                self.close() 
+                self.close()
             else:
                 self.close()
 
