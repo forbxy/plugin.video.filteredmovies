@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from common import log
 import xbmc
 import xbmcgui
 import json
@@ -7,8 +8,6 @@ import urllib.parse
 import os
 import time
 
-def log(msg, level=xbmc.LOGINFO):
-    xbmc.log(f"[FilteredMovies] {msg}", level)
 
 def get_filter_val(filters, key, default=None):
     if filters and key in filters:
@@ -70,7 +69,7 @@ def get_inprogress_episodes_map():
         return progress_map
         
     except Exception as e:
-        xbmc.log(f"[moviefilter] Error fetching in-progress episodes: {e}", xbmc.LOGERROR)
+        log(f"Error fetching in-progress episodes: {e}", xbmc.LOGERROR)
         return {}
 
 def build_filter(filters=None, media_type=None):
@@ -1179,6 +1178,5 @@ def create_list_item(m):
     info_tag.setDbId(int(item_id))
 
     li.setPath(url)
-    # log(f"Created ListItem: {m['title']} ({media_type}) -> {url}")
 
     return li, url, is_folder

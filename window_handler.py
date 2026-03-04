@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from common import notification
+from common import notification, log
 import xbmc
 import xbmcgui
 import time
@@ -106,10 +106,6 @@ for group, data in FILTER_MAP.items():
         FILTER_ID_TO_INFO_MAP[btn_id] = (group, val)
 
 class FilterWindow(xbmcgui.WindowXML):
-    @classmethod
-    def log(cls, msg):
-        xbmc.log(f"[FilterWindow] {msg}", xbmc.LOGINFO)
-    
     def _set_button_state(self, btn_id, is_selected):
         color_val = 'FFEB9E17' if is_selected else 'FFFFFFFF'
         xbmcgui.Window(10000).setProperty(f'MFG.FilterColor.{btn_id}', color_val)
@@ -126,10 +122,9 @@ class FilterWindow(xbmcgui.WindowXML):
                 loaded_state = json.loads(decoded)
                 
                 self.filter_state = loaded_state
-                # self.log(f"Loaded state: {len(self.filter_state)} keys")
                 return
             except Exception as e:
-                self.log(f"Error loading state blob: {e}")
+                log(f"Error loading state blob: {e}", xbmc.LOGERROR)
         
         # 使用默认值初始化 (ID + 值)
         for group, data in FILTER_MAP.items():
@@ -150,9 +145,9 @@ class FilterWindow(xbmcgui.WindowXML):
             
             # 保存到单个 Skin String
             xbmc.executebuiltin(f'Skin.SetString(MFG.State,{encoded})')
-            self.log("Saved state to Skin.String(MFG.State)")
+            log("Saved state to Skin.String(MFG.State)")
         except Exception as e:
-            self.log(f"Error saving state: {e}")
+            log(f"Error saving state: {e}", xbmc.LOGERROR)
 
     def update_highlights(self, target_group=None):
         """
@@ -202,8 +197,6 @@ class FilterWindow(xbmcgui.WindowXML):
         self.worker = threading.Thread(target=self._t9_input_worker)
         self.worker.daemon = True
         self.worker.start()
-        
-        self.log(f"onInit complete")
 
     def _t9_input_worker(self):
         # 初始状态为阻塞等待，避免空转
@@ -214,7 +207,7 @@ class FilterWindow(xbmcgui.WindowXML):
         while self.running:
             # 检查 Kodi 是否正在关闭
             if monitor.abortRequested():
-                self.log("Abort requested, closing window")
+                log("Abort requested, closing window")
                 self.close()
                 break
 
@@ -254,16 +247,15 @@ class FilterWindow(xbmcgui.WindowXML):
                         # 清空输入立即响应
                         current_input = ""
                     elif etype == 'close':
-                        self.log("close worker")
+                        log("close worker")
                         return
                 if events:
                     xbmcgui.Window(10000).setProperty("MFG.T9Input", current_input)
-                # self.log(f"{time.time()} {current_input} {last_input} {events}")
 
                 if current_input == "9527007":
                     t9_helper.helper.rebuild_cache()
                     notification("已重建 T9 缓存...", sound=True)
-                    xbmc.log("[FilterWindow] Magic code 9527007 detected. Rebuilding T9 cache.", xbmc.LOGWARNING)
+                    log("Magic code 9527007 detected. Rebuilding T9 cache.", xbmc.LOGWARNING)
                     current_input = ""
                     xbmcgui.Window(10000).setProperty("MFG.T9Input", current_input)
 
@@ -279,7 +271,7 @@ class FilterWindow(xbmcgui.WindowXML):
                         last_input = current_input
                 
             except Exception as e:
-                self.log(f"Worker error: {e}")
+                log(f"Worker error: {e}", xbmc.LOGERROR)
 
     def cleanup(self):
         self.running = False
@@ -295,7 +287,7 @@ class FilterWindow(xbmcgui.WindowXML):
     def onAction(self, action):
         action_id = action.getId()
         button_code = action.getButtonCode()
-        self.log(f"onAction: ID={action_id} ButtonCode={button_code}")
+        log(f"onAction: ID={action_id} ButtonCode={button_code}")
         
         # 关闭/返回/ESC等必须立即处理的按键
         if action_id in [10, 122]:  # ESC, HOME
@@ -402,7 +394,7 @@ class FilterWindow(xbmcgui.WindowXML):
     
     def refresh_container(self, state=None):
         # 更新 ReloadID 以触发 XML 中的 content 刷新
-        self.log("Refreshing container via ReloadID")
+        log("Refreshing container via ReloadID")
         # 触发刷新动画 (Fade Out)
         xbmcgui.Window(10000).setProperty("MFG.IsRefreshing", "true")
          # 等待淡出动画完成

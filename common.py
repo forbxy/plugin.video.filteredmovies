@@ -28,3 +28,6 @@ def get_icon_path():
 
 def notification(message, title="FilteredMovies", duration=1000, sound=False):
     xbmcgui.Dialog().notification(title, message, get_icon_path(), duration, sound)
+    
+def log(msg, level=xbmc.LOGINFO):
+    xbmc.log(f"[{ADDON_ID}] {msg}", level)

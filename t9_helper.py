@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from common import log
 import os
 import json
 import xbmcvfs
@@ -26,9 +27,6 @@ class T9Helper:
         self.cached_t9_map = None
 
         self.synced = False
-
-    def log(self, msg, level=xbmc.LOGINFO):
-        xbmc.log(f"[T9Helper] {msg}", level)
     
     def search(self, input_seq):
         """
@@ -100,13 +98,13 @@ class T9Helper:
         """
         强制重建缓存
         """
-        self.log("Forcing T9 Cache Rebuild requested.")
+        log("Forcing T9 Cache Rebuild requested.")
         if os.path.exists(self.CACHE_FILE):
             try:
                 os.remove(self.CACHE_FILE)
-                self.log("Deleted old T9 cache file.")
+                log("Deleted old T9 cache file.")
             except Exception as e:
-                self.log(f"Error delete old cache file: {e}", xbmc.LOGERROR)
+                log(f"Error delete old cache file: {e}", xbmc.LOGERROR)
         self.build_memory_cache_sync()
         self.synced = True
 
@@ -119,7 +117,7 @@ class T9Helper:
                 with open(self.CHAR_MAP_FILE, "r", encoding="utf-8") as f:
                     self.char_map = json.load(f)
             except Exception as e:
-                self.log(f"ERROR load char_map: {e}", xbmc.LOGERROR)
+                log(f"ERROR load char_map: {e}", xbmc.LOGERROR)
                 self.char_map = {}
     
     def _clear_char_map(self):
@@ -249,7 +247,7 @@ class T9Helper:
                     with open(self.CACHE_FILE, "r", encoding="utf-8") as f:
                         self.cached_t9_map = json.load(f)
                 except Exception as e:
-                    self.log(f"ERROR load cache from file: {e}", xbmc.LOGERROR)
+                    log(f"ERROR load cache from file: {e}", xbmc.LOGERROR)
         return self.cached_t9_map
 
     def _check_needs_update(self, item_type, cache):
@@ -282,7 +280,7 @@ class T9Helper:
         res = json.loads(xbmc.executeJSONRPC(json.dumps(json_query)))
         
         if "error" in res:
-            self.log(f"Error checking update for {item_type}: {res.get('error')}")
+            log(f"Error checking update for {item_type}: {res.get('error')}")
             return True
 
         remote_items = res.get("result", {}).get(cache_key, [])
@@ -300,7 +298,7 @@ class T9Helper:
              return local_total > 0
 
         if local_total != total_remote:
-            self.log(f"[{item_type}] Count mismatch: Remote={total_remote}, Local={local_total}")
+            log(f"[{item_type}] Count mismatch: Remote={total_remote}, Local={local_total}")
             return True
 
         # Check ID Set consistency
@@ -313,9 +311,9 @@ class T9Helper:
             missing_in_remote = local_ids - remote_ids
             
             if missing_in_local:
-                 self.log(f"[{item_type}] Local cache missing IDs: {list(missing_in_local)[:5]}...")
+                 log(f"[{item_type}] Local cache missing IDs: {list(missing_in_local)[:5]}...")
             if missing_in_remote:
-                 self.log(f"[{item_type}] Local cache has extra IDs: {list(missing_in_remote)[:5]}...")
+                 log(f"[{item_type}] Local cache has extra IDs: {list(missing_in_remote)[:5]}...")
             
             return True
 
@@ -332,7 +330,7 @@ class T9Helper:
                 local_codes = set(local_cache[rnd_id])
                 
                 if remote_codes != local_codes:
-                    self.log(f"[{item_type}] T9 Code mismatch for Random ID {rnd_id} ({rnd_title})")
+                    log(f"[{item_type}] T9 Code mismatch for Random ID {rnd_id} ({rnd_title})")
                     return True
         
         return False
@@ -356,7 +354,7 @@ class T9Helper:
         # --- 电影 (Movies) ---
         try:
             if self._check_needs_update("movies", cache):
-                self.log("Movies cache needs update. Rebuilding all movies and sets...")
+                log("Movies cache needs update. Rebuilding all movies and sets...")
                 
                 # Full rebuild for movies
                 movies = self._get_all_movies_rpc()
@@ -368,7 +366,7 @@ class T9Helper:
                     if title:
                         cache["movies"][mid] = self._generate_t9_codes(title)
                 
-                self.log(f"Rebuilt {len(cache['movies'])} movies.")
+                log(f"Rebuilt {len(cache['movies'])} movies.")
 
                 # Rebuild sets as well since movies update often implies set changes or we just do it to be safe
                 sets = self._get_all_sets_rpc()
@@ -378,21 +376,21 @@ class T9Helper:
                     title = s.get("title", "")
                     if title:
                         cache["sets"][mid] = self._generate_t9_codes(title)
-                self.log(f"Rebuilt {len(cache['sets'])} sets.")
+                log(f"Rebuilt {len(cache['sets'])} sets.")
                 
                 dirty = True
             else:
-                self.log("Movies cache is up-to-date.")
+                log("Movies cache is up-to-date.")
 
         except Exception as e:
-            self.log(f"Error updating movies: {e}")
+            log(f"Error updating movies: {e}")
             import traceback
             traceback.print_exc()
 
         # --- 剧集 (TV Shows) ---
         try:
             if self._check_needs_update("tvshows", cache):
-                self.log("TVShows cache needs update. Rebuilding all tvshows...")
+                log("TVShows cache needs update. Rebuilding all tvshows...")
                 
                 # Full rebuild for tvshows
                 tvshows = self._get_all_tvshows_rpc()
@@ -404,22 +402,22 @@ class T9Helper:
                     if title:
                         cache["tvshows"][mid] = self._generate_t9_codes(title)
                 
-                self.log(f"Rebuilt {len(cache['tvshows'])} tvshows.")
+                log(f"Rebuilt {len(cache['tvshows'])} tvshows.")
                 dirty = True
             else:
-                 self.log("TVShows cache is up-to-date.")
+                 log("TVShows cache is up-to-date.")
 
         except Exception as e:
-            self.log(f"Error updating tvshows: {e}")
+            log(f"Error updating tvshows: {e}")
 
         if dirty:
             try:
                 with open(self.CACHE_FILE, "w", encoding="utf-8") as f:
                     json.dump(cache, f, ensure_ascii=False)
                     
-                self.log(f"Cache updated and saved to {self.CACHE_FILE}")
+                log(f"Cache updated and saved to {self.CACHE_FILE}")
             except Exception as e:
-                self.log(f"Error saving cache: {e}")
+                log(f"Error saving cache: {e}")
         self._clear_char_map() # Clear char map from memory after use
         return cache
 

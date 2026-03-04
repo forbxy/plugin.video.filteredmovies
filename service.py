@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from common import get_skin_name,notification
+from common import get_skin_name,notification,log
 import xbmc
 import xbmcgui
 import xbmcvfs
@@ -16,9 +16,6 @@ if not os.path.exists(ADDON_DATA_PATH):
     os.makedirs(ADDON_DATA_PATH)
 
 SKIP_DATA_FILE = os.path.join(ADDON_DATA_PATH, 'skip_intro_data.json')
-
-def log(msg, level=xbmc.LOGINFO):
-    xbmc.log(f"[FilteredMoviesService] {msg}", level)
 
 def warmup_xml_cache():
     try:

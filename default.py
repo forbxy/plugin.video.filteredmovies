@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from common import get_skin_name,notification
+from common import get_skin_name,notification, log
 import sys
 import urllib.parse
 import json
@@ -31,7 +31,7 @@ if not os.path.exists(ADDON_DATA_PATH):
 SKIP_DATA_FILE = os.path.join(ADDON_DATA_PATH, 'skip_intro_data.json')
 WINDOW_CACHE_FILE = os.path.join(ADDON_DATA_PATH, 'window_cache.pickle')
 
-def log(msg): xbmc.log(f"[moviefilter] {msg}", xbmc.LOGINFO)
+
 
 def prefetch_data_for_window():
     try:
@@ -1065,13 +1065,13 @@ def filter_list(reload_param):
 
     # Check cache if first load
     if reload_param.startswith("first_"):
-        # Wait for cache file (max 500ms)
+        # Wait for cache file (max 1000ms)
         waited = 0
-        while not os.path.exists(WINDOW_CACHE_FILE) and waited < 10:
+        while not os.path.exists(WINDOW_CACHE_FILE) and waited < 20:
             xbmc.sleep(50)
             waited += 1
 
-    if reload_param.startswith("first_") and waited < 10:
+    if reload_param.startswith("first_") and waited < 20:
         try:
             log(f"Found window cache: {WINDOW_CACHE_FILE}")
             with open(WINDOW_CACHE_FILE, 'rb') as f:
