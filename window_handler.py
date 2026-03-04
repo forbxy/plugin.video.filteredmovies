@@ -412,7 +412,7 @@ class FilterWindow(xbmcgui.WindowXML):
 
 
 class DialogSelectWindow(xbmcgui.WindowXMLDialog):
-    def __init__(self, strXMLname, strFallbackPath, strDefaultName, forceFallback=0):
+    def __init__(self, strXMLname, strFallbackPath, strDefaultName, forceFallback='1080i'):
         super(DialogSelectWindow, self).__init__(strXMLname, strFallbackPath, strDefaultName, forceFallback)
         self.items = []
         self.selected_index = -1
@@ -454,7 +454,7 @@ class DialogSelectWindow(xbmcgui.WindowXMLDialog):
         self.close()
 
 class OSDListWindow(xbmcgui.WindowXMLDialog):
-    def __init__(self, strXMLname, strFallbackPath, strDefaultName, forceFallback=0):
+    def __init__(self, strXMLname, strFallbackPath, strDefaultName, forceFallback='1080i'):
         super(OSDListWindow, self).__init__(strXMLname, strFallbackPath, strDefaultName, forceFallback)
         self.items = []
         self.callback = None

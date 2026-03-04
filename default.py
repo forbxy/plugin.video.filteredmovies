@@ -669,7 +669,7 @@ def select_subtitle():
     # Use custom window
     log("Opening custom window")
     import window_handler
-    w = window_handler.DialogSelectWindow('Custom_1112_SubtitleSelect.xml', ADDON_PATH, 'Default', '1112')
+    w = window_handler.DialogSelectWindow('Custom_1112_SubtitleSelect.xml', ADDON_PATH, 'Default', '1080i')
     w.setItems(display_items)
     w.doModal()
     log("Window closed")
@@ -707,7 +707,7 @@ def open_osd_subtitle_list():
 
     import window_handler
     # Use the new XML
-    w = window_handler.OSDListWindow('Custom_1113_OSDSubtitleList.xml', ADDON_PATH, 'Default', '1113')
+    w = window_handler.OSDListWindow('Custom_1113_OSDSubtitleList.xml', ADDON_PATH, 'Default', '1080i')
     w.setItems(display_items)
     
     def on_select(item):
@@ -895,7 +895,7 @@ def select_audio():
 
     # Use custom window
     import window_handler
-    w = window_handler.DialogSelectWindow('Custom_1114_AudioSelect.xml', ADDON_PATH, 'Default', '1114')
+    w = window_handler.DialogSelectWindow('Custom_1114_AudioSelect.xml', ADDON_PATH, 'Default', '1080i')
     w.setItems(display_items)
     w.doModal()
     
@@ -966,7 +966,7 @@ def open_osd_audio_list():
 
     import window_handler
     # Use new XML for audio list
-    w = window_handler.OSDListWindow('Custom_1115_OSDAudioList.xml', ADDON_PATH, 'Default', '1115')
+    w = window_handler.OSDListWindow('Custom_1115_OSDAudioList.xml', ADDON_PATH, 'Default', '1080i')
     w.setItems(display_items)
     
     def on_select(item):
@@ -1051,7 +1051,7 @@ def launch_t9():
 
     import window_handler
     # 创建并显示窗口
-    w = window_handler.FilterWindow(xml_file, ADDON_PATH, 'Default', '5111')
+    w = window_handler.FilterWindow(xml_file, ADDON_PATH, 'Default', '1080i')
     w.doModal()
     w.cleanup()
 
@@ -1192,7 +1192,7 @@ def select_playback_speed():
 
     # 3. Open Dialog
     import window_handler
-    w = window_handler.DialogSelectWindow('Custom_1116_SpeedSelect.xml', ADDON_PATH, 'Default', '1116')
+    w = window_handler.DialogSelectWindow('Custom_1116_SpeedSelect.xml', ADDON_PATH, 'Default', '1080i')
     w.setItems(display_items)
     w.doModal()
     
