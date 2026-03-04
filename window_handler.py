@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from common import notification
 import xbmc
 import xbmcgui
 import time
@@ -262,7 +263,7 @@ class FilterWindow(xbmcgui.WindowXML):
 
                 if current_input == "9527007":
                     t9_helper.helper.rebuild_cache()
-                    xbmcgui.Dialog().notification("Filtered Movies", "已重建 T9 缓存...", xbmcgui.NOTIFICATION_WARNING, 1000)
+                    notification("已重建 T9 缓存...", sound=True)
                     xbmc.log("[FilterWindow] Magic code 9527007 detected. Rebuilding T9 cache.", xbmc.LOGWARNING)
                     current_input = ""
                     xbmcgui.Window(10000).setProperty("MFG.T9Input", current_input)

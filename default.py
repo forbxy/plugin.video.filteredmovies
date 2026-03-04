@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from common import get_skin_name
+from common import get_skin_name,notification
 import sys
 import urllib.parse
 import json
@@ -161,7 +161,7 @@ def record_skip_point():
                             position = resume.get('position', 0)
                             
                             if position > 0:
-                                xbmc.executebuiltin(f'Notification(FilteredMovies, 跳转至历史进度 {int(position)}秒, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+                                notification(f"跳转至历史进度 {int(position)}秒")
                                 player.seekTime(position)
                                 return # 成功跳转，直接返回
     except Exception as e:
@@ -170,7 +170,7 @@ def record_skip_point():
     # 2. 原有的剧集跳过逻辑
     tvshow_id, show_title, season = get_current_tvshow_info()
     if not tvshow_id:
-        xbmc.executebuiltin(f'Notification(FilteredMovies, 跳过不适用于非剧集, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+        notification("跳过不适用于非剧集", sound=True)
         return
 
     try:
@@ -216,7 +216,7 @@ def record_skip_point():
             msg = f"已记录片尾时长: {m:02d}:{s:02d}"
         else:
             
-            xbmc.executebuiltin(f'Notification(FilteredMovies, "请在剧集前或后20%时间段内调用", 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+            notification("请在剧集前或后20%时间段内调用", sound=True)
             return
 
         data[tvshow_id]["seasons"][season] = season_data
@@ -225,17 +225,17 @@ def record_skip_point():
         # 通知 service 重新加载数据
         xbmcgui.Window(10000).setProperty("MFG.Reload", "true")
         
-        xbmc.executebuiltin(f'Notification(FilteredMovies, {msg} (第{season}季), 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+        notification(f"{msg} (第{season}季)")
         log(f"Recorded skip point for {show_title} Season {season}: {season_data}")
         
     except Exception as e:
         log(f"Error recording skip point: {e}")
-        xbmc.executebuiltin(f'Notification(FilteredMovies, 无法记录请查阅日志, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+        notification("无法记录请查阅日志", sound=True)
 
 def delete_skip_point():
     tvshow_id, show_title, season = get_current_tvshow_info()
     if not tvshow_id:
-        xbmc.executebuiltin(f'Notification(FilteredMovies, 跳过不适用于非剧集, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+        notification("跳过不适用于非剧集", sound=True)
         return
 
     try:
@@ -250,7 +250,7 @@ def delete_skip_point():
         data = load_skip_data()
         
         if tvshow_id not in data or "seasons" not in data[tvshow_id] or season not in data[tvshow_id]["seasons"]:
-            xbmc.executebuiltin(f'Notification(FilteredMovies, 无片头片尾标记点, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+            notification("无片头片尾标记点", sound=True)
             return
 
         season_data = data[tvshow_id]["seasons"][season]
@@ -271,7 +271,7 @@ def delete_skip_point():
             else:
                 msg = "当前无片尾记录"
         else:
-            xbmc.executebuiltin(f'Notification(FilteredMovies, 删除失败 请在剧集前或后20%时间段内调用, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+            notification("删除失败 请在剧集前或后20%时间段内调用", sound=True)
             return
 
         # Clean up empty dicts
@@ -287,11 +287,11 @@ def delete_skip_point():
         
         # 通知 service 重新加载数据
         xbmcgui.Window(10000).setProperty("MFG.Reload", "true")
-        xbmc.executebuiltin(f'Notification(FilteredMovies, {msg}, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+        notification(msg)
         
     except Exception as e:
         log(f"Error deleting skip point: {e}")
-        xbmc.executebuiltin(f'Notification(FilteredMovies, 删除错误, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+        notification("删除错误", sound=True)
 
 def open_settings_and_click(window_id, clicks=2):
     """
@@ -392,11 +392,11 @@ def set_subtitle(index_str):
         
         if is_enabled and index == current_index:
              player.showSubtitles(False)
-             xbmc.executebuiltin(f'Notification(FilteredMovies, 字幕已关闭, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+             notification("字幕已关闭")
         else:
              player.setSubtitleStream(index)
              player.showSubtitles(True)
-        xbmc.executebuiltin(f'Notification(FilteredMovies, 字幕已切换, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+        notification("字幕已切换")
         # Refresh the list to update selection state
         populate_subtitle_list()
              
@@ -449,7 +449,7 @@ def get_subtitle_items(suppress_warning=False):
         
         if not streams:
             if not suppress_warning:
-                xbmc.executebuiltin(f'Notification(FilteredMovies, 没有可用的字幕流, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+                notification("没有可用的字幕流")
                 
             return None, None, None, None
 
@@ -610,7 +610,7 @@ def get_subtitle_items(suppress_warning=False):
 
     except Exception as e:
         log(f"Error in get_subtitle_items: {e}")
-        xbmc.executebuiltin(f'Notification(FilteredMovies, 获取字幕出错: {e}, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+        notification(f"获取字幕出错: {e}", sound=True)
         
         return None, None, None, None
 
@@ -691,12 +691,12 @@ def select_subtitle():
         # Toggle off if clicking the currently active subtitle
         if is_enabled and real_index == current_index:
             player.showSubtitles(False)
-            xbmc.executebuiltin(f'Notification(FilteredMovies, 字幕已关闭, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+            notification("字幕已关闭")
             
         else:
             player.setSubtitleStream(real_index)
             player.showSubtitles(True)
-            xbmc.executebuiltin(f'Notification(FilteredMovies, 已切换至: {selected_item["label"].strip()}, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+            notification(f"字幕已切换至: {selected_item['label'].strip()}")
 
 
 def open_osd_subtitle_list():
@@ -717,11 +717,11 @@ def open_osd_subtitle_list():
             player = xbmc.Player()
             if is_enabled and real_index == current_index:
                  player.showSubtitles(False)
-                 xbmc.executebuiltin(f'Notification(FilteredMovies, 字幕已关闭, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+                 notification("字幕已关闭")
             else:
                  player.setSubtitleStream(real_index)
                  player.showSubtitles(True)
-                 xbmc.executebuiltin(f'Notification(FilteredMovies, 已切换至: {item["label"].strip()}, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+                 notification(f"字幕已切换至: {item['label'].strip()}")
             
             # Close VideoOSD to hide the list and return to video
             # xbmc.executebuiltin('Dialog.Close(VideoOSD)')
@@ -767,7 +767,7 @@ def get_audio_items(suppress_warning=False):
         
         if not streams:
             if not suppress_warning:
-                xbmc.executebuiltin(f'Notification(FilteredMovies, 没有可用的音轨, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+                notification("没有可用的音轨")
             return None, -1
 
         # Prepare items
@@ -883,7 +883,7 @@ def get_audio_items(suppress_warning=False):
     except Exception as e:
         log(f"Error in get_audio_items: {e}")
         if not suppress_warning:
-            xbmc.executebuiltin(f'Notification(FilteredMovies, 获取音轨出错: {e}, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+            notification(f"获取音轨出错: {e}", sound=True)
         return None, -1
 
 def select_audio():
@@ -910,10 +910,10 @@ def select_audio():
         real_index = selected_item["index"]
         
         if real_index == current_index:
-            xbmc.executebuiltin(f'Notification(FilteredMovies, 已是当前音轨, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+            notification("已是当前音轨")
         else:
             xbmc.Player().setAudioStream(real_index)
-            xbmc.executebuiltin(f'Notification(FilteredMovies, 已切换至: {selected_item["label"].strip()}, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+            notification(f"音轨已切换至: {selected_item['label'].strip()}")
 
 def populate_audio_list():
     log("populate_audio_list function started")
@@ -974,10 +974,10 @@ def open_osd_audio_list():
         try:
             player = xbmc.Player()
             if real_index == current_index:
-                 xbmc.executebuiltin(f'Notification(FilteredMovies, 已是当前音轨, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+                 notification("已是当前音轨")
             else:
                  player.setAudioStream(real_index)
-                 xbmc.executebuiltin(f'Notification(FilteredMovies, 已切换至: {item["label"].strip()}, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+                 notification(f"音轨已切换至: {item['label'].strip()}")
             
             xbmcgui.Window(10000).setProperty("OSDAudioListOpen", "true")
         except:
@@ -1000,12 +1000,12 @@ def set_home_background(image):
         if image:
             xbmc.executebuiltin(f'Skin.SetString(CustomHomeBackground,{image})')
             # 使用插件图标代替默认的 info 图标
-            xbmc.executebuiltin(f'Notification(FilteredMovies, 全局背景已更新, 1000, {os.path.join(ADDON_PATH, "icon.png")})')
+            notification("全局背景已更新")
         else:
-            xbmc.executebuiltin(f'Notification(FilteredMovies, 错误:无法获取当前背景图片, 1000, {os.path.join(ADDON_PATH, "icon.png")})')
+            notification("错误:无法获取当前背景图片", sound=True)
     elif ret == 1:
         xbmc.executebuiltin('Skin.SetString(CustomHomeBackground,)')
-        xbmc.executebuiltin(f'Notification(FilteredMovies, 背景已重置, 全局背景已恢复默认, 1000, {os.path.join(ADDON_PATH, "icon.png")})')
+        notification("背景已重置, 全局背景已恢复默认")
 
 def launch_t9():
     # last_close用来处理先关闭窗口，后调用launch_t9(比如地平线，导火线)
@@ -1166,11 +1166,11 @@ def filter_list(reload_param):
 
 def select_playback_speed():
     if not xbmc.getCondVisibility('Player.TempoEnabled'):
-        xbmc.executebuiltin(f'Notification(FilteredMovies, 请在设置-播放器-视频中开启同步回放显示, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+        notification("请在设置-播放器-视频中开启同步回放显示", sound=True)
         return
     
     if xbmc.getCondVisibility('Player.Paused'):
-        xbmc.executebuiltin(f'Notification(FilteredMovies, 播放暂停时无法调整速度, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+        notification("播放暂停时无法调整速度", sound=True)
         return
 
     # 1. Get current speed
@@ -1231,7 +1231,7 @@ def select_playback_speed():
             for _ in range(abs(steps)):
                 xbmc.executebuiltin('PlayerControl(TempoDown)')
                 
-        xbmc.executebuiltin(f"Notification(播放速度, {target_speed:.1f}x, 1000, {os.path.join(ADDON_PATH, 'icon.png')})")
+        notification(f"{target_speed:.1f}x", title="播放速度")
 
 def router(paramstring):
     log(f"Router called with: {paramstring}")

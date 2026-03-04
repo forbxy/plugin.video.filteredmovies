@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from common import get_skin_name
+from common import get_skin_name,notification
 import xbmc
 import xbmcgui
 import xbmcvfs
@@ -344,7 +344,7 @@ class PlayerMonitor(xbmc.Player):
                 if current_time < skip_time:
                     log(f"Auto skipping intro for {show_title} S{season}. Current: {current_time}, Target: {skip_time}")
                     self.seekTime(skip_time)
-                    xbmc.executebuiltin(f'Notification(FilteredMovies, 自动跳过片头 已跳转至 {int(skip_time)}秒, 2000, {os.path.join(ADDON_PATH, "icon.png")})')
+                    notification(f"自动跳过片头 已跳转至 {int(skip_time)}秒")
             except Exception as e:
                 log(f"Error during skip: {e}")
 
@@ -613,7 +613,7 @@ if __name__ == '__main__':
                     # 检查是否被用户取消
                     if countdown_window.cancelled:
                         player.cancel_skip = True
-                        xbmc.executebuiltin(f'Notification(FilteredMovies, 自动跳过片尾 已取消, 1000, {os.path.join(ADDON_PATH, "icon.png")})')
+                        notification("自动跳过片头 已取消")
                         # 清理窗口
                         if countdown_thread and countdown_thread.is_alive():
                             countdown_thread.join()
@@ -626,7 +626,7 @@ if __name__ == '__main__':
                     if countdown_remaining <= 0:
                         player.outro_triggered = True
                         log("Countdown finished. Auto skipping outro -> Next episode")
-                        
+                        notification("自动跳过片头")
                         # 关闭窗口
                         if countdown_window:
                             countdown_window.close()
