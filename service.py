@@ -629,7 +629,7 @@ if __name__ == '__main__':
                     # 检查是否被用户取消
                     if countdown_window.cancelled:
                         player.cancel_skip = True
-                        notification("自动跳过片头 已取消")
+                        notification("自动跳过片尾 已取消")
                         # 清理窗口
                         if countdown_thread and countdown_thread.is_alive():
                             countdown_thread.join()
@@ -642,7 +642,7 @@ if __name__ == '__main__':
                     if countdown_remaining <= 0:
                         player.outro_triggered = True
                         log("Countdown finished. Auto skipping outro -> Next episode")
-                        notification("自动跳过片头")
+                        # notification("自动跳过片尾")
                         # 关闭窗口
                         if countdown_window:
                             countdown_window.close()
