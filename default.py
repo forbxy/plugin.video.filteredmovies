@@ -354,6 +354,9 @@ def open_playing_tvshow():
     # xbmc.sleep(100)
     
     try:
+        if not xbmc.Player().isPlayingVideo():
+            return
+            
         json_query = {
             "jsonrpc": "2.0",
             "method": "Player.GetItem",
@@ -369,13 +372,15 @@ def open_playing_tvshow():
         if 'result' in response and 'item' in response['result']:
             item = response['result']['item']
             tvshow_id = item.get('tvshowid')
+            item_type = item.get('type')
             
-            if tvshow_id and tvshow_id != -1:
+            if item_type == 'episode' and tvshow_id and tvshow_id != -1:
                 log(f"Opening TVShow ID: {tvshow_id}")
                 path = f"videodb://tvshows/titles/{tvshow_id}/"
                 xbmc.executebuiltin(f"ActivateWindow(Videos,{path},return)")
             else:
-                log("Current playing item has no TV show ID")
+                log("Current playing item is not a TV show, opening Playlist")
+                xbmc.executebuiltin("ActivateWindow(VideoPlaylist)")
     except Exception as e:
         log(f"Error opening playing tvshow: {e}")
 
