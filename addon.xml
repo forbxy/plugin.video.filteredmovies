@@ -7,11 +7,6 @@
         <import addon="xbmc.python" version="3.0.0" />
     </requires>
 
-    <!-- 真正的插件入口定义 -->
-    <extension point="xbmc.python.pluginsource" library="default.py">
-        <provides>video</provides>
-    </extension>
-
     <!-- 注册 default.py 为脚本模块，以便 RunScript 调用 -->
     <extension point="xbmc.python.script" library="default.py">
         <provides>executable</provides>
