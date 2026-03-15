@@ -572,6 +572,9 @@ def get_subtitle_items(suppress_warning=False):
                 'msa': '马来语', 'may': '马来语', 'ms': '马来语',
                 'pol': '波兰语', 'pl': '波兰语',
                 'tgl': '塔加洛语', 'tl': '塔加洛语', 'fil': '菲律宾语',
+                'eus': '巴斯克语', 'baq': '巴斯克语', 'eu': '巴斯克语', 'basque': '巴斯克语',
+                'cat': '加泰罗尼亚语', 'ca': '加泰罗尼亚语', 'catalan': '加泰罗尼亚语',
+                'glg': '加利西亚语', 'gl': '加利西亚语', 'gallegan': '加利西亚语',
                 'unk': '未知', '': '未知'
             }
             
@@ -888,6 +891,9 @@ def get_audio_items(suppress_warning=False):
                 'msa': '马来语', 'may': '马来语', 'ms': '马来语',
                 'pol': '波兰语', 'pl': '波兰语',
                 'tgl': '塔加洛语', 'tl': '塔加洛语', 'fil': '菲律宾语',
+                'eus': '巴斯克语', 'baq': '巴斯克语', 'eu': '巴斯克语', 'basque': '巴斯克语',
+                'cat': '加泰罗尼亚语', 'ca': '加泰罗尼亚语', 'catalan': '加泰罗尼亚语',
+                'glg': '加利西亚语', 'gl': '加利西亚语', 'gallegan': '加利西亚语',
                 'unk': '未知', '': '未知'
             }
             
