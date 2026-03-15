@@ -389,6 +389,51 @@ def open_playing_tvshow():
     except Exception as e:
         log(f"Error opening playing tvshow: {e}")
 
+def force_prev():
+    try:
+        player = xbmc.Player()
+        if not player.isPlaying():
+            return
+        
+        # 统一使用播放列表逻辑，不再单独处理剧集
+        if player.isPlayingVideo():
+            playlist_id = xbmc.PLAYLIST_VIDEO
+        else:
+            playlist_id = xbmc.PLAYLIST_MUSIC
+            
+        pl = xbmc.PlayList(playlist_id)
+        pos = pl.getposition()
+        
+        if pos > 0:
+            log(f"ForcePrev: Jumping to playlist pos {pos-1}")
+            
+            # 获取 active player id
+            active_player_id = 1
+            try:
+                p_res = json.loads(xbmc.executeJSONRPC('{"jsonrpc":"2.0","method":"Player.GetActivePlayers","id":1}'))
+                if 'result' in p_res and len(p_res['result']) > 0:
+                    active_player_id = p_res['result'][0]['playerid']
+            except: pass
+
+            json_query_goto = {
+                "jsonrpc": "2.0",
+                "method": "Player.GoTo",
+                "params": {
+                    "playerid": active_player_id,
+                    "to": pos - 1
+                },
+                "id": 1
+            }
+            xbmc.executeJSONRPC(json.dumps(json_query_goto))
+        else:
+            log("ForcePrev: At start of playlist, restarting")
+            notification("已是第一个")
+            player.seekTime(0)
+
+    except Exception as e:
+        log(f"Error in force_prev: {e}")
+        notification("操作失败", sound=True)
+
 def set_subtitle(index_str):
     log(f"set_subtitle called with index: {index_str}")
     try:
@@ -1351,21 +1396,7 @@ def router(paramstring):
         return
 
     if mode == "force_prev":
-        # 重新播放当前视频
-        pl = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
-        pos = pl.getposition()
-        if pos >= 0:
-            # 使用 JSON-RPC Player.GoTo 跳转到当前位置，实现重播
-            json_query = {
-                "jsonrpc": "2.0",
-                "method": "Player.GoTo",
-                "params": {
-                    "playerid": 1,
-                    "to": pos
-                },
-                "id": 1
-            }
-            xbmc.executeJSONRPC(json.dumps(json_query))
+        force_prev()
         return
 
     if mode == "open_videodb":
