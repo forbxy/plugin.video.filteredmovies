@@ -1,0 +1,664 @@
+{
+    "name_to_code": {
+        "backspace": 61448,
+        "tab": 61449,
+        "return": 61453,
+        "escape": 61467,
+        "esc": 61467,
+        "zero": 61488,
+        "one": 61489,
+        "two": 61490,
+        "three": 61491,
+        "four": 61492,
+        "five": 61493,
+        "six": 61494,
+        "seven": 61495,
+        "eight": 61496,
+        "nine": 61497,
+        "a": 61505,
+        "b": 61506,
+        "c": 61507,
+        "d": 61508,
+        "e": 61509,
+        "f": 61510,
+        "g": 61511,
+        "h": 61512,
+        "i": 61513,
+        "j": 61514,
+        "k": 61515,
+        "l": 61516,
+        "m": 61517,
+        "n": 61518,
+        "o": 61519,
+        "p": 61520,
+        "q": 61521,
+        "r": 61522,
+        "s": 61523,
+        "t": 61524,
+        "u": 61525,
+        "v": 61526,
+        "w": 61527,
+        "x": 61528,
+        "y": 61529,
+        "z": 61530,
+        "space": 61472,
+        "exclaim": 61473,
+        "doublequote": 61474,
+        "hash": 61475,
+        "dollar": 61476,
+        "percent": 61477,
+        "ampersand": 61478,
+        "quote": 61479,
+        "leftbracket": 61480,
+        "rightbracket": 61481,
+        "asterisk": 61482,
+        "plus": 61483,
+        "comma": 61484,
+        "minus": 61485,
+        "period": 61486,
+        "forwardslash": 61487,
+        "colon": 61498,
+        "semicolon": 61499,
+        "lessthan": 61500,
+        "equals": 61501,
+        "greaterthan": 61502,
+        "questionmark": 61503,
+        "at": 61504,
+        "opensquarebracket": 61531,
+        "backslash": 61532,
+        "closesquarebracket": 61533,
+        "caret": 61534,
+        "underline": 61535,
+        "leftquote": 61536,
+        "openbrace": 61563,
+        "pipe": 61564,
+        "closebrace": 61565,
+        "tilde": 61566,
+        "numpadzero": 61552,
+        "numpadone": 61553,
+        "numpadtwo": 61554,
+        "numpadthree": 61555,
+        "numpadfour": 61556,
+        "numpadfive": 61557,
+        "numpadsix": 61558,
+        "numpadseven": 61559,
+        "numpadeight": 61560,
+        "numpadnine": 61561,
+        "numpaddivide": 61537,
+        "numpadtimes": 61538,
+        "numpadminus": 61539,
+        "numpadplus": 61540,
+        "enter": 61541,
+        "numpadperiod": 61542,
+        "browser_back": 61616,
+        "browser_forward": 61617,
+        "browser_refresh": 61618,
+        "browser_stop": 61619,
+        "browser_search": 61620,
+        "browser_favorites": 61621,
+        "browser_home": 61622,
+        "volume_mute": 61623,
+        "volume_down": 61624,
+        "volume_up": 61625,
+        "next_track": 61626,
+        "prev_track": 61627,
+        "stop": 61628,
+        "play_pause": 61629,
+        "rewind": 61636,
+        "fastforward": 61637,
+        "launch_mail": 61630,
+        "launch_media_select": 61631,
+        "launch_app1_pc_icon": 61632,
+        "launch_app2_pc_icon": 61633,
+        "launch_file_browser": 61634,
+        "launch_media_center": 61635,
+        "record": 61638,
+        "f1": 61584,
+        "f2": 61585,
+        "f3": 61586,
+        "f4": 61587,
+        "f5": 61588,
+        "f6": 61589,
+        "f7": 61590,
+        "f8": 61591,
+        "f9": 61592,
+        "f10": 61593,
+        "f11": 61594,
+        "f12": 61595,
+        "f13": 61596,
+        "f14": 61597,
+        "f15": 61598,
+        "up": 61568,
+        "down": 61569,
+        "right": 61571,
+        "left": 61570,
+        "insert": 61574,
+        "delete": 61575,
+        "home": 61576,
+        "end": 61577,
+        "pageup": 61572,
+        "pagedown": 61573,
+        "numlock": 61658,
+        "capslock": 61657,
+        "rightshift": 61651,
+        "leftshift": 61650,
+        "rightctrl": 61649,
+        "leftctrl": 61648,
+        "leftalt": 61652,
+        "leftwindows": 61654,
+        "rightwindows": 61655,
+        "menu": 61656,
+        "pause": 61440,
+        "scrolllock": 61660,
+        "printscreen": 61659,
+        "power": 61440,
+        "sleep": 61440,
+        "guide": 61664,
+        "settings": 61665,
+        "info": 61666,
+        "red": 61667,
+        "green": 61668,
+        "yellow": 61669,
+        "blue": 61670,
+        "zoom": 61671,
+        "text": 61672,
+        "favorites": 61673,
+        "homepage": 61674,
+        "config": 61675,
+        "epg": 61676
+    },
+    "code_to_names": {
+        "61448": [
+            "backspace"
+        ],
+        "61449": [
+            "tab"
+        ],
+        "61453": [
+            "return"
+        ],
+        "61467": [
+            "escape",
+            "esc"
+        ],
+        "61488": [
+            "zero"
+        ],
+        "61489": [
+            "one"
+        ],
+        "61490": [
+            "two"
+        ],
+        "61491": [
+            "three"
+        ],
+        "61492": [
+            "four"
+        ],
+        "61493": [
+            "five"
+        ],
+        "61494": [
+            "six"
+        ],
+        "61495": [
+            "seven"
+        ],
+        "61496": [
+            "eight"
+        ],
+        "61497": [
+            "nine"
+        ],
+        "61505": [
+            "a"
+        ],
+        "61506": [
+            "b"
+        ],
+        "61507": [
+            "c"
+        ],
+        "61508": [
+            "d"
+        ],
+        "61509": [
+            "e"
+        ],
+        "61510": [
+            "f"
+        ],
+        "61511": [
+            "g"
+        ],
+        "61512": [
+            "h"
+        ],
+        "61513": [
+            "i"
+        ],
+        "61514": [
+            "j"
+        ],
+        "61515": [
+            "k"
+        ],
+        "61516": [
+            "l"
+        ],
+        "61517": [
+            "m"
+        ],
+        "61518": [
+            "n"
+        ],
+        "61519": [
+            "o"
+        ],
+        "61520": [
+            "p"
+        ],
+        "61521": [
+            "q"
+        ],
+        "61522": [
+            "r"
+        ],
+        "61523": [
+            "s"
+        ],
+        "61524": [
+            "t"
+        ],
+        "61525": [
+            "u"
+        ],
+        "61526": [
+            "v"
+        ],
+        "61527": [
+            "w"
+        ],
+        "61528": [
+            "x"
+        ],
+        "61529": [
+            "y"
+        ],
+        "61530": [
+            "z"
+        ],
+        "61472": [
+            "space"
+        ],
+        "61473": [
+            "exclaim"
+        ],
+        "61474": [
+            "doublequote"
+        ],
+        "61475": [
+            "hash"
+        ],
+        "61476": [
+            "dollar"
+        ],
+        "61477": [
+            "percent"
+        ],
+        "61478": [
+            "ampersand"
+        ],
+        "61479": [
+            "quote"
+        ],
+        "61480": [
+            "leftbracket"
+        ],
+        "61481": [
+            "rightbracket"
+        ],
+        "61482": [
+            "asterisk"
+        ],
+        "61483": [
+            "plus"
+        ],
+        "61484": [
+            "comma"
+        ],
+        "61485": [
+            "minus"
+        ],
+        "61486": [
+            "period"
+        ],
+        "61487": [
+            "forwardslash"
+        ],
+        "61498": [
+            "colon"
+        ],
+        "61499": [
+            "semicolon"
+        ],
+        "61500": [
+            "lessthan"
+        ],
+        "61501": [
+            "equals"
+        ],
+        "61502": [
+            "greaterthan"
+        ],
+        "61503": [
+            "questionmark"
+        ],
+        "61504": [
+            "at"
+        ],
+        "61531": [
+            "opensquarebracket"
+        ],
+        "61532": [
+            "backslash"
+        ],
+        "61533": [
+            "closesquarebracket"
+        ],
+        "61534": [
+            "caret"
+        ],
+        "61535": [
+            "underline"
+        ],
+        "61536": [
+            "leftquote"
+        ],
+        "61563": [
+            "openbrace"
+        ],
+        "61564": [
+            "pipe"
+        ],
+        "61565": [
+            "closebrace"
+        ],
+        "61566": [
+            "tilde"
+        ],
+        "61552": [
+            "numpadzero"
+        ],
+        "61553": [
+            "numpadone"
+        ],
+        "61554": [
+            "numpadtwo"
+        ],
+        "61555": [
+            "numpadthree"
+        ],
+        "61556": [
+            "numpadfour"
+        ],
+        "61557": [
+            "numpadfive"
+        ],
+        "61558": [
+            "numpadsix"
+        ],
+        "61559": [
+            "numpadseven"
+        ],
+        "61560": [
+            "numpadeight"
+        ],
+        "61561": [
+            "numpadnine"
+        ],
+        "61537": [
+            "numpaddivide"
+        ],
+        "61538": [
+            "numpadtimes"
+        ],
+        "61539": [
+            "numpadminus"
+        ],
+        "61540": [
+            "numpadplus"
+        ],
+        "61541": [
+            "enter"
+        ],
+        "61542": [
+            "numpadperiod"
+        ],
+        "61616": [
+            "browser_back"
+        ],
+        "61617": [
+            "browser_forward"
+        ],
+        "61618": [
+            "browser_refresh"
+        ],
+        "61619": [
+            "browser_stop"
+        ],
+        "61620": [
+            "browser_search"
+        ],
+        "61621": [
+            "browser_favorites"
+        ],
+        "61622": [
+            "browser_home"
+        ],
+        "61623": [
+            "volume_mute"
+        ],
+        "61624": [
+            "volume_down"
+        ],
+        "61625": [
+            "volume_up"
+        ],
+        "61626": [
+            "next_track"
+        ],
+        "61627": [
+            "prev_track"
+        ],
+        "61628": [
+            "stop"
+        ],
+        "61629": [
+            "play_pause"
+        ],
+        "61636": [
+            "rewind"
+        ],
+        "61637": [
+            "fastforward"
+        ],
+        "61630": [
+            "launch_mail"
+        ],
+        "61631": [
+            "launch_media_select"
+        ],
+        "61632": [
+            "launch_app1_pc_icon"
+        ],
+        "61633": [
+            "launch_app2_pc_icon"
+        ],
+        "61634": [
+            "launch_file_browser"
+        ],
+        "61635": [
+            "launch_media_center"
+        ],
+        "61638": [
+            "record"
+        ],
+        "61584": [
+            "f1"
+        ],
+        "61585": [
+            "f2"
+        ],
+        "61586": [
+            "f3"
+        ],
+        "61587": [
+            "f4"
+        ],
+        "61588": [
+            "f5"
+        ],
+        "61589": [
+            "f6"
+        ],
+        "61590": [
+            "f7"
+        ],
+        "61591": [
+            "f8"
+        ],
+        "61592": [
+            "f9"
+        ],
+        "61593": [
+            "f10"
+        ],
+        "61594": [
+            "f11"
+        ],
+        "61595": [
+            "f12"
+        ],
+        "61596": [
+            "f13"
+        ],
+        "61597": [
+            "f14"
+        ],
+        "61598": [
+            "f15"
+        ],
+        "61568": [
+            "up"
+        ],
+        "61569": [
+            "down"
+        ],
+        "61571": [
+            "right"
+        ],
+        "61570": [
+            "left"
+        ],
+        "61574": [
+            "insert"
+        ],
+        "61575": [
+            "delete"
+        ],
+        "61576": [
+            "home"
+        ],
+        "61577": [
+            "end"
+        ],
+        "61572": [
+            "pageup"
+        ],
+        "61573": [
+            "pagedown"
+        ],
+        "61658": [
+            "numlock"
+        ],
+        "61657": [
+            "capslock"
+        ],
+        "61651": [
+            "rightshift"
+        ],
+        "61650": [
+            "leftshift"
+        ],
+        "61649": [
+            "rightctrl"
+        ],
+        "61648": [
+            "leftctrl"
+        ],
+        "61652": [
+            "leftalt"
+        ],
+        "61654": [
+            "leftwindows"
+        ],
+        "61655": [
+            "rightwindows"
+        ],
+        "61656": [
+            "menu"
+        ],
+        "61440": [
+            "pause",
+            "power",
+            "sleep"
+        ],
+        "61660": [
+            "scrolllock"
+        ],
+        "61659": [
+            "printscreen"
+        ],
+        "61664": [
+            "guide"
+        ],
+        "61665": [
+            "settings"
+        ],
+        "61666": [
+            "info"
+        ],
+        "61667": [
+            "red"
+        ],
+        "61668": [
+            "green"
+        ],
+        "61669": [
+            "yellow"
+        ],
+        "61670": [
+            "blue"
+        ],
+        "61671": [
+            "zoom"
+        ],
+        "61672": [
+            "text"
+        ],
+        "61673": [
+            "favorites"
+        ],
+        "61674": [
+            "homepage"
+        ],
+        "61675": [
+            "config"
+        ],
+        "61676": [
+            "epg"
+        ]
+    }
+}

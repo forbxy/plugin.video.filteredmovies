@@ -177,6 +177,74 @@ class FilterWindow(xbmcgui.WindowXML):
                 for btn_id in all_ids:
                     self._set_button_state(btn_id, btn_id == active_id)
 
+    def _fav_from_custom_keymaps(self):
+        """解析用户的 keymap XML，提取绑定了 toggle_favourite 的自定义按键代码"""
+        import os
+        import json
+        import xml.etree.ElementTree as ET
+        
+        # 记录全局的键盘映射 button_code -> action_str
+        global_keyboard_map = {}
+        
+        # 加载键盘映射 JSON
+        mapping_file = os.path.join(os.path.dirname(__file__), '..', 'resources', 'keyboard_mapping.json')
+        name_to_code = {}
+        try:
+            with open(mapping_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                name_to_code = data.get("name_to_code", {})
+        except Exception as e:
+            log(f"Failed to load keyboard mapping json: {e}", xbmc.LOGERROR)
+
+        folder = xbmc.translatePath('special://profile/keymaps/')
+        if os.path.exists(folder):
+            # 获取所有xml并按字母顺序排序，以正确处理Kodi的覆盖加载机制
+            xml_files = sorted([f for f in os.listdir(folder) if f.lower().endswith('.xml')])
+            
+            for file_name in xml_files:
+                file_path = os.path.join(folder, file_name)
+                try:
+                    tree = ET.parse(file_path)
+                    root = tree.getroot()
+                    
+                    # Kodi 的 keymap 加载是不区分大小写的，我们遍历子节点匹配
+                    for global_node in root:
+                        if global_node.tag.lower() == 'global':
+                            for keyboard_node in global_node:
+                                if keyboard_node.tag.lower() == 'keyboard':
+                                    # 遍历所有的按键标签
+                                    for elem in keyboard_node:
+                                        tag = elem.tag.lower()
+                                        text = elem.text or ''
+                                        button_code = None
+                                        
+                                        # 处理 <key id="xxx">
+                                        if tag == 'key' and 'id' in elem.attrib:
+                                            try:
+                                                button_code = int(elem.attrib['id'])
+                                            except ValueError:
+                                                pass
+                                        else:
+                                            # 处理具有命名标签的映射
+                                            if tag in name_to_code:
+                                                button_code = name_to_code[tag]
+                                                
+                                        # 将得到的 button_code 映射覆盖，这就是Kodi执行的加载合并逻辑
+                                        if button_code is not None:
+                                            global_keyboard_map[button_code] = text
+                                            
+                except Exception as e:
+                    log(f"Failed to parse keymap {file_path}: {e}", xbmc.LOGERROR)
+
+        # 从最终合并完成的字典中，筛选出分配给了我们的 toggle_favourite 脚本的按钮代码
+        allowed_button_codes = set()
+        for code, action_text in global_keyboard_map.items():
+            if 'plugin.video.filteredmovies' in action_text and 'toggle_favourite' in action_text:
+                allowed_button_codes.add(code)
+
+        log(f"Parsed favourite button codes: {allowed_button_codes}")
+        return allowed_button_codes
+
     def onInit(self):
         # Set property to indicate window is open
         # Clear T9 input
@@ -287,7 +355,25 @@ class FilterWindow(xbmcgui.WindowXML):
         log(f"onAction: ID={action_id} ButtonCode={button_code}")
         
         # 关闭/返回/ESC等必须立即处理的按键
-        if action_id in [10, 122]:  # ESC, HOME
+        if action_id == 10:  # ESC
+            self.close()
+            return
+            
+        if action_id == 122:  # HOME / Search / Built-in
+            # 自动放行的全局系统按键列表
+            if button_code in [61616, 61622, 61674, 61448, 61467, 61588, 61440]:
+                log(f"Auto allowing action 122 for system button_code {button_code}")
+                return
+
+            # 延迟加载按键映射
+            if not hasattr(self, 'fav_button_codes'):
+                log("Parsing custom keymaps for the first time on action 122")
+                self.fav_button_codes = self._fav_from_custom_keymaps()
+
+            # 动态检查该 button_code 是否在用户的 keymap中被绑定为 toggle_favourite
+            if self.fav_button_codes and button_code in self.fav_button_codes:
+                log(f"Ignoring action 122 for button_code {button_code} because it is mapped to toggle_favourite")
+                return
             self.close()
             return
         if action_id == 92:  # NavBack
