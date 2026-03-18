@@ -144,6 +144,12 @@ RunScript(plugin.video.filteredmovies, ?mode=delete_skip_point)
 ```
 
 ### 4. 其他实用接口
+
+**切换收藏状态/将选中项加入或移出收藏夹**
+```xml
+RunScript(plugin.video.filteredmovies, ?mode=toggle_favourite)
+```
+
 **打开当前播放剧集的列表**
 ```xml
 RunScript(plugin.video.filteredmovies, ?mode=open_playing_tvshow)
