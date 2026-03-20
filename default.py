@@ -1343,6 +1343,32 @@ def select_playback_speed():
                 
         notification(f"{target_speed:.1f}x", title="播放速度")
 
+def restart_linux_kodi():
+    if not xbmc.getCondVisibility("System.Platform.Linux") or xbmc.getCondVisibility("System.Platform.Android"):
+        notification("当前系统不支持此操作", sound=True)
+        return
+        
+    log("Executing system level Kodi restart (kill -4 -> wait -> kill -9)")
+    notification("正在发送重启指令...")
+    xbmc.sleep(1000)
+    
+    kodi_pid = os.getpid()
+    
+    # 将包含kill逻辑的脚本独立出来，作为完全后台运行的命令
+    # 为了避免 kodi 退出时导致 sh 进程被杀，利用 daemon 方式或双层 nohup
+    kill_script = (
+        f"kill -4 {kodi_pid} 2>/dev/null; "
+        f"for i in $(seq 1 10); do "
+        f"  kill -0 {kodi_pid} 2>/dev/null || exit 0; "
+        f"  sleep 1; "
+        f"done; "
+        f"kill -9 {kodi_pid} 2>/dev/null"
+    )
+    
+    # os.system 中让脚本后台完全脱离 kodi
+    cmd = f"nohup sh -c '{kill_script}' >/dev/null 2>&1 &"
+    os.system(cmd)
+
 def router(paramstring):
     log(f"Router called with: {paramstring}")
     if not paramstring:
@@ -1393,6 +1419,10 @@ def router(paramstring):
 
     if mode == "delete_skip_point":
         delete_skip_point()
+        return
+
+    if mode == "restart_linux_kodi":
+        restart_linux_kodi()
         return
 
     if mode == "select_subtitle":
