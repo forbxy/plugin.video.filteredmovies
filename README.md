@@ -165,7 +165,8 @@ RunScript(plugin.video.filteredmovies, ?mode=open_playing_tvshow)
 
 **Linux下重启Kodi**
 *   仅对 Linux/CoreELEC/LibreELEC/Ubuntu 等类 Unix 系统有效。
-*   发送底层中断信号 (`kill -4` / `kill -9`)，重启 Kodi(优雅kill -4 等待10秒还不停止，kill -9强制退出)。
+*   发送底层中断信号 (`kill -TERM` / `kill -KILL`)，重启 Kodi(优雅kill -TERM 等待10秒还不停止，kill -KILL强制退出)。  
+*   之后systemd会重新拉起kodi
 ```xml
 RunScript(plugin.video.filteredmovies, ?mode=restart_linux_kodi)
 ```

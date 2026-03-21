@@ -1425,12 +1425,12 @@ def restart_linux_kodi():
     # 将包含kill逻辑的脚本独立出来，作为完全后台运行的命令
     # 为了避免 kodi 退出时导致 sh 进程被杀，利用 daemon 方式或双层 nohup
     kill_script = (
-        f"kill -4 {kodi_pid} 2>/dev/null; "
+        f"kill -TERM {kodi_pid} 2>/dev/null; "
         f"for i in $(seq 1 10); do "
         f"  kill -0 {kodi_pid} 2>/dev/null || exit 0; "
         f"  sleep 1; "
         f"done; "
-        f"kill -9 {kodi_pid} 2>/dev/null"
+        f"kill -KILL {kodi_pid} 2>/dev/null"
     )
     
     # os.system 中让脚本后台完全脱离 kodi
