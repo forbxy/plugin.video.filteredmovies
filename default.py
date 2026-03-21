@@ -1369,6 +1369,19 @@ def restart_linux_kodi():
     cmd = f"nohup sh -c '{kill_script}' >/dev/null 2>&1 &"
     os.system(cmd)
 
+def reboot_from_nand():
+    has_nand = os.path.exists("/dev/system") or os.path.exists("/dev/userdata") or os.path.exists("/dev/env")
+    if not has_nand:
+        notification("当前系统不支持或未检测到内部存储", sound=True)
+        return
+        
+    log("Executing system level reboot from NAND")
+    notification("正在从内部存储重启...")
+    xbmc.sleep(1000)
+    
+    os.system("/usr/sbin/rebootfromnand")
+    xbmc.executebuiltin("Reset")
+
 def router(paramstring):
     log(f"Router called with: {paramstring}")
     if not paramstring:
@@ -1423,6 +1436,10 @@ def router(paramstring):
 
     if mode == "restart_linux_kodi":
         restart_linux_kodi()
+        return
+
+    if mode == "reboot_from_nand":
+        reboot_from_nand()
         return
 
     if mode == "select_subtitle":

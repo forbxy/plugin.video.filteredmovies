@@ -162,3 +162,9 @@ RunScript(plugin.video.filteredmovies, ?mode=open_playing_tvshow)
 RunScript(plugin.video.filteredmovies, ?mode=restart_linux_kodi)
 ```
 
+**重启到内部存储 (Reboot from eMMC/NAND)**
+*   对安装在 SD卡/U盘中的 CoreELEC 等外部启动系统有效，重启回电视盒子内部的安卓系统。
+```xml
+RunScript(plugin.video.filteredmovies, ?mode=reboot_from_nand)
+```
+
