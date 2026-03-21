@@ -130,6 +130,14 @@ RunScript(plugin.video.filteredmovies, ?mode=select_audio)
 RunScript(plugin.video.filteredmovies, ?mode=select_playback_speed)
 ```
 
+**VS10 色彩引擎模式切换**
+*   循环切换或直接指定当前片源可用的 VS10 转码模式 (Origin / SDR / HDR10 / DV) 自动跳过不支持的模式。
+```xml
+RunScript(plugin.video.filteredmovies, ?mode=set_vs10_mode)
+<!-- 或者指定转码，target_mode可用值为 vs10.original, vs10.sdr, vs10.hdr10, vs10.dv -->
+RunScript(plugin.video.filteredmovies, ?mode=set_vs10_mode&target_mode=vs10.dv)
+```
+
 ### 3. 跳过片头片尾接口
 **记录当前时间为跳过点 (片头/片尾)**
 *   在剧集播放的前20%调用记录为片头结束点。

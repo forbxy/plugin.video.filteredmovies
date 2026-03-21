@@ -1201,6 +1201,74 @@ def filter_list(reload_param):
         xbmcgui.Window(10000).setProperty("MFG.IsRefreshing", "false")
     log(f"Filtered list populated with {len(list_items)} items")
 
+def set_vs10_mode(target_mode=None):
+    try:
+        raw_mode = xbmc.getInfoLabel("Player.Process(amlogic.vs10.mode.raw)")
+        if not raw_mode:
+            log("VS10 mode not available: amlogic.vs10.mode.raw is empty")
+            notification("VS10引擎未就绪或不受支持")
+            return
+        log(f"Current VS10 raw mode: {raw_mode}")
+        mode_names = {
+            "vs10.original": "Origin",
+            "vs10.sdr": "SDR",
+            "vs10.hdr10": "HDR10",
+            "vs10.dv": "Dolby Vision"
+        }
+
+        if target_mode and target_mode in mode_names:
+            xbmc.executebuiltin(f"Action({target_mode})")
+            # notification("VS10 Mode", f"Switched to {mode_names.get(target_mode)}")
+            if target_mode == "vs10.original":
+                message = "关闭VS10转码，使用原始输出"
+            else:
+                message = f"使用VS10转码为{mode_names.get(target_mode)}"
+            notification(message,duration=4000)
+            return
+
+        hdr_type = xbmc.getInfoLabel("Player.Process(video.hdr.type)")
+        
+        available_modes = ["vs10.original"]
+        
+        if "SDR" in hdr_type or "HDR" in hdr_type:
+            available_modes.append("vs10.dv")
+            
+        if "SDR" in hdr_type or "HLG" in hdr_type:
+            available_modes.append("vs10.hdr10")
+            
+        available_modes.append("vs10.sdr")
+        
+        current_mode = "vs10.original"
+        if raw_mode == "3":
+            current_mode = "vs10.sdr"
+        elif raw_mode == "2":
+            current_mode = "vs10.hdr10"
+        elif raw_mode in ["0", "1"]:
+            if "Dolby" in hdr_type:
+                current_mode = "vs10.original"
+            else:
+                current_mode = "vs10.dv"
+        elif raw_mode == "5":
+            current_mode = "vs10.original"
+            
+        try:
+            curr_index = available_modes.index(current_mode)
+            next_index = (curr_index + 1) % len(available_modes)
+            next_mode = available_modes[next_index]
+        except ValueError:
+            next_mode = available_modes[0]
+            
+        xbmc.executebuiltin(f"Action({next_mode})")
+        
+        if next_mode == "vs10.original":
+                message = "关闭VS10转码，使用原始输出"
+        else:
+            message = f"使用VS10转码为{mode_names.get(next_mode, next_mode)}"
+        notification(message,duration=4000)
+        
+    except Exception as e:
+        log(f"Error cycling VS10 mode: {e}")
+
 def toggle_favourite():
     """与原生右键菜单的"添加到收藏夹/从收藏夹移除"行为一致"""
     # 从当前选中的 ListItem 读取信息，与原生 context menu 一致
@@ -1468,6 +1536,11 @@ def router(paramstring):
 
     if mode == "toggle_favourite":
         toggle_favourite()
+        return
+
+    if mode == "set_vs10_mode":
+        target = params.get("target_mode")
+        set_vs10_mode(target)
         return
 
 if __name__ == "__main__":
