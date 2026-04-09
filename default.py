@@ -1342,6 +1342,26 @@ def toggle_favourite():
     else:
         notification("已添加到收藏夹", title=title)
 
+def confirm_stop_playback():
+    if not xbmc.Player().isPlayingVideo():
+        notification("当前没有正在播放的视频")
+        return
+
+    title = xbmc.getInfoLabel('Player.Title') or ''
+    message = f"确定停止播放 {title}？" if title else "确定停止当前播放？"
+
+    # yesnocustom 返回值: 0=No(返回), 1=Yes(退出), 2=Custom(后台播放)
+    ret = xbmcgui.Dialog().yesnocustom("停止确认", message,
+                                        customlabel="后台播放",
+                                        yeslabel="确定",
+                                        nolabel="返回",
+                                        defaultbutton=xbmcgui.DLG_YESNO_YES_BTN)
+    if ret == 1:
+        xbmc.Player().stop()
+    elif ret == 2:
+        xbmc.executebuiltin("Action(Back)")
+
+
 def select_playback_speed():
     if not xbmc.getCondVisibility('Player.TempoEnabled'):
         notification("请在设置-播放器-视频中开启同步回放显示", sound=True)
@@ -1541,6 +1561,10 @@ def router(paramstring):
     if mode == "set_vs10_mode":
         target = params.get("target_mode")
         set_vs10_mode(target)
+        return
+
+    if mode == "confirm_stop_playback":
+        confirm_stop_playback()
         return
 
 if __name__ == "__main__":

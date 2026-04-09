@@ -177,3 +177,9 @@ RunScript(plugin.video.filteredmovies, ?mode=restart_linux_kodi)
 RunScript(plugin.video.filteredmovies, ?mode=reboot_from_nand)
 ```
 
+**退出播放确认弹窗**
+*   弹出确认窗口，显示当前播放的视频标题，确认后停止播放。
+```xml
+RunScript(plugin.video.filteredmovies, ?mode=confirm_stop_playback)
+```
+

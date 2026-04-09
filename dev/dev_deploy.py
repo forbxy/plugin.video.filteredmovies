@@ -5,7 +5,7 @@ import os
 import shutil
 import fnmatch
 
-DEV_REMOTE = False
+DEV_REMOTE = True
 
 SOURCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if DEV_REMOTE:
