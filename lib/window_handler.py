@@ -3,6 +3,7 @@ from .common import notification, log
 from . import t9_helper
 import xbmc
 import xbmcgui
+import xbmcvfs
 import time
 import threading
 import queue
@@ -196,7 +197,7 @@ class FilterWindow(xbmcgui.WindowXML):
         except Exception as e:
             log(f"Failed to load keyboard mapping json: {e}", xbmc.LOGERROR)
 
-        folder = xbmc.translatePath('special://profile/keymaps/')
+        folder = xbmcvfs.translatePath('special://profile/keymaps/')
         if os.path.exists(folder):
             # 获取所有xml并按字母顺序排序，以正确处理Kodi的覆盖加载机制
             xml_files = sorted([f for f in os.listdir(folder) if f.lower().endswith('.xml')])
