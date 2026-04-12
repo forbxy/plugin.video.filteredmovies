@@ -1432,8 +1432,8 @@
             <animation type="Conditional" condition="String.IsEqual(Window(Home).Property(MFG.IsRefreshing),true)" reversible="true">
                 <effect type="fade" start="100" end="0" time="100" />
             </animation>
-            <onleft>6009</onleft>
             <onup>9998</onup>
+            <wraparound>true</wraparound>
             <onclick condition="String.IsEqual(ListItem.DBType,tvshow)">ActivateWindow(videos,videodb://tvshows/titles/$INFO[ListItem.DBID]/,return)</onclick>
             <onclick condition="String.IsEqual(ListItem.DBType,set)">ActivateWindow(videos,videodb://movies/sets/$INFO[ListItem.DBID]/,return)</onclick>
             <content>plugin://plugin.video.filteredmovies/?mode=filter_list&amp;reload=$INFO[Window(Home).Property(MFG.ReloadID)]</content>
