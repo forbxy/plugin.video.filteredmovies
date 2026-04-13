@@ -23,12 +23,8 @@ _T9_MAP = {
 }
 
 _MAX_ORIGINALTITLE_BYTES = 64 * 1024
-
-# 数字的中文读音首字母映射
-_DIGIT_PINYIN_INITIAL = {
-    '0': 'L', '1': 'Y', '2': 'E', '3': 'S', '4': 'S',
-    '5': 'W', '6': 'L', '7': 'Q', '8': 'B', '9': 'J',
-}
+_MAX_READINGS_PER_CHAR = 3   # 单个字符最多取几个读音
+_MAX_HETERONYM_CHARS = 3     # 最多允许几个多音字参与排列组合，超出的取第一个
 
 
 class T9Helper:
@@ -152,7 +148,15 @@ class T9Helper:
                     char_full.add(digit)
 
             if char_full:
-                full_options.append(sorted(char_full))
+                full_options.append(sorted(char_full)[:_MAX_READINGS_PER_CHAR])
+
+        # 限制多音字数量，超出的只保留第一个
+        heteronym_count = 0
+        for i, opts in enumerate(full_options):
+            if len(opts) > 1:
+                heteronym_count += 1
+                if heteronym_count > _MAX_HETERONYM_CHARS:
+                    full_options[i] = [opts[0]]
 
         results = set()
 
@@ -193,15 +197,21 @@ class T9Helper:
                 if "A" <= c <= "Z":
                     char_initials.add(c)
 
-            # 数字字符始终保留数字本身及其中文读音首字母
+            # 数字字符保留数字本身
             c = char.upper()
             if "0" <= c <= "9":
                 char_initials.add(c)
-                if c in _DIGIT_PINYIN_INITIAL:
-                    char_initials.add(_DIGIT_PINYIN_INITIAL[c])
 
             if char_initials:
-                initial_options.append(sorted(char_initials))
+                initial_options.append(sorted(char_initials)[:_MAX_READINGS_PER_CHAR])
+
+        # 限制多音字数量，超出的只保留第一个
+        heteronym_count = 0
+        for i, opts in enumerate(initial_options):
+            if len(opts) > 1:
+                heteronym_count += 1
+                if heteronym_count > _MAX_HETERONYM_CHARS:
+                    initial_options[i] = [opts[0]]
 
         results = set()
         if initial_options:
