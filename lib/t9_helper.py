@@ -44,6 +44,19 @@ class T9Helper:
         self._ensure_thread = None
         self._ensure_lock = threading.Lock()
 
+    def _get_search_field(self):
+        """返回用户选择的搜索索引字段名（originaltitle 或 sorttitle）。"""
+        import xbmcaddon
+        return xbmcaddon.Addon(self.ADDON_ID).getSetting('search_field') or 'originaltitle'
+
+    def _get_media_rpc_map(self):
+        sf = self._get_search_field()
+        return {
+            "movie": ("VideoLibrary.SetMovieDetails", "movieid", sf),
+            "tvshow": ("VideoLibrary.SetTVShowDetails", "tvshowid", sf),
+            "set": ("VideoLibrary.SetMovieSetDetails", "setid", "plot"),
+        }
+
     def ensure_search_index_ready_async(self, show_progress=True, skip_check=False):
         """
         异步确保电影/剧集搜索索引已准备，避免阻塞调用方。
@@ -245,7 +258,7 @@ class T9Helper:
             return {}
 
     def _get_all_movies_rpc(self, properties=None):
-        props = properties or ["title", "originaltitle"]
+        props = properties or ["title", self._get_search_field()]
         json_query = {
             "jsonrpc": "2.0",
             "method": "VideoLibrary.GetMovies",
@@ -259,7 +272,7 @@ class T9Helper:
         return result.get('result', {}).get('movies', [])
 
     def _get_all_tvshows_rpc(self, properties=None):
-        props = properties or ["title", "originaltitle"]
+        props = properties or ["title", self._get_search_field()]
         json_query = {
             "jsonrpc": "2.0",
             "method": "VideoLibrary.GetTVShows",
@@ -288,9 +301,10 @@ class T9Helper:
 
     def _has_unprepared_originaltitle_entries(self, media_type):
         """
-        检查是否存在 originaltitle 缺少数字索引的条目。
+        检查是否存在搜索字段缺少数字索引的条目。
         仅拉取 1 条用于 existence check。
         """
+        sf = self._get_search_field()
         if media_type == "movie":
             method = "VideoLibrary.GetMovies"
             result_key = "movies"
@@ -302,58 +316,63 @@ class T9Helper:
             "jsonrpc": "2.0",
             "method": method,
             "params": {
-                "properties": ["title", "originaltitle"],
+                "properties": ["title", sf],
                 "sort": {"method": "none"},
                 "limits": {"start": 0, "end": 1},
                 "filter": {
                     "and": [
                         {
-                            "field": "originaltitle",
+                            "field": "title",
+                            "operator": "isnot",
+                            "value": "",
+                        },
+                        {
+                            "field": sf,
                             "operator": "doesnotcontain",
                             "value": "|0",
                         },
                         {
-                            "field": "originaltitle",
+                            "field": sf,
                             "operator": "doesnotcontain",
                             "value": "|1",
                         },
                         {
-                            "field": "originaltitle",
+                            "field": sf,
                             "operator": "doesnotcontain",
                             "value": "|2",
                         },
                         {
-                            "field": "originaltitle",
+                            "field": sf,
                             "operator": "doesnotcontain",
                             "value": "|3",
                         },
                         {
-                            "field": "originaltitle",
+                            "field": sf,
                             "operator": "doesnotcontain",
                             "value": "|4",
                         },
                         {
-                            "field": "originaltitle",
+                            "field": sf,
                             "operator": "doesnotcontain",
                             "value": "|5",
                         },
                         {
-                            "field": "originaltitle",
+                            "field": sf,
                             "operator": "doesnotcontain",
                             "value": "|6",
                         },
                         {
-                            "field": "originaltitle",
+                            "field": sf,
                             "operator": "doesnotcontain",
                             "value": "|7",
                         },
                         {
-                            "field": "originaltitle",
+                            "field": sf,
                             "operator": "doesnotcontain",
                             "value": "|8",
                         },
                         {
-                            "field": "originaltitle",
+                            "field": sf,
                             "operator": "doesnotcontain",
                             "value": "|9",
                         },
@@ -377,7 +396,7 @@ class T9Helper:
         sample_id_key = "movieid" if media_type == "movie" else "tvshowid"
         sample_id = sample.get(sample_id_key)
         sample_title = sample.get("title", "") or ""
-        sample_original = sample.get("originaltitle", "") or ""
+        sample_original = sample.get(sf, "") or ""
 
         log(
             f"Unprepared {media_type} sample: id={sample_id}, title={sample_title}, "
@@ -385,15 +404,9 @@ class T9Helper:
         )
         return True
 
-    # media_type -> (rpc_method, id_param, value_param)
-    _MEDIA_RPC_MAP = {
-        "movie": ("VideoLibrary.SetMovieDetails", "movieid", "originaltitle"),
-        "tvshow": ("VideoLibrary.SetTVShowDetails", "tvshowid", "originaltitle"),
-        "set": ("VideoLibrary.SetMovieSetDetails", "setid", "plot"),
-    }
-
     def _set_item_field(self, media_type, item_id, value):
-        rpc_method, id_param, value_param = self._MEDIA_RPC_MAP[media_type]
+        rpc_map = self._get_media_rpc_map()
+        rpc_method, id_param, value_param = rpc_map[media_type]
         query = {
             "jsonrpc": "2.0",
             "method": rpc_method,
@@ -414,7 +427,8 @@ class T9Helper:
         if not pending_updates:
             return 0
 
-        rpc_method, id_param, value_param = self._MEDIA_RPC_MAP[media_type]
+        rpc_map = self._get_media_rpc_map()
+        rpc_method, id_param, value_param = rpc_map[media_type]
 
         payloads = []
         ordered_ids = []
@@ -563,8 +577,9 @@ class T9Helper:
             except TypeError:
                 dialog.create("搜索索引准备中")
 
-        movies = self._get_all_movies_rpc(properties=["title", "originaltitle"])
-        tvshows = self._get_all_tvshows_rpc(properties=["title", "originaltitle"])
+        sf = self._get_search_field()
+        movies = self._get_all_movies_rpc(properties=["title", sf])
+        tvshows = self._get_all_tvshows_rpc(properties=["title", sf])
 
         import xbmcaddon
         enable_set_search = xbmcaddon.Addon(self.ADDON_ID).getSetting('enable_set_search') == 'true'
@@ -582,8 +597,8 @@ class T9Helper:
 
         # (items, id_key, media_type, kind, value_field)
         media_groups = [
-            (movies, "movieid", "movie", "电影", "originaltitle"),
-            (tvshows, "tvshowid", "tvshow", "剧集", "originaltitle"),
+            (movies, "movieid", "movie", "电影", sf),
+            (tvshows, "tvshowid", "tvshow", "剧集", sf),
             (moviesets, "setid", "set", "合集", "plot"),
         ]
 

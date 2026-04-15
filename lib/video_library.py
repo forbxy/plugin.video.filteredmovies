@@ -2,8 +2,14 @@
 from .common import log
 import xbmc
 import xbmcgui
+import xbmcaddon
 import json
 import datetime
+
+
+def get_search_field():
+    """返回用户选择的搜索索引字段名（originaltitle 或 sorttitle）。"""
+    return xbmcaddon.Addon('plugin.video.filteredmovies').getSetting('search_field') or 'originaltitle'
 
 
 def get_filter_val(filters, key, default=None):
@@ -84,7 +90,7 @@ def build_filter(filters=None, media_type=None):
         raw_t9 = str(t9_val).strip()
         if raw_t9 and media_type in ["movie", "tvshow"]:
             rules.append({
-                "field": "originaltitle",
+                "field": get_search_field(),
                 "operator": "contains",
                 "value": raw_t9
             })
@@ -418,7 +424,7 @@ def get_documentary_items(limit, filters=None):
     filter_obj_tv = add_rule(filter_obj_tv, doc_rule)
 
     # 获取电影
-    movie_props = ["title", "thumbnail", "art", "dateadded", "rating", "year", "file", "resume", "runtime", "lastplayed"]
+    movie_props = ["title", "art", "dateadded", "rating", "year", "file", "resume", "runtime", "lastplayed"]
     params_movies = {
         "jsonrpc": "2.0", "id": "movies",
         "method": "VideoLibrary.GetMovies",
@@ -431,7 +437,7 @@ def get_documentary_items(limit, filters=None):
     }
     
     # 获取剧集
-    tv_props = ["title", "thumbnail", "art", "dateadded", "rating", "year", "episode", "watchedepisodes", "file", "lastplayed"]
+    tv_props = ["title", "art", "dateadded", "rating", "year", "episode", "watchedepisodes", "file", "lastplayed"]
     params_tv = {
         "jsonrpc": "2.0", "id": "tvshows",
         "method": "VideoLibrary.GetTVShows",
@@ -540,7 +546,9 @@ def get_movie_items(filters, limit):
     sort_obj = build_sort(filters)
 
     filter_obj = build_filter(filters, media_type="movie")
-    props = ["title", "thumbnail", "art", "dateadded", "rating", "year", "resume", "runtime", "lastplayed", "playcount", "genre", "file", "plot", "originaltitle"]
+    props = ["title", "art", "dateadded", "rating", "year", "resume", "runtime", "lastplayed", "playcount", "file"]
+    if has_t9_filter(filters):
+        props.append(get_search_field())
 
     params = {
         "jsonrpc": "2.0", "id": "movies",
@@ -563,7 +571,9 @@ def get_tvshow_items(filters, limit):
     sort_obj = build_sort(filters)
 
     filter_obj = build_filter(filters, media_type="tvshow")
-    props = ["title", "thumbnail", "art", "dateadded", "rating", "year", "episode", "watchedepisodes", "lastplayed", "playcount", "genre", "file", "plot", "originaltitle"]
+    props = ["title", "art", "dateadded", "rating", "year", "episode", "watchedepisodes", "lastplayed", "playcount", "file"]
+    if has_t9_filter(filters):
+        props.append(get_search_field())
 
     params = {
         "jsonrpc": "2.0", "id": "tvshows",
@@ -604,7 +614,7 @@ def get_set_items(filters, limit):
     # Always fetch a large number to allow local filtering of single-movie sets
     fetch_limit = 20000
 
-    props = ["title", "thumbnail", "art", "plot", "playcount"]
+    props = ["title", "art", "plot", "playcount"]
     params = {
         "jsonrpc": "2.0", "id": "sets",
         "method": "VideoLibrary.GetMovieSets",
@@ -714,7 +724,9 @@ def get_concert_items(filters, limit):
 
     filter_obj = add_rule(build_filter(temp_filters, media_type="movie"), music_rule)
 
-    props = ["title", "thumbnail", "art", "dateadded", "rating", "year", "resume", "runtime", "lastplayed", "playcount", "genre", "file", "plot", "originaltitle"]
+    props = ["title", "art", "dateadded", "rating", "year", "resume", "runtime", "lastplayed", "playcount", "genre", "file"]
+    if has_t9_filter(filters):
+        props.append(get_search_field())
     params = {
         "jsonrpc": "2.0", "id": "movies",
         "method": "VideoLibrary.GetMovies",
@@ -762,8 +774,12 @@ def get_documentary_items(filters, limit):
     filter_obj_tv = add_rule(build_filter(filters, media_type="tvshow"), doc_rule)
 
     # Batch fetch
-    movie_props = ["title", "thumbnail", "art", "dateadded", "rating", "year", "file", "resume", "runtime", "lastplayed", "plot", "playcount", "originaltitle"]
-    tv_props = ["title", "thumbnail", "art", "dateadded", "rating", "year", "episode", "watchedepisodes", "file", "lastplayed", "plot", "originaltitle"]
+    movie_props = ["title", "art", "dateadded", "rating", "year", "file", "resume", "runtime", "lastplayed", "playcount"]
+    tv_props = ["title", "art", "dateadded", "rating", "year", "episode", "watchedepisodes", "file", "lastplayed"]
+    if has_t9_filter(filters):
+        _sf = get_search_field()
+        movie_props.append(_sf)
+        tv_props.append(_sf)
 
     batch_cmds = [
         {
@@ -803,8 +819,12 @@ def get_mixed_items(filters, limit):
     filter_obj_movie = build_filter(filters, media_type="movie")
     filter_obj_tv = build_filter(filters, media_type="tvshow")
 
-    movie_props = ["title", "thumbnail", "art", "dateadded", "rating", "year", "file", "resume", "runtime", "lastplayed", "plot", "playcount", "originaltitle"]
-    tv_props = ["title", "thumbnail", "art", "dateadded", "rating", "year", "episode", "watchedepisodes", "file", "lastplayed", "plot", "originaltitle"]
+    movie_props = ["title", "art", "dateadded", "rating", "year", "file", "resume", "runtime", "lastplayed", "playcount"]
+    tv_props = ["title", "art", "dateadded", "rating", "year", "episode", "watchedepisodes", "file", "lastplayed"]
+    if has_t9_filter(filters):
+        _sf = get_search_field()
+        movie_props.append(_sf)
+        tv_props.append(_sf)
 
     batch_cmds = [
         {
@@ -884,80 +904,15 @@ def jsonrpc_get_items(filters=None, limit=500):
     # T9 搜索时按距离稳定排序，距离相同的项保持用户排序
     if t9_active:
         raw_t9 = str(t9_val).strip()
+        _sf = get_search_field()
         def _t9_key(item):
             if item.get("media_type") == "set":
                 field = item.get("plot", "")
             else:
-                field = item.get("originaltitle", "")
+                field = item.get(_sf, "")
             return _t9_match_distance(field, raw_t9)
         items.sort(key=_t9_key)
 
-    return items
-
-def fix_movie_set_poster(items):
-    sets_needing_art = []
-    for i, item in enumerate(items):
-        if item.get("media_type") == "set":
-            art = item.get("art", {})
-            # 检查是否需要回退（缺少海报）
-            has_poster = "poster" in art
-            has_thumb = bool(item.get("thumbnail"))
-            
-            if not has_poster and not has_thumb:
-                sets_needing_art.append((i, item["title"]))
-    
-    if not sets_needing_art:
-        return items
-        
-    batch_cmds = []
-    for idx, (i, set_title) in enumerate(sets_needing_art):
-        flt = {"field": "set", "operator": "is", "value": set_title}
-        cmd = {
-            "jsonrpc": "2.0",
-            "method": "VideoLibrary.GetMovies",
-            "params": {
-                "filter": flt,
-                "properties": ["art", "thumbnail"],
-                "limits": {"end": 1}
-            },
-            "id": str(idx)
-        }
-        batch_cmds.append(cmd)
-        
-    if batch_cmds:
-        try:
-            resp = xbmc.executeJSONRPC(json.dumps(batch_cmds))
-            results = json.loads(resp)
-            if isinstance(results, list):
-                for res in results:
-                    try:
-                        req_id = int(res.get("id", -1))
-                    except:
-                        continue
-                        
-                    if req_id >= 0 and req_id < len(sets_needing_art):
-                        item_index = sets_needing_art[req_id][0]
-                        
-                        if "result" in res and "movies" in res["result"] and res["result"]["movies"]:
-                            movie = res["result"]["movies"][0]
-                            # 更新原始项目
-                            orig_item = items[item_index]
-                            if "art" not in orig_item: orig_item["art"] = {}
-                            
-                            fb_art = movie.get("art", {})
-                            fb_thumb = movie.get("thumbnail")
-                            
-                            # 合并艺术图
-                            for k, v in fb_art.items():
-                                if k not in orig_item["art"]:
-                                    orig_item["art"][k] = v
-                            
-                            # 如果仍然没有缩略图，则使用电影缩略图
-                            if not orig_item.get("thumbnail") and fb_thumb:
-                                orig_item["thumbnail"] = fb_thumb
-        except Exception as e:
-            log(f"Error batch fetching set art: {e}")
-            
     return items
 
 def create_list_item(m):
@@ -971,9 +926,6 @@ def create_list_item(m):
     if "poster" in art:
         art_dict["poster"] = art["poster"]
         art_dict["thumb"] = art["poster"]
-    elif m.get("thumbnail"):
-        art_dict["poster"] = m["thumbnail"]
-        art_dict["thumb"] = m["thumbnail"]
     
     if "fanart" in art:
         art_dict["fanart"] = art["fanart"]

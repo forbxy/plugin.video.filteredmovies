@@ -51,6 +51,22 @@
                     <default>false</default>
                     <control type="toggle"/>
                 </setting>
+                <setting id="search_field" type="string" label="32018" help="32019">
+                    <level>0</level>
+                    <default>originaltitle</default>
+                    <constraints>
+                        <options>
+                            <option label="32020">originaltitle</option>
+                            <option label="32021">sorttitle</option>
+                        </options>
+                    </constraints>
+                    <control type="spinner" format="string"/>
+                </setting>
+                <setting id="auto_write_search_index" type="boolean" label="32022" help="32023">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
             </group>
         </category>
     </section>

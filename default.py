@@ -61,7 +61,6 @@ def prefetch_data_for_window():
         log(f"Prefetching with filters: {filters}")
         filter_limit = int(ADDON.getSetting('filter_limit') or 300)
         items = library.jsonrpc_get_items(filters=filters, limit=filter_limit)
-        items = library.fix_movie_set_poster(items)
         
         # 4. Save to cache
         with open(WINDOW_CACHE_FILE, 'wb') as f:
@@ -1180,7 +1179,6 @@ def filter_list(reload_param):
 
     # 4. Get Items
     items = library.jsonrpc_get_items(filters=filters, limit=limit)
-    items = library.fix_movie_set_poster(items)
     # 5. Populate List
     
     list_items = []

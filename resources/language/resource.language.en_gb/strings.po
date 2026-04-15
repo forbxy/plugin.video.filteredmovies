@@ -81,3 +81,27 @@ msgstr ""
 msgctxt "#32017"
 msgid "When enabled, movie sets can be searched by T9/initials. After toggling this option, enter 000000 (six zeros) in T9 input to manually rebuild or clean up the index."
 msgstr ""
+
+msgctxt "#32018"
+msgid "Search index field"
+msgstr ""
+
+msgctxt "#32019"
+msgid "Which database field to store and match the T9 search index. originaltitle is the default; sorttitle can be used as an alternative if originaltitle is needed for other purposes."
+msgstr ""
+
+msgctxt "#32020"
+msgid "originaltitle"
+msgstr ""
+
+msgctxt "#32021"
+msgid "sorttitle"
+msgstr ""
+
+msgctxt "#32022"
+msgid "Auto write search index"
+msgstr ""
+
+msgctxt "#32023"
+msgid "When enabled, the plugin will automatically write T9 search index data to the selected search field for movies and TV shows."
+msgstr ""

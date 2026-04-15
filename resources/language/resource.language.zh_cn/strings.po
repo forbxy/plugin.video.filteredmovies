@@ -80,4 +80,28 @@ msgstr "启用系列电影搜索"
 
 msgctxt "#32017"
 msgid "When enabled, movie sets can be searched by T9/initials. After toggling this option, enter 000000 (six zeros) in T9 input to manually rebuild or clean up the index."
-msgstr "启用后可通过T9/首字母搜索系列电影。切换开关后需要在T9输入000000（六个0）以手动清理或创建一次索引。"
+msgstr "启用后可通过T9/首字母搜索系列电影,但是搜索索引会添加到系列电影介绍里，在某些皮肤上可能不太美观。切换开关后需要在T9输入000000（六个0）以手动清理或创建一次索引。"
+
+msgctxt "#32018"
+msgid "Search index field"
+msgstr "搜索索引字段"
+
+msgctxt "#32019"
+msgid "Which database field to store and match the T9 search index. originaltitle is the default; sorttitle can be used as an alternative if originaltitle is needed for other purposes."
+msgstr "用于存储和匹配T9搜索索引的数据库字段。默认使用originaltitle；如果originaltitle需要用于其他用途，可改用sorttitle。"
+
+msgctxt "#32020"
+msgid "originaltitle"
+msgstr "originaltitle（原始标题）"
+
+msgctxt "#32021"
+msgid "sorttitle"
+msgstr "sorttitle（排序标题）"
+
+msgctxt "#32022"
+msgid "Auto write search index"
+msgstr "自动写入搜索索引"
+
+msgctxt "#32023"
+msgid "When enabled, the plugin will automatically write T9 search index data to the selected search field for movies and TV shows."
+msgstr "启用后，插件会自动将T9搜索索引数据写入所选的搜索字段中（电影和剧集）。"

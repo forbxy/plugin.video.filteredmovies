@@ -407,7 +407,8 @@ class FilterWindow(xbmcgui.WindowXML):
         self.worker.daemon = True
         self.worker.start()
         # 异步准备搜索索引，避免阻塞窗口初始化。
-        t9_helper.helper.ensure_search_index_ready_async(show_progress=True)
+        if xbmcaddon.Addon().getSetting('auto_write_search_index') != 'false':
+            t9_helper.helper.ensure_search_index_ready_async(show_progress=True)
 
     def _t9_input_worker(self):
         monitor = xbmc.Monitor()
