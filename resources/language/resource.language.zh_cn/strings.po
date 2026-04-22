@@ -105,3 +105,11 @@ msgstr "自动写入搜索索引"
 msgctxt "#32023"
 msgid "When enabled, the plugin will automatically write T9 search index data to the selected search field for movies and TV shows."
 msgstr "启用后，插件会自动将T9搜索索引数据写入所选的搜索字段中（电影和剧集）。"
+
+msgctxt "#32024"
+msgid "Autofill/fix playlist for current episode or folder"
+msgstr "播放时自动补全或修正当前播放剧集/文件夹内视频的播放列表"
+
+msgctxt "#32025"
+msgid "When enabled, starting an episode or a video file from a folder will automatically fill and sort the current playlist with the full season or all videos in that folder. For scraped TV shows, misplaced or out-of-order episodes are also corrected. Up to 50 items before and 50 after the current item are kept."
+msgstr "启用后，开始播放剧集或文件夹中的视频时，自动将当前播放列表补全为整季剧集或该文件夹下全部视频，并修正已刮削剧集的乱序问题；当前项前方保留最多50集，后方保留最多50集。"
