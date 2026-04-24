@@ -861,7 +861,10 @@ class MediaSelectWindow(xbmcgui.WindowXMLDialog):
         # 填充字幕列表
         sub_focus = 0
         for i, item in enumerate(self.subtitle_items):
-            li = xbmcgui.ListItem(label=item["label"])
+            li = xbmcgui.ListItem(label=item.get("label", ""))
+            li.setProperty("SubLanguage", item.get("language", ""))
+            li.setProperty("SubName", item.get("name", ""))
+            li.setProperty("SubExtraFlags", item.get("extra_flags", ""))
             if item.get("is_active"):
                 li.setProperty("IsActive", "true")
                 sub_focus = i
@@ -875,7 +878,24 @@ class MediaSelectWindow(xbmcgui.WindowXMLDialog):
         # 填充音轨列表
         audio_focus = 0
         for i, item in enumerate(self.audio_items):
-            li = xbmcgui.ListItem(label=item["label"])
+            li = xbmcgui.ListItem(label=item.get("label", ""))
+            language_and_name = item.get("language_and_name", "")
+            if not language_and_name:
+                language_value = item.get("language", "")
+                name_value = item.get("name", "")
+                if language_value and name_value:
+                    language_and_name = f"{language_value}-{name_value}"
+                else:
+                    language_and_name = language_value or name_value
+
+            li.setProperty("AudioLanguageAndName", language_and_name)
+
+            codec_value = item.get("codec", "")
+            code_info_value = item.get("code_info", "")
+            li.setProperty("AudioCodec", codec_value)
+            li.setProperty("AudioCodeInfo", code_info_value)
+            li.setProperty("AudioChannel", item.get("channel", ""))
+            li.setProperty("AudioExtraFlags", item.get("extra_flags", ""))
             if item.get("is_active"):
                 li.setProperty("IsActive", "true")
                 audio_focus = i

@@ -242,24 +242,68 @@
                             <aspectratio align="center" aligny="center">keep</aspectratio>
                             <texture>$INFO[ListItem.Thumb]</texture>
                         </control>
-                        <!-- 普通项 -->
+                        <!-- 普通项 language -->
                         <control type="label">
                             <left>24</left>
                             <top>0</top>
-                            <width>630</width>
+                            <width>214</width>
                             <height>50</height>
-                            <label>$INFO[ListItem.Label]</label>
+                            <label>$INFO[ListItem.Property(SubLanguage)]</label>
                             <aligny>center</aligny>
                             <textcolor>BBFFFFFF</textcolor>
                             <visible>!String.IsEqual(ListItem.Property(IsActive),true)</visible>
                         </control>
-                        <!-- 当前活动项（高亮色） -->
+                        <!-- 当前活动项 language -->
                         <control type="label">
                             <left>24</left>
                             <top>0</top>
-                            <width>630</width>
+                            <width>214</width>
                             <height>50</height>
-                            <label>$INFO[ListItem.Label]</label>
+                            <label>$INFO[ListItem.Property(SubLanguage)]</label>
+                            <aligny>center</aligny>
+                            <textcolor>FFEB9E17</textcolor>
+                            <visible>String.IsEqual(ListItem.Property(IsActive),true)</visible>
+                        </control>
+                        <!-- 普通项 name -->
+                        <control type="label">
+                            <left>238</left>
+                            <top>0</top>
+                            <width>214</width>
+                            <height>50</height>
+                            <label>$INFO[ListItem.Property(SubName)]</label>
+                            <aligny>center</aligny>
+                            <textcolor>BBFFFFFF</textcolor>
+                            <visible>!String.IsEqual(ListItem.Property(IsActive),true)</visible>
+                        </control>
+                        <!-- 当前活动项 name -->
+                        <control type="label">
+                            <left>238</left>
+                            <top>0</top>
+                            <width>214</width>
+                            <height>50</height>
+                            <label>$INFO[ListItem.Property(SubName)]</label>
+                            <aligny>center</aligny>
+                            <textcolor>FFEB9E17</textcolor>
+                            <visible>String.IsEqual(ListItem.Property(IsActive),true)</visible>
+                        </control>
+                        <!-- 普通项 extra_flags -->
+                        <control type="label">
+                            <left>452</left>
+                            <top>0</top>
+                            <width>214</width>
+                            <height>50</height>
+                            <label>$INFO[ListItem.Property(SubExtraFlags)]</label>
+                            <aligny>center</aligny>
+                            <textcolor>BBFFFFFF</textcolor>
+                            <visible>!String.IsEqual(ListItem.Property(IsActive),true)</visible>
+                        </control>
+                        <!-- 当前活动项 extra_flags -->
+                        <control type="label">
+                            <left>452</left>
+                            <top>0</top>
+                            <width>214</width>
+                            <height>50</height>
+                            <label>$INFO[ListItem.Property(SubExtraFlags)]</label>
                             <aligny>center</aligny>
                             <textcolor>FFEB9E17</textcolor>
                             <visible>String.IsEqual(ListItem.Property(IsActive),true)</visible>
@@ -310,9 +354,29 @@
                         <control type="label">
                             <left>24</left>
                             <top>0</top>
-                            <width>630</width>
+                            <width>214</width>
                             <height>50</height>
-                            <label>$INFO[ListItem.Label]</label>
+                            <label>$INFO[ListItem.Property(SubLanguage)]</label>
+                            <aligny>center</aligny>
+                            <textcolor>white</textcolor>
+                            <scroll>true</scroll>
+                        </control>
+                        <control type="label">
+                            <left>238</left>
+                            <top>0</top>
+                            <width>214</width>
+                            <height>50</height>
+                            <label>$INFO[ListItem.Property(SubName)]</label>
+                            <aligny>center</aligny>
+                            <textcolor>white</textcolor>
+                            <scroll>true</scroll>
+                        </control>
+                        <control type="label">
+                            <left>452</left>
+                            <top>0</top>
+                            <width>214</width>
+                            <height>50</height>
+                            <label>$INFO[ListItem.Property(SubExtraFlags)]</label>
                             <aligny>center</aligny>
                             <textcolor>white</textcolor>
                             <scroll>true</scroll>
@@ -365,24 +429,112 @@
                             <aspectratio align="center" aligny="center">keep</aspectratio>
                             <texture>$INFO[ListItem.Thumb]</texture>
                         </control>
-                        <!-- 普通项 -->
+                        <!-- 普通项 language_and_name -->
                         <control type="label">
                             <left>24</left>
                             <top>0</top>
-                            <width>630</width>
+                            <width>137</width>
                             <height>50</height>
-                            <label>$INFO[ListItem.Label]</label>
+                            <label>$INFO[ListItem.Property(AudioLanguageAndName)]</label>
                             <aligny>center</aligny>
                             <textcolor>BBFFFFFF</textcolor>
                             <visible>!String.IsEqual(ListItem.Property(IsActive),true)</visible>
                         </control>
-                        <!-- 当前活动项（高亮色） -->
+                        <!-- 当前活动项 language_and_name -->
                         <control type="label">
                             <left>24</left>
                             <top>0</top>
-                            <width>630</width>
+                            <width>137</width>
                             <height>50</height>
-                            <label>$INFO[ListItem.Label]</label>
+                            <label>$INFO[ListItem.Property(AudioLanguageAndName)]</label>
+                            <aligny>center</aligny>
+                            <textcolor>FFEB9E17</textcolor>
+                            <visible>String.IsEqual(ListItem.Property(IsActive),true)</visible>
+                        </control>
+                        <!-- 普通项 codec -->
+                        <control type="label">
+                            <left>161</left>
+                            <top>0</top>
+                            <width>192</width>
+                            <height>50</height>
+                            <label>$INFO[ListItem.Property(AudioCodec)]</label>
+                            <aligny>center</aligny>
+                            <textcolor>BBFFFFFF</textcolor>
+                            <visible>!String.IsEqual(ListItem.Property(IsActive),true)</visible>
+                        </control>
+                        <!-- 当前活动项 codec -->
+                        <control type="label">
+                            <left>161</left>
+                            <top>0</top>
+                            <width>192</width>
+                            <height>50</height>
+                            <label>$INFO[ListItem.Property(AudioCodec)]</label>
+                            <aligny>center</aligny>
+                            <textcolor>FFEB9E17</textcolor>
+                            <visible>String.IsEqual(ListItem.Property(IsActive),true)</visible>
+                        </control>
+                        <!-- 普通项 code_info -->
+                        <control type="label">
+                            <left>353</left>
+                            <top>0</top>
+                            <width>137</width>
+                            <height>50</height>
+                            <label>$INFO[ListItem.Property(AudioCodeInfo)]</label>
+                            <aligny>center</aligny>
+                            <textcolor>BBFFFFFF</textcolor>
+                            <visible>!String.IsEqual(ListItem.Property(IsActive),true)</visible>
+                        </control>
+                        <!-- 当前活动项 code_info -->
+                        <control type="label">
+                            <left>353</left>
+                            <top>0</top>
+                            <width>137</width>
+                            <height>50</height>
+                            <label>$INFO[ListItem.Property(AudioCodeInfo)]</label>
+                            <aligny>center</aligny>
+                            <textcolor>FFEB9E17</textcolor>
+                            <visible>String.IsEqual(ListItem.Property(IsActive),true)</visible>
+                        </control>
+                        <!-- 普通项 channel -->
+                        <control type="label">
+                            <left>490</left>
+                            <top>0</top>
+                            <width>82</width>
+                            <height>50</height>
+                            <label>$INFO[ListItem.Property(AudioChannel)]</label>
+                            <aligny>center</aligny>
+                            <textcolor>BBFFFFFF</textcolor>
+                            <visible>!String.IsEqual(ListItem.Property(IsActive),true)</visible>
+                        </control>
+                        <!-- 当前活动项 channel -->
+                        <control type="label">
+                            <left>490</left>
+                            <top>0</top>
+                            <width>82</width>
+                            <height>50</height>
+                            <label>$INFO[ListItem.Property(AudioChannel)]</label>
+                            <aligny>center</aligny>
+                            <textcolor>FFEB9E17</textcolor>
+                            <visible>String.IsEqual(ListItem.Property(IsActive),true)</visible>
+                        </control>
+                        <!-- 普通项 extra flags -->
+                        <control type="label">
+                            <left>572</left>
+                            <top>0</top>
+                            <width>82</width>
+                            <height>50</height>
+                            <label>$INFO[ListItem.Property(AudioExtraFlags)]</label>
+                            <aligny>center</aligny>
+                            <textcolor>BBFFFFFF</textcolor>
+                            <visible>!String.IsEqual(ListItem.Property(IsActive),true)</visible>
+                        </control>
+                        <!-- 当前活动项 extra flags -->
+                        <control type="label">
+                            <left>572</left>
+                            <top>0</top>
+                            <width>82</width>
+                            <height>50</height>
+                            <label>$INFO[ListItem.Property(AudioExtraFlags)]</label>
                             <aligny>center</aligny>
                             <textcolor>FFEB9E17</textcolor>
                             <visible>String.IsEqual(ListItem.Property(IsActive),true)</visible>
@@ -433,9 +585,49 @@
                         <control type="label">
                             <left>24</left>
                             <top>0</top>
-                            <width>630</width>
+                            <width>137</width>
                             <height>50</height>
-                            <label>$INFO[ListItem.Label]</label>
+                            <label>$INFO[ListItem.Property(AudioLanguageAndName)]</label>
+                            <aligny>center</aligny>
+                            <textcolor>white</textcolor>
+                            <scroll>true</scroll>
+                        </control>
+                        <control type="label">
+                            <left>161</left>
+                            <top>0</top>
+                            <width>192</width>
+                            <height>50</height>
+                            <label>$INFO[ListItem.Property(AudioCodec)]</label>
+                            <aligny>center</aligny>
+                            <textcolor>white</textcolor>
+                            <scroll>true</scroll>
+                        </control>
+                        <control type="label">
+                            <left>353</left>
+                            <top>0</top>
+                            <width>137</width>
+                            <height>50</height>
+                            <label>$INFO[ListItem.Property(AudioCodeInfo)]</label>
+                            <aligny>center</aligny>
+                            <textcolor>white</textcolor>
+                            <scroll>true</scroll>
+                        </control>
+                        <control type="label">
+                            <left>490</left>
+                            <top>0</top>
+                            <width>82</width>
+                            <height>50</height>
+                            <label>$INFO[ListItem.Property(AudioChannel)]</label>
+                            <aligny>center</aligny>
+                            <textcolor>white</textcolor>
+                            <scroll>true</scroll>
+                        </control>
+                        <control type="label">
+                            <left>572</left>
+                            <top>0</top>
+                            <width>82</width>
+                            <height>50</height>
+                            <label>$INFO[ListItem.Property(AudioExtraFlags)]</label>
                             <aligny>center</aligny>
                             <textcolor>white</textcolor>
                             <scroll>true</scroll>

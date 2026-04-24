@@ -28,6 +28,7 @@ _LANG_MAP = {
     'nor': '挪威语', 'no': '挪威语',
     'swe': '瑞典语', 'sv': '瑞典语',
     'ara': '阿拉伯语', 'ar': '阿拉伯语',
+    'arc': '阿拉姆语',
     'hrv': '克罗地亚语', 'hr': '克罗地亚语',
     'ces': '捷克语', 'cze': '捷克语', 'cs': '捷克语',
     'ell': '希腊语', 'gre': '希腊语', 'el': '希腊语',
@@ -52,7 +53,7 @@ _LANG_MAP = {
     'czech': '捷克语', 'greek': '希腊语', 'hebrew': '希伯来语', 'hungarian': '匈牙利语',
     'romanian': '罗马尼亚语', 'turkish': '土耳其语', 'bulgarian': '保加利亚语', 'malay': '马来语',
     'polish': '波兰语', 'tagalog': '塔加洛语', 'filipino': '菲律宾语',
-    'ukrainian': '乌克兰语', 'icelandic': '冰岛语',
+    'ukrainian': '乌克兰语', 'icelandic': '冰岛语', 'aramaic': '阿拉姆语',
 }
 
 _SUBTITLE_NAME_REPLACEMENTS = [
@@ -75,6 +76,8 @@ _SUBTITLE_NAME_REPLACEMENTS = [
     (r'Cantonese', '粤语'),
 ]
 
+_AUDIO_NAME_CHANNEL_SUFFIX_RE = re.compile(r'\s+\d+\.\d+\s*$')
+
 
 def _resolve_lang_name(lang_code):
     name = _LANG_MAP.get(lang_code.lower())
@@ -86,6 +89,91 @@ def _resolve_lang_name(lang_code):
         except Exception:
             name = lang_code
     return name or '未知'
+
+
+def _translate_stream_name(name):
+    if not name:
+        return ''
+
+    translated_name = name
+    for pattern, repl in _SUBTITLE_NAME_REPLACEMENTS:
+        translated_name = re.sub(pattern, repl, translated_name, flags=re.IGNORECASE)
+
+    parts = translated_name.split('-')
+    first_part = parts[0].strip()
+    mapped = _LANG_MAP.get(first_part.lower())
+    if mapped:
+        parts[0] = mapped
+        translated_name = '-'.join(parts)
+
+    return translated_name
+
+
+def _strip_language_prefix_from_name(name, language):
+    cleaned_name = (name or '').strip()
+    cleaned_language = (language or '').strip()
+
+    if not cleaned_name or not cleaned_language:
+        return cleaned_name
+
+    if cleaned_name.lower() == cleaned_language.lower():
+        return ''
+
+    lower_name = cleaned_name.lower()
+    lower_language = cleaned_language.lower()
+    if not lower_name.startswith(lower_language):
+        return cleaned_name
+
+    remainder = cleaned_name[len(cleaned_language):].strip()
+    remainder = re.sub(r'^[\s\-_/|:：]+', '', remainder)
+
+    bracket_pairs = (
+        ('(', ')'),
+        ('（', '）'),
+        ('[', ']'),
+        ('【', '】'),
+    )
+    for left_bracket, right_bracket in bracket_pairs:
+        if remainder.startswith(left_bracket) and remainder.endswith(right_bracket):
+            remainder = remainder[1:-1].strip()
+            break
+
+    return remainder
+
+
+def _strip_audio_channel_suffix(name):
+    cleaned_name = (name or '').strip()
+    if not cleaned_name:
+        return ''
+    cleaned_name = _AUDIO_NAME_CHANNEL_SUFFIX_RE.sub('', cleaned_name).strip()
+    return cleaned_name
+
+
+def _format_khz(value):
+    if value <= 0:
+        return ''
+    numeric = float(value)
+    khz = numeric / 1000.0 if numeric >= 1000.0 else numeric
+    if khz.is_integer():
+        return f"{int(khz)}kHz"
+    return f"{khz:.1f}kHz"
+
+
+def _format_kbps(value):
+    if value <= 0:
+        return ''
+    numeric = float(value)
+    kbps = int(round(numeric / 1000.0 if numeric >= 1000.0 else numeric))
+    return f"{kbps}kbps"
+
+
+def _build_code_info(bitrate, samplerate):
+    bitrate_text = _format_kbps(bitrate)
+    samplerate_text = _format_khz(samplerate)
+
+    if bitrate_text and samplerate_text:
+        return f"{bitrate_text}-{samplerate_text}"
+    return bitrate_text or samplerate_text
 
 
 def get_subtitle_items(suppress_warning=False):
@@ -137,34 +225,46 @@ def get_subtitle_items(suppress_warning=False):
             lang_code = s.get('language', 'unk')
             name = s.get('name', '')
 
-            lang_name = _resolve_lang_name(lang_code)
-            label = lang_name
+            language = _resolve_lang_name(lang_code)
 
-            if name and name.lower() != lang_name.lower() and name.lower() != lang_code.lower():
-                for pattern, repl in _SUBTITLE_NAME_REPLACEMENTS:
-                    name = re.sub(pattern, repl, name, flags=re.IGNORECASE)
-                parts = name.split('-')
-                first_part = parts[0].strip()
-                translated = _LANG_MAP.get(first_part.lower())
-                if translated:
-                    parts[0] = translated
-                    name = "-".join(parts)
-                label += f"-{name}"
+            # 翻译并清理 name 字段
+            translated_name = _translate_stream_name(name)
+            cleaned_name = _strip_language_prefix_from_name(translated_name, language)
+            # 如果 name 与语言代码相同，也清掉
+            if cleaned_name and cleaned_name.lower() == lang_code.lower():
+                cleaned_name = ''
+            # 去掉中文括号包裹的"外挂"
+            if cleaned_name:
+                cleaned_name = cleaned_name.replace('（外挂）', '外挂')
 
-            flags = []
-            if s.get('isforced'): flags.append("强制")
-            if s.get('isimpaired'): flags.append("解说")
-            if s.get('isdefault'): flags.append("默认")
+            # 合并 flags
+            extra_flags_parts = []
+            if s.get('isdefault'):
+                extra_flags_parts.append('默认')
+            if s.get('isforced'):
+                extra_flags_parts.append('强制')
+            if s.get('isimpaired'):
+                extra_flags_parts.append('解说')
             if name and ('commentary' in name.lower() or '解说' in name or 'description' in name.lower()):
-                flags.append("解说字幕")
-            if flags:
-                label += f" ({', '.join(flags)})"
+                if '解说' not in extra_flags_parts:
+                    extra_flags_parts.append('解说字幕')
+            extra_flags = '-'.join(extra_flags_parts)
+
+            # 构建完整 label（用于通知等场景）
+            label = language
+            if cleaned_name:
+                label += f"-{cleaned_name}"
+            if extra_flags:
+                label += f" ({extra_flags})"
 
             is_chinese = lang_code.lower() in ['chi', 'zho', 'zh', 'chn']
             is_external = '(external)' in name.lower() or '（外挂）' in name.lower()
 
             raw_items.append({
                 "label": label,
+                "language": language,
+                "name": cleaned_name,
+                "extra_flags": extra_flags,
                 "index": idx,
                 "is_active": (is_enabled and idx == current_index),
                 "is_chinese": is_chinese,
@@ -176,7 +276,9 @@ def get_subtitle_items(suppress_warning=False):
         raw_items.sort(key=lambda x: (not x['is_external'], not x['is_chinese'], x['original_order']))
 
         display_items = [
-            {"label": item["label"], "index": item["index"],
+            {"label": item["label"], "language": item["language"],
+             "name": item["name"], "extra_flags": item["extra_flags"],
+             "index": item["index"],
              "is_active": item["is_active"], "lang_code": item.get("lang_code", "unk")}
             for item in raw_items
         ]
@@ -211,38 +313,57 @@ def get_audio_items(suppress_warning=False):
         current_index = current_stream.get('index', -1)
         display_items = []
 
+        def _is_positive_number(value):
+            try:
+                return float(value) > 0
+            except (TypeError, ValueError):
+                return False
+
+        has_known_bitrate = any(_is_positive_number(s.get('bitrate', 0)) for s in streams)
+
         for s in streams:
             idx = s.get('index')
             lang_code = s.get('language', 'unk')
             name = s.get('name', '')
             channels = s.get('channels', 0)
             codec = s.get('codec', '')
+            bitrate = s.get('bitrate', 0)
+            samplerate = s.get('samplerate', 0)
 
-            lang_name = _resolve_lang_name(lang_code)
+            language = _resolve_lang_name(lang_code)
+            translated_name = _translate_stream_name(name)
+            name_without_language = _strip_language_prefix_from_name(translated_name, language)
+            name_without_language = _strip_audio_channel_suffix(name_without_language)
+            if language and name_without_language:
+                language_and_name = f"{language}-{name_without_language}"
+            else:
+                language_and_name = language or name_without_language
+            code_info = _build_code_info(bitrate, samplerate)
+            if not code_info and has_known_bitrate:
+                code_info = '未知码率'
+            channel = f"{int(channels)}声道" if channels else ''
 
-            display_codec = codec.upper()
-            if 'AC3' in name.upper(): display_codec = 'AC3'
-            elif 'DTS' in name.upper(): display_codec = 'DTS'
-            elif 'AAC' in name.upper(): display_codec = 'AAC'
-
-            ch_str = f"{channels}ch"
-            if channels == 6: ch_str = "5.1"
-            elif channels == 2: ch_str = "2.0"
-            elif channels == 8: ch_str = "7.1"
-
-            if name:
-                for pattern, repl in _SUBTITLE_NAME_REPLACEMENTS:
-                    name = re.sub(pattern, repl, name, flags=re.IGNORECASE)
+            extra_flags_parts = []
+            if s.get('isdefault'):
+                extra_flags_parts.append('默认')
+            if s.get('isimpaired'):
+                extra_flags_parts.append('解说')
+            if s.get('isoriginal'):
+                extra_flags_parts.append('原始')
+            extra_flags = '-'.join(extra_flags_parts)
 
             details = []
-            if name:
-                details.append(name)
-            else:
-                details.append(f"{display_codec} {ch_str}")
-            if s.get('isdefault'): details.append("默认")
-            if s.get('isimpaired'): details.append("解说")
+            if codec:
+                details.append(codec)
+            if code_info:
+                details.append(code_info)
 
-            label = lang_name + (f" - {' '.join(details)}" if details else "")
+            if channel:
+                details.append(channel)
+            if extra_flags:
+                details.append(extra_flags)
+
+            label = language_and_name + (f" - {' - '.join(details)}" if details else "")
 
             sort_priority = 2
             if lang_code.lower() in ['chi', 'zho', 'zh', 'chn']:
@@ -252,6 +373,13 @@ def get_audio_items(suppress_warning=False):
 
             display_items.append({
                 "label": label,
+                "language": language,
+                "name": name_without_language,
+                "language_and_name": language_and_name,
+                "codec": codec,
+                "code_info": code_info,
+                "channel": channel,
+                "extra_flags": extra_flags,
                 "index": idx,
                 "is_active": (idx == current_index),
                 "sort_priority": sort_priority,
