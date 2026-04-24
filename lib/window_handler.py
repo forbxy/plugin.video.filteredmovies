@@ -984,8 +984,8 @@ class MediaSelectWindow(xbmcgui.WindowXMLDialog):
         elif action_id == 7:
             # 确定键：由 onClick 处理，这里忽略
             return
-        elif action_id in [4, 5, 6] or (100 <= action_id <= 107):
-            # 其他方向键/翻页/鼠标：交给控件处理
+        elif action_id in [4, 5, 6, 88, 89, 91] or (100 <= action_id <= 107):
+            # 其他方向键/翻页/音量加减/静音，鼠标：交给控件处理
             return
         else:
             log(f"[MediaSelectWindow] onAction unhandled action_id={action_id}, closing window")
