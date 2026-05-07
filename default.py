@@ -14,6 +14,7 @@ import xbmcplugin
 
 from lib.common import ADDON_PATH, ADDON_DATA_PATH, get_setting, get_skin_name, jsonrpc_request, notification, log
 from lib import video_library as library
+from lib.playlist_library import get_autoplay_next_values, set_autoplay_next_values
 
 if not os.path.exists(ADDON_DATA_PATH):
     os.makedirs(ADDON_DATA_PATH)
@@ -126,6 +127,66 @@ def get_current_tvshow_info():
         log(f"Error getting TV show info: {e}")
     return None, None, None
 
+
+def ensure_autoplay_next_setting_after_mark(tvshow_id):
+    if not tvshow_id:
+        return
+
+    item_type = ""
+    result = jsonrpc_request({
+        "jsonrpc": "2.0",
+        "method": "Player.GetItem",
+        "params": {
+            "properties": ["type"],
+            "playerid": 1,
+        },
+        "id": "Player.GetItem",
+    }) or {}
+    if isinstance(result, dict):
+        item = result.get("item") or {}
+        item_type = str(item.get("type") or "").lower()
+
+    # 仅对剧集或目录模式提示；电影/音乐视频不处理。
+    if item_type in ("movie", "musicvideo") and not str(tvshow_id).startswith("directory:"):
+        return
+
+    if str(tvshow_id).startswith("directory:"):
+        required_value = 4
+        required_label = "未分类"
+    else:
+        required_value = 2
+        required_label = "剧集"
+
+    current_values = get_autoplay_next_values()
+    if required_value in current_values:
+        return
+
+    message = (
+        f"跳过片头/片尾需要打开设置-播放器-自动播放下一集({required_label})。\n"
+        "是否自动添加该设置并退出，然后手动重新播放？"
+    )
+    confirmed = xbmcgui.Dialog().yesno(
+        "自动播放下一集未开启",
+        message,
+        yeslabel="确定",
+        nolabel="取消",
+    )
+    if not confirmed:
+        return
+
+    new_values = current_values + [required_value]
+    if not set_autoplay_next_values(new_values):
+        notification("自动添加设置失败，请手动开启", sound=True)
+        return
+
+    try:
+        player = xbmc.Player()
+        if player.isPlayingVideo():
+            player.stop()
+    except Exception as e:
+        log(f"Error stopping playback after setting autoplay next: {e}")
+    # notification(f"已自动开启自动播放下一集({required_label})，已退出播放，请手动重新播放", duration=2800)
+
 def record_skip_point():
     # 1. 尝试处理 ISO 电影的历史进度跳转
     try:
@@ -231,6 +292,7 @@ def record_skip_point():
         
         notification(f"{msg} (第{season}季)")
         log(f"Recorded skip point for {show_title} Season {season}: {season_data}")
+        ensure_autoplay_next_setting_after_mark(tvshow_id)
         
     except Exception as e:
         log(f"Error recording skip point: {e}")

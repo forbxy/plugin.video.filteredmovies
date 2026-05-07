@@ -1,36 +1,71 @@
 # -*- coding: utf-8 -*-
-import os
-import re
 import traceback
 
 import xbmc
 
-from lib.common import get_setting, jsonrpc_request, log
+from lib.common import jsonrpc_request, log
 
 MAX_PLAYLIST_ITEMS_BEFORE = 50
 MAX_PLAYLIST_ITEMS_AFTER = 50
+
+
+def get_autoplay_next_values():
+    result = jsonrpc_request({
+        "jsonrpc": "2.0",
+        "method": "Settings.GetSettingValue",
+        "params": {
+            "setting": "videoplayer.autoplaynextitem",
+        },
+        "id": "Settings.GetSettingValue",
+    }) or {}
+
+    value = result.get("value") if isinstance(result, dict) else None
+    if isinstance(value, list):
+        values = []
+        for item in value:
+            try:
+                values.append(int(item))
+            except (TypeError, ValueError):
+                continue
+        return values
+
+    if isinstance(value, (int, float)):
+        return [int(value)]
+
+    if isinstance(value, str):
+        values = []
+        for item in value.split(','):
+            item = item.strip()
+            if not item:
+                continue
+            try:
+                values.append(int(item))
+            except ValueError:
+                continue
+        return values
+
+    return []
+
+
+def set_autoplay_next_values(values):
+    normalized = sorted(set(int(v) for v in values))
+    result = jsonrpc_request({
+        "jsonrpc": "2.0",
+        "method": "Settings.SetSettingValue",
+        "params": {
+            "setting": "videoplayer.autoplaynextitem",
+            "value": normalized,
+        },
+        "id": "Settings.SetSettingValue",
+    })
+    return bool(result)
+
 
 def normalize_media_path(path):
     if not path:
         return ""
     normalized = str(path).split('?', 1)[0].split('#', 1)[0]
     return normalized.replace('\\', '/').rstrip('/')
-
-
-def natural_sort_key(value):
-    """自然排序键：让 2 排在 10 前面。"""
-    text = str(value or "")
-    return [int(part) if part.isdigit() else part.casefold() for part in re.split(r'(\d+)', text)]
-
-
-def get_parent_media_path(path):
-    normalized = normalize_media_path(path)
-    if not normalized:
-        return None
-    last_sep = normalized.rfind('/')
-    if last_sep <= 0:
-        return None
-    return normalized[:last_sep]
 
 
 def get_active_video_playlist_state():
@@ -116,39 +151,6 @@ def get_season_playlist_files(tvshow_id, season):
     return [item.get("file") for item in episodes if item.get("file")]
 
 
-def get_directory_playlist_files(current_file):
-    parent_dir = get_parent_media_path(current_file)
-    if not parent_dir:
-        return []
-
-    result = jsonrpc_request({
-        "jsonrpc": "2.0",
-        "method": "Files.GetDirectory",
-        "params": {
-            "directory": parent_dir,
-            "media": "video",
-            "properties": ["file", "title"],
-        },
-        "id": "Files.GetDirectory",
-    }) or {}
-    files = result.get("files") or []
-
-    # 文件夹模式按标题自然排序，再据此判断当前项前后应补哪些内容。
-    playlist_items = []
-    for item in files:
-        file_path = item.get("file")
-        if not file_path:
-            continue
-        file_type = item.get("filetype")
-        if file_type and file_type != "file":
-            continue
-        sort_title = item.get("title") or item.get("label") or os.path.basename(normalize_media_path(file_path))
-        playlist_items.append((sort_title, file_path))
-
-    playlist_items.sort(key=lambda value: (natural_sort_key(value[0]), normalize_media_path(value[1]).casefold()))
-    return [file_path for _, file_path in playlist_items]
-
-
 def insert_playlist_item(playlist_id, position, file_path):
     result = jsonrpc_request({
         "jsonrpc": "2.0",
@@ -215,9 +217,6 @@ def autofill_playlist_for_current_video():
 
 
 def _autofill_playlist_for_current_video():
-    if get_setting('autofill_playlist_on_play') == 'false':
-        return
-
     state = get_active_video_playlist_state()
     if not state:
         return
@@ -234,13 +233,10 @@ def _autofill_playlist_for_current_video():
     tvshow_id = state.get("tvshowid")
     season = state.get("season")
     is_scraped_tvshow = tvshow_id not in (None, -1) and season not in (None, -1)
+    if not is_scraped_tvshow:
+        return
 
-    if is_scraped_tvshow:
-        target_files = get_season_playlist_files(tvshow_id, season)
-    else:
-        if current_file_norm.startswith("plugin://") or current_file_norm.startswith("pvr://"):
-            return
-        target_files = get_directory_playlist_files(current_file)
+    target_files = get_season_playlist_files(tvshow_id, season)
 
     target_files = [path for path in target_files if path]
     if len(target_files) <= 1:
@@ -253,37 +249,5 @@ def _autofill_playlist_for_current_video():
     playlist_id = state.get("playlistid", 1)
     current_position = state.get("position", 0)
 
-    if is_scraped_tvshow:
-        # 刮削剧集：补全缺失并修正乱序，一次完成
-        _sync_season_playlist(playlist_id, current_position, current_file_norm, target_norms, target_files)
-    else:
-        # 文件夹模式：只补当前项附近的缺失项
-        current_playlist_norms = set(
-            normalize_media_path(p) for p in get_playlist_files(playlist_id) if p
-        )
-        if all(n in current_playlist_norms for n in target_norms):
-            return
-
-        current_target_index = target_norms.index(current_file_norm)
-        missing_before = [
-            path for path, norm in zip(target_files[:current_target_index], target_norms[:current_target_index])
-            if norm not in current_playlist_norms
-        ][-MAX_PLAYLIST_ITEMS_BEFORE:]
-        missing_after = [
-            path for path, norm in zip(target_files[current_target_index + 1:], target_norms[current_target_index + 1:])
-            if norm not in current_playlist_norms
-        ][:MAX_PLAYLIST_ITEMS_AFTER]
-
-        inserted_before = 0
-        for path in missing_before:
-            if insert_playlist_item(playlist_id, current_position + inserted_before, path):
-                inserted_before += 1
-        insert_pos = current_position + inserted_before + 1
-        inserted_after = 0
-        for path in missing_after:
-            if insert_playlist_item(playlist_id, insert_pos, path):
-                inserted_after += 1
-                insert_pos += 1
-
-        if inserted_before or inserted_after:
-            log(f"Autofilled directory playlist: before={inserted_before}, after={inserted_after}, playlistid={playlist_id}")
+    # 刮削剧集：补全缺失并修正乱序，一次完成
+    _sync_season_playlist(playlist_id, current_position, current_file_norm, target_norms, target_files)

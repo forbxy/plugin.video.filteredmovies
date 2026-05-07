@@ -10,7 +10,7 @@ import xbmcgui
 import xbmcvfs
 
 from lib.common import ADDON_PATH, ADDON_DATA_PATH, get_setting, get_skin_name, jsonrpc_request, notification, log
-from lib.playlist_autofill import autofill_playlist_for_current_video
+from lib.playlist_library import autofill_playlist_for_current_video
 
 if not os.path.exists(ADDON_DATA_PATH):
     os.makedirs(ADDON_DATA_PATH)
@@ -42,49 +42,6 @@ def load_skip_data():
         log(f"Error loading skip data: {e}")
         return {}
 
-def get_current_tvshow_info():
-    try:
-        response = jsonrpc_request({
-            "jsonrpc": "2.0",
-            "method": "Player.GetItem",
-            "params": {
-                "properties": ["tvshowid", "showtitle", "season", "file"],
-                "playerid": 1,
-            },
-            "id": 1,
-        }) or {}
-
-        if 'item' in response:
-            item = response['item']
-            tvshow_id = item.get('tvshowid')
-            show_title = item.get('showtitle')
-            season = item.get('season', -1)
-            
-            # 1. 优先使用已刮削的剧集信息
-            if tvshow_id and tvshow_id != -1:
-                return str(tvshow_id), show_title, str(season)
-            
-            # 2. 兼容未刮削的文件/文件夹模式
-            file_path = item.get('file')
-            if file_path:
-                # 忽略插件流或 PVR
-                if file_path.startswith("plugin://") or file_path.startswith("pvr://"):
-                    return None, None, None
-                    
-                # 使用 os.path 处理路径 (自动适配系统分隔符)
-                parent_dir = os.path.dirname(file_path)
-                dir_name = os.path.basename(parent_dir)
-                
-                if not dir_name:
-                    dir_name = "Unknown Folder"
-                
-                # 使用 "directory:路径" 作为 ID，如果是不同路径则视为不同剧集
-                # 默认季数为 1
-                return f"directory:{parent_dir}", dir_name, "1"
-    except Exception as e:
-        log(f"Error getting TV show info: {e}")
-    return None, None, None
-
 class PlayerMonitor(xbmc.Player):
     def __init__(self):
         xbmc.Player.__init__(self)
@@ -92,15 +49,64 @@ class PlayerMonitor(xbmc.Player):
         self.outro_triggered = False
         self.outro_countdown_start = None
         self.cancel_skip = False
+        self.current_player_item = None
+
+    def refresh_current_player_item(self):
+        result = jsonrpc_request({
+            "jsonrpc": "2.0",
+            "method": "Player.GetItem",
+            "params": {
+                "properties": ["tvshowid", "showtitle", "season", "file"],
+                "playerid": 1,
+            },
+            "id": "Player.GetItem",
+        }) or {}
+
+        self.current_player_item = result.get('item') if isinstance(result, dict) else None
+        return self.current_player_item
+
+    def get_current_tvshow_info(self):
+        item = self.current_player_item
+        if not isinstance(item, dict):
+            item = self.refresh_current_player_item()
+        if not isinstance(item, dict):
+            return None, None, None
+
+        try:
+            tvshow_id = item.get('tvshowid')
+            show_title = item.get('showtitle')
+            season = item.get('season', -1)
+            # 1. 优先使用已刮削的剧集信息
+            if tvshow_id and tvshow_id != -1:
+                return str(tvshow_id), show_title, str(season)
+            # 2. 兼容未刮削的文件/文件夹模式
+            file_path = item.get('file')
+            if file_path:
+                # 忽略插件流或 PVR
+                if file_path.startswith("plugin://") or file_path.startswith("pvr://"):
+                    return None, None, None
+                # 使用 os.path 处理路径 (自动适配系统分隔符)
+                parent_dir = os.path.dirname(file_path)
+                dir_name = os.path.basename(parent_dir)
+                if not dir_name:
+                    dir_name = "Unknown Folder"
+                # 使用 "directory:路径" 作为 ID，如果是不同路径则视为不同剧集
+                # 默认季数为 1
+                return f"directory:{parent_dir}", dir_name, "1"
+        except Exception as e:
+            log(f"Error getting TV show info: {e}")
+        return None, None, None
 
     def onAVStarted(self):
         # 视频开始播放（包括切集）时触发
         # 稍微延迟一下，确保元数据已加载
         xbmc.sleep(1000)
+        self.refresh_current_player_item()
         self.check_intro()
         self.update_outro_info()
         self.load_iso_subtitles()
-        autofill_playlist_for_current_video()
+        if get_setting('autofill_playlist_on_play') != 'false':
+            autofill_playlist_for_current_video()
 
     def update_outro_info(self):
         self.current_outro_time = None
@@ -111,7 +117,7 @@ class PlayerMonitor(xbmc.Player):
         if not self.isPlayingVideo():
             return
 
-        tvshow_id, show_title, season = get_current_tvshow_info()
+        tvshow_id, show_title, season = self.get_current_tvshow_info()
         if not tvshow_id: return
 
         data = load_skip_data()
@@ -137,7 +143,7 @@ class PlayerMonitor(xbmc.Player):
         if not self.isPlayingVideo():
             return
 
-        tvshow_id, show_title, season = get_current_tvshow_info()
+        tvshow_id, show_title, season = self.get_current_tvshow_info()
         if not tvshow_id:
             return
 
@@ -174,22 +180,14 @@ class PlayerMonitor(xbmc.Player):
             if not self.isPlayingVideo():
                 log("Not playing video, skipping ISO subtitle check.")
                 return
-            
-            # Try to get the file path from Player.GetItem
-            json_query = {
-                "jsonrpc": "2.0",
-                "method": "Player.GetItem",
-                "params": {
-                    "properties": ["file"],
-                    "playerid": 1
-                },
-                "id": "Player.GetItem"
-            }
-            response = jsonrpc_request(json_query) or {}
-            
+
+            item = self.current_player_item
+            if not isinstance(item, dict):
+                item = self.refresh_current_player_item()
+
             playing_file = None
-            if 'item' in response:
-                item_file = response['item'].get('file')
+            if isinstance(item, dict):
+                item_file = item.get('file')
                 if item_file:
                     log(f"Player.GetItem returned file: {item_file}")
                     playing_file = item_file
