@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
-from .common import log
+from .common import get_setting, jsonrpc_request, log
 import xbmc
 import xbmcgui
-import xbmcaddon
-import json
 import datetime
 
 
 def get_search_field():
     """返回用户选择的搜索索引字段名（originaltitle 或 sorttitle）。"""
-    return xbmcaddon.Addon('plugin.video.filteredmovies').getSetting('search_field') or 'originaltitle'
+    return get_setting('search_field') or 'originaltitle'
 
 
 def get_filter_val(filters, key, default=None):
@@ -48,11 +46,10 @@ def get_inprogress_episodes_map():
             },
             "id": "inprogress_eps"
         }
-        
-        resp = xbmc.executeJSONRPC(json.dumps(params))
-        data = json.loads(resp)
-        
-        episodes = data.get("result", {}).get("episodes", [])
+
+        data = jsonrpc_request(params) or {}
+
+        episodes = data.get("episodes", [])
         
         progress_map = {}
         
@@ -454,8 +451,7 @@ def get_documentary_items(limit, filters=None):
     items = []
     
     try:
-        resp = xbmc.executeJSONRPC(json.dumps(batch_cmds))
-        results = json.loads(resp)
+        results = jsonrpc_request(batch_cmds) or []
         
         if isinstance(results, list):
             for res in results:
@@ -497,11 +493,10 @@ def get_movieset_progress_map():
             },
             "id": "set_movies"
         }
-        
-        resp = xbmc.executeJSONRPC(json.dumps(params))
-        data = json.loads(resp)
-        
-        movies = data.get("result", {}).get("movies", [])
+
+        data = jsonrpc_request(params) or {}
+
+        movies = data.get("movies", [])
         
         progress_map = {}
         
@@ -561,8 +556,8 @@ def get_movie_items(filters, limit):
     }
     if filter_obj: params["params"]["filter"] = filter_obj
 
-    resp = xbmc.executeJSONRPC(json.dumps(params))
-    items = json.loads(resp).get("result", {}).get("movies", [])
+    data = jsonrpc_request(params) or {}
+    items = data.get("movies", [])
     for item in items: item["media_type"] = "movie"
 
     return sort_items_locally(items, sort_obj)
@@ -586,8 +581,8 @@ def get_tvshow_items(filters, limit):
     }
     if filter_obj: params["params"]["filter"] = filter_obj
 
-    resp = xbmc.executeJSONRPC(json.dumps(params))
-    items = json.loads(resp).get("result", {}).get("tvshows", [])
+    data = jsonrpc_request(params) or {}
+    items = data.get("tvshows", [])
 
     # Attach partial progress
     partial_progress_map = get_inprogress_episodes_map()
@@ -632,8 +627,8 @@ def get_set_items(filters, limit):
     set_basic_filter = build_filter(basic_filters, media_type="set")
     if set_basic_filter: params["params"]["filter"] = set_basic_filter
 
-    resp = xbmc.executeJSONRPC(json.dumps(params))
-    items = json.loads(resp).get("result", {}).get("sets", [])
+    data = jsonrpc_request(params) or {}
+    items = data.get("sets", [])
 
     # T9 本地过滤（GetMovieSets 不支持 plot filter）
     t9_val = get_filter_val(filters, "filter.t9")
@@ -662,8 +657,8 @@ def get_set_items(filters, limit):
                 "params": {"properties": ["setid"], "filter": movie_filter},
                 "id": "set_complex_lookup"
             }
-            resp_lookup = xbmc.executeJSONRPC(json.dumps(params_lookup))
-            movies = json.loads(resp_lookup).get("result", {}).get("movies", [])
+            lookup_data = jsonrpc_request(params_lookup) or {}
+            movies = lookup_data.get("movies", [])
             valid_set_ids = {m.get("setid") for m in movies if m.get("setid")}
 
             items = [x for x in items if x.get("setid") in valid_set_ids]
@@ -738,8 +733,8 @@ def get_concert_items(filters, limit):
         }
     }
 
-    resp = xbmc.executeJSONRPC(json.dumps(params))
-    items = json.loads(resp).get("result", {}).get("movies", [])
+    data = jsonrpc_request(params) or {}
+    items = data.get("movies", [])
 
     # 严格条件：类型必须且只能有一条，并且该条是“音乐”。
     filtered_items = []
@@ -794,8 +789,7 @@ def get_documentary_items(filters, limit):
 
     items = []
     try:
-        resp = xbmc.executeJSONRPC(json.dumps(batch_cmds))
-        results = json.loads(resp)
+        results = jsonrpc_request(batch_cmds) or []
         if isinstance(results, list):
             for res in results:
                 if "result" in res:
@@ -841,8 +835,7 @@ def get_mixed_items(filters, limit):
 
     items = []
     try:
-        resp = xbmc.executeJSONRPC(json.dumps(batch_cmds))
-        results = json.loads(resp)
+        results = jsonrpc_request(batch_cmds) or []
         if isinstance(results, list):
             for res in results:
                 if "result" in res:

@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-from .common import notification, log
+from .common import ADDON_PATH, get_setting, notification, log
 from . import t9_helper
 import xbmc
 import xbmcgui
-import xbmcaddon
 import xbmcvfs
 import time
 import threading
@@ -22,9 +21,6 @@ _MULTITAP_MAP = {
     '8': ['8', 'T', 'U', 'V'],
     '9': ['9', 'W', 'X', 'Y', 'Z'],
 }
-
-_ADDON_PATH = xbmcvfs.translatePath(xbmcaddon.Addon('plugin.video.filteredmovies').getAddonInfo('path'))
-
 
 class CharSelectorDialog(xbmcgui.WindowXMLDialog):
     """T9 多字符选择弹窗：连续按同一数字键循环选择字符，超时自动确认。"""
@@ -407,7 +403,7 @@ class FilterWindow(xbmcgui.WindowXML):
         self.worker.daemon = True
         self.worker.start()
         # 异步准备搜索索引，避免阻塞窗口初始化。
-        if xbmcaddon.Addon().getSetting('auto_write_search_index') != 'false':
+        if get_setting('auto_write_search_index') != 'false':
             t9_helper.helper.ensure_search_index_ready_async(show_progress=True)
 
     def _t9_input_worker(self):
@@ -459,7 +455,7 @@ class FilterWindow(xbmcgui.WindowXML):
                     if current_input and current_input != "000000":
                         mt_state = self.filter_state.get('filter.mediatype', {})
                         if mt_state.get('value') == '系列电影':
-                            enable_set_search = xbmcaddon.Addon().getSetting('enable_set_search') == 'true'
+                            enable_set_search = get_setting('enable_set_search') == 'true'
                             if not enable_set_search:
                                 notification("系列电影搜索未启用，请在设置中开启")
                                 current_input = ""
@@ -555,7 +551,7 @@ class FilterWindow(xbmcgui.WindowXML):
 
     def _is_digit_letter_mode(self):
         try:
-            return xbmcaddon.Addon('plugin.video.filteredmovies').getSettingString('input_mode') != 'pure_digit'
+            return get_setting('input_mode') != 'pure_digit'
         except Exception:
             return True
 
@@ -563,7 +559,7 @@ class FilterWindow(xbmcgui.WindowXML):
         """打开字符选择弹窗，连续按键循环选择。"""
         while digit:
             dlg = CharSelectorDialog(
-                'Custom_1117_CharSelector.xml', _ADDON_PATH, 'Default', '1080i')
+                'Custom_1117_CharSelector.xml', ADDON_PATH, 'Default', '1080i')
             dlg.setup(digit)
             dlg.doModal()
             selected = dlg.selected_char
@@ -782,7 +778,7 @@ def _get_flag_path(lang_code):
     if not lang_code or lang_code in ('unk', 'und', ''):
         return None
     import os
-    flags_dir = os.path.join(_ADDON_PATH, 'resources', 'skins', 'Default', 'media', 'flags')
+    flags_dir = os.path.join(ADDON_PATH, 'resources', 'skins', 'Default', 'media', 'flags')
     code = lang_code.lower()
     path = os.path.join(flags_dir, f'{code}.png')
     if os.path.exists(path):

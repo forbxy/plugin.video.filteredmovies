@@ -9,18 +9,12 @@ import pickle
 import base64
 
 import xbmc
-import xbmcaddon
 import xbmcgui
-import xbmcvfs
 import xbmcplugin
 
-from lib.common import get_skin_name, notification, log
+from lib.common import ADDON_PATH, ADDON_DATA_PATH, get_setting, get_skin_name, jsonrpc_request, notification, log
 from lib import video_library as library
 
-ADDON_ID = 'plugin.video.filteredmovies'
-ADDON = xbmcaddon.Addon(id=ADDON_ID)
-ADDON_PATH = xbmcvfs.translatePath(ADDON.getAddonInfo('path'))
-ADDON_DATA_PATH = xbmcvfs.translatePath(ADDON.getAddonInfo('profile'))
 if not os.path.exists(ADDON_DATA_PATH):
     os.makedirs(ADDON_DATA_PATH)
 SKIP_DATA_FILE = os.path.join(ADDON_DATA_PATH, 'skip_intro_data.json')
@@ -59,7 +53,7 @@ def prefetch_data_for_window():
         
         # 3. Fetch items
         log(f"Prefetching with filters: {filters}")
-        filter_limit = int(ADDON.getSetting('filter_limit') or 300)
+        filter_limit = int(get_setting('filter_limit') or 300)
         items = library.jsonrpc_get_items(filters=filters, limit=filter_limit)
         
         # 4. Save to cache
@@ -91,20 +85,18 @@ def save_skip_data(data):
 def get_current_tvshow_info():
     try:
         # 使用 JSON-RPC 获取可靠的 ID 和标题
-        json_query = {
+        result = jsonrpc_request({
             "jsonrpc": "2.0",
             "method": "Player.GetItem",
             "params": {
                 "properties": ["tvshowid", "showtitle", "season", "file"],
-                "playerid": 1
+                "playerid": 1,
             },
-            "id": 1
-        }
-        json_response = xbmc.executeJSONRPC(json.dumps(json_query))
-        response = json.loads(json_response)
-        
-        if 'result' in response and 'item' in response['result']:
-            item = response['result']['item']
+            "id": 1,
+        }) or {}
+
+        if 'item' in result:
+            item = result['item']
             tvshow_id = item.get('tvshowid')
             show_title = item.get('showtitle')
             season = item.get('season', -1)
@@ -143,36 +135,32 @@ def record_skip_point():
             # 检查是否为蓝光 ISO (包含 bluray:// 和 .mpls)
             if playing_file.endswith("iso") or playing_file.endswith("ISO") or ("bluray://" in playing_file and ".mpls" in playing_file):
                 # 获取当前电影 ID
-                json_query = {
+                res_json = jsonrpc_request({
                     "jsonrpc": "2.0",
                     "method": "Player.GetItem",
                     "params": {"properties": ["file"], "playerid": 1},
-                    "id": "get_item_db"
-                }
-                res = xbmc.executeJSONRPC(json.dumps(json_query))
-                res_json = json.loads(res)
-                
-                if 'result' in res_json and 'item' in res_json['result']:
-                    item = res_json['result']['item']
+                    "id": "get_item_db",
+                }) or {}
+
+                if 'item' in res_json:
+                    item = res_json['item']
                     movie_id = item.get('id')
                     media_type = item.get('type')
                     
                     if movie_id and media_type == 'movie':
                         # 使用 JSON-RPC 获取历史进度
-                        json_query_resume = {
+                        res_resume_json = jsonrpc_request({
                             "jsonrpc": "2.0",
                             "method": "VideoLibrary.GetMovieDetails",
                             "params": {
                                 "movieid": movie_id,
-                                "properties": ["resume"]
+                                "properties": ["resume"],
                             },
-                            "id": "get_resume"
-                        }
-                        res_resume = xbmc.executeJSONRPC(json.dumps(json_query_resume))
-                        res_resume_json = json.loads(res_resume)
-                        
-                        if 'result' in res_resume_json and 'moviedetails' in res_resume_json['result']:
-                            details = res_resume_json['result']['moviedetails']
+                            "id": "get_resume",
+                        }) or {}
+
+                        if 'moviedetails' in res_resume_json:
+                            details = res_resume_json['moviedetails']
                             resume = details.get('resume', {})
                             position = resume.get('position', 0)
                             
@@ -326,11 +314,10 @@ def open_playing_tvshow():
             },
             "id": 1
         }
-        json_response = xbmc.executeJSONRPC(json.dumps(json_query))
-        response = json.loads(json_response)
-        
-        if 'result' in response and 'item' in response['result']:
-            item = response['result']['item']
+        response = jsonrpc_request(json_query) or {}
+
+        if 'item' in response:
+            item = response['item']
             tvshow_id = item.get('tvshowid')
             season = item.get('season', -1)
             item_type = item.get('type')
@@ -370,9 +357,13 @@ def force_prev():
             # 获取 active player id
             active_player_id = 1
             try:
-                p_res = json.loads(xbmc.executeJSONRPC('{"jsonrpc":"2.0","method":"Player.GetActivePlayers","id":1}'))
-                if 'result' in p_res and len(p_res['result']) > 0:
-                    active_player_id = p_res['result'][0]['playerid']
+                p_res = jsonrpc_request({
+                    "jsonrpc": "2.0",
+                    "method": "Player.GetActivePlayers",
+                    "id": 1,
+                }) or []
+                if len(p_res) > 0:
+                    active_player_id = p_res[0]['playerid']
             except: pass
 
             json_query_goto = {
@@ -384,7 +375,7 @@ def force_prev():
                 },
                 "id": 1
             }
-            xbmc.executeJSONRPC(json.dumps(json_query_goto))
+            jsonrpc_request(json_query_goto)
         else:
             log("ForcePrev: At start of playlist, restarting")
             notification("已是第一个")
@@ -413,13 +404,15 @@ def set_subtitle(index_str):
         is_enabled = False
         
         try:
-            r = json.loads(xbmc.executeJSONRPC(json.dumps({
-                "jsonrpc": "2.0", "method": "Player.GetProperties", 
-                "params": {"playerid": 1, "properties": ["subtitleenabled", "currentsubtitle"]}, "id": 1
-            })))
-            if 'result' in r:
-                is_enabled = r['result'].get('subtitleenabled', False)
-                current_stream = r['result'].get('currentsubtitle', {})
+            r = jsonrpc_request({
+                "jsonrpc": "2.0",
+                "method": "Player.GetProperties",
+                "params": {"playerid": 1, "properties": ["subtitleenabled", "currentsubtitle"]},
+                "id": 1,
+            }) or {}
+            if r:
+                is_enabled = r.get('subtitleenabled', False)
+                current_stream = r.get('currentsubtitle', {})
                 current_index = current_stream.get('index', -1)
         except: pass
         
@@ -484,12 +477,12 @@ def populate_subtitle_list():
 def open_media_selector(initial_tab):
     """打开统一字幕/音轨选择器，initial_tab 为 'subtitle' 或 'audio'。"""
     from lib import window_handler
-    position = ADDON.getSetting('osd_selector_position') or 'center'
+    position = get_setting('osd_selector_position') or 'center'
     valid_positions = {'top_left', 'top_right', 'center', 'bottom_left', 'bottom_right'}
     if position not in valid_positions:
         position = 'center'
     xbmcgui.Window(10000).setProperty("MFG.SelectorPosition", position)
-    raw_value = ADDON.getSetting('osd_selector_bg_opacity') or '90'
+    raw_value = get_setting('osd_selector_bg_opacity') or '90'
     try:
         percent = int(raw_value)
     except Exception:
@@ -749,8 +742,8 @@ def filter_list(reload_param):
 
     # 3. T9 Input
     t9_input = xbmcgui.Window(10000).getProperty("MFG.T9Input")
-    filter_limit = int(ADDON.getSetting('filter_limit') or 300)
-    search_limit = int(ADDON.getSetting('search_limit') or 72)
+    filter_limit = int(get_setting('filter_limit') or 300)
+    search_limit = int(get_setting('search_limit') or 72)
     limit = filter_limit
     if t9_input:
         t9_digits = "".join(ch for ch in str(t9_input) if ch.isdigit())
@@ -886,14 +879,13 @@ def toggle_favourite():
         fav_type = "media"
 
     # 检查是否已在收藏夹
-    get_fav_query = {
+    fav_resp = jsonrpc_request({
         "jsonrpc": "2.0",
         "method": "Favourites.GetFavourites",
         "params": {"properties": ["path", "windowparameter"]},
-        "id": 1
-    }
-    fav_resp = json.loads(xbmc.executeJSONRPC(json.dumps(get_fav_query)))
-    favourites = fav_resp.get("result", {}).get("favourites") or []
+        "id": 1,
+    }) or {}
+    favourites = fav_resp.get("favourites") or []
     log(f"Current favourites: {favourites}")
     is_favourite = False
     if path.startswith("favourites://"):
@@ -915,13 +907,12 @@ def toggle_favourite():
     if thumb:
         add_params["thumbnail"] = thumb
 
-    add_query = {
+    jsonrpc_request({
         "jsonrpc": "2.0",
         "method": "Favourites.AddFavourite",
         "params": add_params,
-        "id": 1
-    }
-    xbmc.executeJSONRPC(json.dumps(add_query))
+        "id": 1,
+    })
     if is_favourite:
         notification("已从收藏夹移除", title=title)
     else:

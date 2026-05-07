@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import re
-import json
 import xbmc
 import xbmcaddon
 
-from .common import notification, log
+from .common import jsonrpc_request, notification, log
 
 _LANG_MAP = {
     'ukr': '乌克兰语', 'uk': '乌克兰语',
@@ -191,13 +190,13 @@ def get_subtitle_items(suppress_warning=False):
         is_enabled = False
 
         try:
-            req_str = json.dumps({
-                "jsonrpc": "2.0", "method": "Player.GetProperties",
-                "params": {"playerid": 1, "properties": ["subtitles", "subtitleenabled", "currentsubtitle"]}, "id": 1
-            })
-            r = json.loads(xbmc.executeJSONRPC(req_str))
-            if 'result' in r:
-                result = r['result']
+            result = jsonrpc_request({
+                "jsonrpc": "2.0",
+                "method": "Player.GetProperties",
+                "params": {"playerid": 1, "properties": ["subtitles", "subtitleenabled", "currentsubtitle"]},
+                "id": 1,
+            }) or {}
+            if result:
                 streams = result.get('subtitles', [])
                 current_stream = result.get('currentsubtitle', {})
                 is_enabled = result.get('subtitleenabled', False)
@@ -294,16 +293,18 @@ def get_subtitle_items(suppress_warning=False):
 def get_audio_items(suppress_warning=False):
     """获取音轨列表。返回 (display_items, current_index)。"""
     try:
-        r = json.loads(xbmc.executeJSONRPC(json.dumps({
-            "jsonrpc": "2.0", "method": "Player.GetProperties",
-            "params": {"playerid": 1, "properties": ["audiostreams", "currentaudiostream"]}, "id": 1
-        })))
+        r = jsonrpc_request({
+            "jsonrpc": "2.0",
+            "method": "Player.GetProperties",
+            "params": {"playerid": 1, "properties": ["audiostreams", "currentaudiostream"]},
+            "id": 1,
+        }) or {}
 
-        if 'result' not in r:
+        if not r:
             return None, -1
 
-        streams = r['result'].get('audiostreams', [])
-        current_stream = r['result'].get('currentaudiostream', {})
+        streams = r.get('audiostreams', [])
+        current_stream = r.get('currentaudiostream', {})
 
         if not streams:
             if not suppress_warning:
