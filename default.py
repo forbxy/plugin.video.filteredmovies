@@ -137,7 +137,6 @@ def ensure_autoplay_next_setting_after_mark(tvshow_id):
         "jsonrpc": "2.0",
         "method": "Player.GetItem",
         "params": {
-            "properties": ["type"],
             "playerid": 1,
         },
         "id": "Player.GetItem",

@@ -111,8 +111,8 @@ msgid "Autofill/fix playlist for current episode or folder"
 msgstr "播放时自动补全或修正当前播放剧集/文件夹内视频的播放列表"
 
 msgctxt "#32025"
-msgid "When enabled, starting an episode or a video file from a folder will automatically fill and sort the current playlist with the full season or all videos in that folder. For scraped TV shows, misplaced or out-of-order episodes are also corrected. Up to 50 items before and 50 after the current item are kept."
-msgstr "启用后，开始播放剧集或文件夹中的视频文件时，自动将当前播放列表补全为整季剧集或该文件夹下全部视频，并修正已刷剥剧集的乱序问题；当前项前方保留最多50集，后方保留最多50集。"
+msgid "When enabled, starting an episode will automatically correct out-of-order items in the current playlist. Up to 10 episodes before and 10 after the current episode are corrected."
+msgstr "启用后，开始播放剧集时，自动修正播放列表的乱序问题；最多修正播放集的前10集，后10集。"
 
 msgctxt "#32026"
 msgid "Media selector position"

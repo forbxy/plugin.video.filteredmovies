@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-import traceback
-
 import xbmc
-
 from lib.common import jsonrpc_request, log
 
-MAX_PLAYLIST_ITEMS_BEFORE = 50
-MAX_PLAYLIST_ITEMS_AFTER = 50
+# 单次补全窗口限制为当前集前后各 10 集，减少 JSON-RPC 次数。
+MAX_PLAYLIST_ITEMS_BEFORE = 10
+MAX_PLAYLIST_ITEMS_AFTER = 10
+MAX_DELETE_LOWER_EPISODES_BELOW = 10
+# 插入/删除播放列表项后等待 300ms，给 Kodi 足够时间处理更新并避免过快连续操作导致的异常。
+PLAYLIST_MUTATION_DELAY_MS = 300
 
 
 def get_autoplay_next_values():
@@ -61,80 +62,27 @@ def set_autoplay_next_values(values):
     return bool(result)
 
 
-def normalize_media_path(path):
-    if not path:
-        return ""
-    normalized = str(path).split('?', 1)[0].split('#', 1)[0]
-    return normalized.replace('\\', '/').rstrip('/')
-
-
-def get_active_video_playlist_state():
-    players = jsonrpc_request({
-        "jsonrpc": "2.0",
-        "method": "Player.GetActivePlayers",
-        "id": "Player.GetActivePlayers",
-    }) or []
-    video_player = next((p for p in players if p.get("type") == "video"), None)
-    if not video_player:
-        return None
-
-    player_id = video_player.get("playerid")
-    properties = jsonrpc_request({
-        "jsonrpc": "2.0",
-        "method": "Player.GetProperties",
-        "params": {
-            "playerid": player_id,
-            "properties": ["playlistid", "position"],
-        },
-        "id": "Player.GetProperties",
-    }) or {}
-    item = jsonrpc_request({
-        "jsonrpc": "2.0",
-        "method": "Player.GetItem",
-        "params": {
-            "playerid": player_id,
-            "properties": ["file", "tvshowid", "season", "episode", "showtitle", "title"],
-        },
-        "id": "Player.GetItem",
-    }) or {}
-
-    current_item = item.get("item") or {}
-    playlistid = int(properties.get("playlistid") or 1)
-    position = int(properties.get("position") or 0)
-    # playlistid/position 为负数说明 Kodi 未将当前项加入播放列表，跳过补全
-    if playlistid < 0 or position < 0:
-        return None
-    return {
-        "playerid": player_id,
-        "playlistid": playlistid,
-        "position": position,
-        "file": current_item.get("file") or "",
-        "tvshowid": current_item.get("tvshowid"),
-        "season": current_item.get("season"),
-        "episode": current_item.get("episode"),
-        "showtitle": current_item.get("showtitle") or "",
-        "title": current_item.get("title") or "",
-        "type": current_item.get("type") or "",
-    }
-
-
-def get_playlist_files(playlist_id):
+def get_playlist_items(playlist_id):
+    # 读取 Kodi 实际播放列表，并转换成仅包含补全所需的轻量结构。
     result = jsonrpc_request({
         "jsonrpc": "2.0",
         "method": "Playlist.GetItems",
         "params": {
             "playlistid": playlist_id,
-            "properties": ["file"],
+            "properties": ["tvshowid", "season", "episode"],
         },
         "id": "Playlist.GetItems",
     }) or {}
-    items = result.get("items") or []
-    return [item.get("file") for item in items if item.get("file")]
+    playlist = result.get("items") or []
+    for idx, itm in enumerate(playlist):
+        itm["position"] = idx
+
+    return playlist
 
 
-def get_season_playlist_files(tvshow_id, season):
+def get_season_episode(tvshow_id, season):
     if tvshow_id in (None, -1) or season in (None, -1):
-        return []
+        return None
 
     result = jsonrpc_request({
         "jsonrpc": "2.0",
@@ -142,112 +90,293 @@ def get_season_playlist_files(tvshow_id, season):
         "params": {
             "tvshowid": int(tvshow_id),
             "season": int(season),
-            "properties": ["file", "episode", "season", "title"],
+            "properties": ["episode"],
             "sort": {"method": "episode", "order": "ascending"},
         },
         "id": "VideoLibrary.GetEpisodes",
     }) or {}
     episodes = result.get("episodes") or []
-    return [item.get("file") for item in episodes if item.get("file")]
+    
+    if not episodes:
+        return None
+    for itm in episodes:
+        itm["tvshowid"] = int(tvshow_id)
+        itm["season"] = int(season)
+        itm["id"] = itm.get("episodeid")
+
+    return {
+        "tvshowid": int(tvshow_id),
+        "season": int(season),
+        "episodes": episodes,
+    }
 
 
-def insert_playlist_item(playlist_id, position, file_path):
-    result = jsonrpc_request({
-        "jsonrpc": "2.0",
-        "method": "Playlist.Insert",
-        "params": {
-            "playlistid": playlist_id,
+class EpisodePlayList:
+    PLAYLIST_ID = 1
+
+    def __init__(self, current_episode, current_season):
+        self.current_episode = int(current_episode)
+        self.current_season = current_season
+
+        if not isinstance(self.current_season, dict):
+            raise ValueError("current_season should be a dict of season info")
+        if self.current_season.get("season") in (None, -1) or self.current_season.get("tvshowid") in (None, -1):
+            raise ValueError(f"current_season should have valid 'season' and 'tvshowid', got: season={self.current_season.get('season')}, tvshowid={self.current_season.get('tvshowid')}")
+        if not self.current_season.get("episodes") or (not isinstance(self.current_season.get("episodes"), list)):
+            raise ValueError(f"current_season should have valid 'episodes' list, got: {self.current_season.get('episodes')}")
+
+        # 仅缓存当前播放列表，以及当前播放集在列表中的首个匹配项引用。
+        self.playlist_items = get_playlist_items(self.PLAYLIST_ID)
+        # 简化策略：按 episode（第几集）匹配第一个，作为当前播放集。
+        self.current_play = self._find_current_play()
+
+    def _find_current_play(self):
+        for item in self.playlist_items:
+            if item.get("episode") == self.current_episode and self.current_season.get("season") == item.get("season") \
+                and self.current_season.get("tvshowid") == item.get("tvshowid"):
+                # 直接返回列表项引用，避免不必要拷贝。
+                return item
+        log(
+            "Current playing episode not found in playlist: "
+            f"current_episode={self.current_episode}, current_season={self.current_season}", xbmc.LOGERROR
+        )
+
+    def _reindex_items(self):
+        for idx, item in enumerate(self.playlist_items):
+            item["position"] = idx
+
+    def insert(self, position, episode_item):
+
+        result = jsonrpc_request({
+            "jsonrpc": "2.0",
+            "method": "Playlist.Insert",
+            "params": {
+                "playlistid": self.PLAYLIST_ID,
+                "position": int(position),
+                "item": {"episodeid": episode_item.get("id")},
+            },
+            "id": "Playlist.Insert",
+        })
+        if result != "OK":
+            return False
+
+        position = int(position)
+        if position < 0:
+            position = 0
+        if position > len(self.playlist_items):
+            position = len(self.playlist_items)
+
+        # RPC 成功后同步更新本地缓存，避免再次全量读取播放列表。
+        self.playlist_items.insert(position, {
             "position": position,
-            "item": {"file": file_path},
-        },
-        "id": "Playlist.Insert",
-    })
-    return result == "OK"
+            "type": "episode",
+            "episode": episode_item.get("episode"),
+            "id": episode_item.get("id"),
+            "season": episode_item.get("season"),
+            "tvshowid": episode_item.get("tvshowid"),
+        })
+        self._reindex_items()
+        xbmc.sleep(PLAYLIST_MUTATION_DELAY_MS)
+        return True
 
+    def remove(self, position):
+        try:
+            position = int(position)
+        except (TypeError, ValueError):
+            return False
 
-def _sync_season_playlist(playlist_id, current_position, current_file_norm, target_norms, target_files):
-    """刮削剧集：将播放列表同步为正确顺序（补全缺失 + 修正乱序，一次完成）。"""
-    target_norm_to_idx = {n: i for i, n in enumerate(target_norms)}
-    current_target_idx = target_norm_to_idx.get(current_file_norm, -1)
-    if current_target_idx < 0:
-        return
+        current_position = self.current_play.get("position") if isinstance(self.current_play, dict) else None
+        if isinstance(current_position, int) and position == current_position:
+            log(
+                "Skip removing current playing item: "
+                f"position={position}, playlistid={self.PLAYLIST_ID}"
+            )
+            return False
 
-    # 确定应出现在播放列表中的集数（当前项前后各50集窗口）
-    desired_before = list(zip(
-        target_files[:current_target_idx], target_norms[:current_target_idx]
-    ))[-MAX_PLAYLIST_ITEMS_BEFORE:]
-    desired_after = list(zip(
-        target_files[current_target_idx + 1:], target_norms[current_target_idx + 1:]
-    ))[:MAX_PLAYLIST_ITEMS_AFTER]
-
-    # 检查播放列表中当前项前后的季集数是否已是期望的内容和顺序
-    fresh_norms = [normalize_media_path(p) for p in get_playlist_files(playlist_id)]
-    season_before = [n for n in fresh_norms[:current_position] if n in target_norm_to_idx]
-    season_after = [n for n in fresh_norms[current_position + 1:] if n in target_norm_to_idx]
-    if season_before == [n for _, n in desired_before] and season_after == [n for _, n in desired_after]:
-        return
-
-    # 删除播放列表中所有本季集数（不含当前项），从高位到低位避免偏移
-    season_positions = [i for i, n in enumerate(fresh_norms) if i != current_position and n in target_norm_to_idx]
-    for pos in sorted(season_positions, reverse=True):
-        jsonrpc_request({
+        result = jsonrpc_request({
             "jsonrpc": "2.0",
             "method": "Playlist.Remove",
-            "params": {"playlistid": playlist_id, "position": pos},
+            "params": {
+                "playlistid": self.PLAYLIST_ID,
+                "position": position,
+            },
             "id": "Playlist.Remove",
         })
+        if result != "OK":
+            return False
 
-    # 删除后当前项位置前移（删掉了多少个在它之前的项）
-    new_pos = current_position - sum(1 for p in season_positions if p < current_position)
+        if 0 <= position < len(self.playlist_items):
+            self.playlist_items.pop(position)
+        self._reindex_items()
+        xbmc.sleep(PLAYLIST_MUTATION_DELAY_MS)
 
-    # 将前置集数插到当前项前面，后置集数插到当前项后面
-    for i, (path, _) in enumerate(desired_before):
-        insert_playlist_item(playlist_id, new_pos + i, path)
-    for i, (path, _) in enumerate(desired_after):
-        insert_playlist_item(playlist_id, new_pos + len(desired_before) + 1 + i, path)
+        return True
 
-    log(f"Synced season playlist: before={len(desired_before)}, after={len(desired_after)}, playlistid={playlist_id}")
+    def _remove_incorrect_order_episodes(self):
+        remove_items = []
+
+        if not self.current_play:
+            return 0
+
+        # 仅处理“当前集后方出现更早剧集”的乱序场景，最多删除 5 条。
+        for item in self.playlist_items[self.current_play["position"] + 1:]:
+            # 只删除同季剧集
+            is_c_tvshow = item.get("tvshowid") == self.current_season.get("tvshowid")
+            is_c_season = is_c_tvshow and item.get("season") == self.current_season.get("season")
+            if not is_c_season:
+                continue
+
+            if item['episode'] < self.current_play["episode"]:
+                remove_items.append(item)
+                if len(remove_items) >= MAX_DELETE_LOWER_EPISODES_BELOW:
+                    break
+
+        if remove_items:
+            log(
+                "Playlist remove plan: "
+                f"current_episode={self.current_episode}, "
+                f"remove_after={[item.get('episode') for item in remove_items]}, "
+                f"playlistid={self.PLAYLIST_ID}"
+            )
+
+        removed = 0
+        # 倒序删除，避免位置前移导致后续下标失真。
+        for item in sorted(remove_items, key=lambda candidate: candidate.get("position", -1), reverse=True):
+            pos = item.get("position")
+            if not isinstance(pos, int):
+                continue
+
+            if self.remove(pos):
+                removed += 1
+                log(
+                    "Removed incorrect order item: "
+                    f"episode={item.get('episode')}, id={item.get('id')}, "
+                    f"position={pos}, playlistid={self.PLAYLIST_ID}"
+                )
+        return removed
 
 
-def autofill_playlist_for_current_video():
-    try:
-        _autofill_playlist_for_current_video()
-    except Exception as e:
-        log(f"Autofill playlist error: {e}\n{traceback.format_exc()}", xbmc.LOGERROR)
+    def _fill_neighbors_around_current(self):
+        insert_before = 0
+        insert_after = 0
+        if not self.current_play:
+            return insert_before, insert_after
+
+        season_episodes = self.current_season.get("episodes")
+        if not isinstance(season_episodes, list):
+            return insert_before, insert_after
+
+        current_episode_idx = -1
+        current_play_id = self.current_play.get("id")
+        for idx, item in enumerate(season_episodes):
+            if not isinstance(item, dict):
+                continue
+            if item.get("id") == current_play_id:
+                current_episode_idx = idx
+                break
+
+        if current_episode_idx < 0:
+            return insert_before, insert_after
+
+        current_tvshowid = self.current_season.get("tvshowid")
+        current_season_id = self.current_season.get("season")
+        existing_ids = {
+            item.get("id")
+            for item in self.playlist_items
+            if item.get("tvshowid") == current_tvshowid
+            and item.get("season") == current_season_id
+            and item.get("id") is not None
+        }
+
+        desired_before = season_episodes[max(0, current_episode_idx - MAX_PLAYLIST_ITEMS_BEFORE):current_episode_idx]
+        desired_after = season_episodes[current_episode_idx + 1:current_episode_idx + 1 + MAX_PLAYLIST_ITEMS_AFTER]
+        missing_before = [item for item in desired_before if item.get("id") not in existing_ids]
+        missing_after = [item for item in desired_after if item.get("id") not in existing_ids]
+
+        if missing_before or missing_after:
+            log(
+                "Playlist fill plan: "
+                f"current_episode={self.current_episode}, "
+                f"missing_before={[item.get('episode') for item in missing_before]}, "
+                f"missing_after={[item.get('episode') for item in missing_after]}, "
+                f"playlistid={self.PLAYLIST_ID}"
+            )
+
+        def get_insert_position(target_episode):
+            if not isinstance(target_episode, int):
+                return None
+
+            last_same_season_position = None
+            for item in self.playlist_items:
+                is_same_tvshow = item.get("tvshowid") == current_tvshowid
+                is_same_season = is_same_tvshow and item.get("season") == current_season_id
+                if not is_same_season:
+                    continue
+
+                position = item.get("position")
+                last_same_season_position = position
+
+                item_episode = item.get("episode")
+                if item_episode > target_episode:
+                    return position
+
+            if isinstance(last_same_season_position, int):
+                return last_same_season_position + 1
+            return len(self.playlist_items)
+
+        for episode_item in missing_before:
+            insert_pos = get_insert_position(episode_item.get("episode"))
+            if not isinstance(insert_pos, int):
+                continue
+
+            if self.insert(insert_pos, episode_item):
+                insert_before += 1
+                existing_ids.add(episode_item.get("id"))
+                log(
+                    "Inserted missing before item: "
+                    f"episode={episode_item.get('episode')}, id={episode_item.get('id')}, "
+                    f"position={insert_pos}, playlistid={self.PLAYLIST_ID}"
+                )
+
+        for episode_item in missing_after:
+            insert_pos = get_insert_position(episode_item.get("episode"))
+            if not isinstance(insert_pos, int):
+                continue
+
+            if self.insert(insert_pos, episode_item):
+                insert_after += 1
+                existing_ids.add(episode_item.get("id"))
+                log(
+                    "Inserted missing after item: "
+                    f"episode={episode_item.get('episode')}, id={episode_item.get('id')}, "
+                    f"position={insert_pos}, playlistid={self.PLAYLIST_ID}"
+                )
+
+        return insert_before, insert_after
 
 
-def _autofill_playlist_for_current_video():
-    state = get_active_video_playlist_state()
-    if not state:
-        return
+    def fix_playlist(self):
+        try:
+            int(self.current_episode)
+        except (TypeError, ValueError):
+            return
 
-    # 已刮削电影不补充/修正播放列表
-    if state.get("type") == "movie":
-        return
+        if not isinstance(self.current_play, dict):
+            return
 
-    current_file = state.get("file") or ""
-    current_file_norm = normalize_media_path(current_file)
-    if not current_file_norm:
-        return
+        season = self.current_season if isinstance(self.current_season, dict) else {}
+        tvshow_id = season.get("tvshowid")
+        season_id = season.get("season")
+        is_scraped_tvshow = tvshow_id not in (None, -1) and season_id not in (None, -1)
+        if not is_scraped_tvshow:
+            return
 
-    tvshow_id = state.get("tvshowid")
-    season = state.get("season")
-    is_scraped_tvshow = tvshow_id not in (None, -1) and season not in (None, -1)
-    if not is_scraped_tvshow:
-        return
+        removed_below = self._remove_incorrect_order_episodes()
+        inserted_before, inserted_after = self._fill_neighbors_around_current()
 
-    target_files = get_season_playlist_files(tvshow_id, season)
-
-    target_files = [path for path in target_files if path]
-    if len(target_files) <= 1:
-        return
-
-    target_norms = [normalize_media_path(path) for path in target_files]
-    if current_file_norm not in target_norms:
-        return
-
-    playlist_id = state.get("playlistid", 1)
-    current_position = state.get("position", 0)
-
-    # 刮削剧集：补全缺失并修正乱序，一次完成
-    _sync_season_playlist(playlist_id, current_position, current_file_norm, target_norms, target_files)
+        if removed_below or inserted_before or inserted_after:
+            log(
+                "Synced season playlist: "
+                f"removed_below={removed_below}, before={inserted_before}, after={inserted_after}, "
+                f"playlistid={self.PLAYLIST_ID}"
+            )

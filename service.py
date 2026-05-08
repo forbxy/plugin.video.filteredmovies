@@ -10,7 +10,7 @@ import xbmcgui
 import xbmcvfs
 
 from lib.common import ADDON_PATH, ADDON_DATA_PATH, get_setting, get_skin_name, jsonrpc_request, notification, log
-from lib.playlist_library import autofill_playlist_for_current_video
+from lib.playlist_library import EpisodePlayList, get_season_episode
 
 if not os.path.exists(ADDON_DATA_PATH):
     os.makedirs(ADDON_DATA_PATH)
@@ -50,20 +50,51 @@ class PlayerMonitor(xbmc.Player):
         self.outro_countdown_start = None
         self.cancel_skip = False
         self.current_player_item = None
+        self.current_season_info = None
 
     def refresh_current_player_item(self):
         result = jsonrpc_request({
             "jsonrpc": "2.0",
             "method": "Player.GetItem",
             "params": {
-                "properties": ["tvshowid", "showtitle", "season", "file"],
+                "properties": ["tvshowid", "showtitle", "season", "episode", "file"],
                 "playerid": 1,
             },
             "id": "Player.GetItem",
         }) or {}
 
-        self.current_player_item = result.get('item') if isinstance(result, dict) else None
+        item = result.get('item') if isinstance(result, dict) else None
+        if isinstance(item, dict):
+            # 统一补齐 episode（第几集），供播放列表补全逻辑直接使用。
+            episode_no = item.get('episode')
+            try:
+                item['episode'] = int(episode_no) if episode_no is not None else None
+            except (TypeError, ValueError):
+                item['episode'] = None
+
+        self.current_player_item = item
         return self.current_player_item
+
+    def refresh_current_season_info(self):
+        item = self.current_player_item
+        if not isinstance(item, dict):
+            item = self.refresh_current_player_item()
+        if not isinstance(item, dict):
+            self.current_season_info = None
+            return None
+
+        tvshow_id = item.get('tvshowid')
+        season = item.get('season')
+        if tvshow_id in (None, -1) or season in (None, -1):
+            self.current_season_info = None
+            return None
+
+        cached = self.current_season_info if isinstance(self.current_season_info, dict) else None
+        if cached and cached.get('tvshowid') == int(tvshow_id) and cached.get('season') == int(season):
+            return cached
+
+        self.current_season_info = get_season_episode(tvshow_id, season)
+        return self.current_season_info
 
     def get_current_tvshow_info(self):
         item = self.current_player_item
@@ -106,7 +137,15 @@ class PlayerMonitor(xbmc.Player):
         self.update_outro_info()
         self.load_iso_subtitles()
         if get_setting('autofill_playlist_on_play') != 'false':
-            autofill_playlist_for_current_video()
+            item = self.current_player_item if isinstance(self.current_player_item, dict) else {}
+            if item.get('episode'):
+                log("Auto-fix playlist check...")
+                self.refresh_current_season_info()
+                EpisodePlayList(
+                    current_episode=item['episode'],
+                    current_season=self.current_season_info,
+                ).fix_playlist()
+                log("Auto-fix playlist check completed.")
 
     def update_outro_info(self):
         self.current_outro_time = None

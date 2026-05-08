@@ -111,7 +111,7 @@ msgid "Autofill/fix playlist for current episode or folder"
 msgstr ""
 
 msgctxt "#32025"
-msgid "When enabled, starting an episode or a video file from a folder will automatically fill and sort the current playlist with the full season or all videos in that folder. For scraped TV shows, misplaced or out-of-order episodes are also corrected. Up to 50 items before and 50 after the current item are kept."
+msgid "When enabled, starting an episode will automatically correct out-of-order items in the current playlist. Up to 10 episodes before and 10 after the current episode are corrected."
 msgstr ""
 
 msgctxt "#32026"

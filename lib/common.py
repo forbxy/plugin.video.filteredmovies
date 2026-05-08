@@ -33,6 +33,9 @@ def jsonrpc_request(payload):
             if isinstance(payload, dict):
                 method = payload.get("method") or method
             log(f"JSON-RPC error for {method}: {response.get('error')}", xbmc.LOGWARNING)
+            caller_stack = "".join(traceback.format_stack(limit=10)[:-1]).rstrip()
+            if caller_stack:
+                log(f"JSON-RPC caller stack for {method}:\n{caller_stack}", xbmc.LOGWARNING)
             return None
 
         # 对单请求返回 result，保留批量请求原始返回。
