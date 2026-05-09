@@ -138,7 +138,7 @@ class PlayerMonitor(xbmc.Player):
         self.load_iso_subtitles()
         if get_setting('autofill_playlist_on_play') != 'false':
             item = self.current_player_item if isinstance(self.current_player_item, dict) else {}
-            if item.get('episode'):
+            if item.get('episode') and item['episode'] != -1:
                 log("Auto-fix playlist check...")
                 self.refresh_current_season_info()
                 EpisodePlayList(
@@ -234,6 +234,11 @@ class PlayerMonitor(xbmc.Player):
             if not playing_file:
                  log("No playing file found via JSONRPC, skipping ISO subtitle check.")
                  return
+
+            # Skip HTTP/HTTPS streams
+            if playing_file.lower().startswith(('http://', 'https://')):
+                log("HTTP stream detected, skipping ISO subtitle check.")
+                return
 
             # Strip query parameters if any
             if '?' in playing_file:
