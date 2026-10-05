@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-from .common import get_setting, jsonrpc_request, log
+from .common import jsonrpc_request, log
 import xbmc
 import xbmcgui
 import datetime
 
 
 def get_search_field():
-    """返回用户选择的搜索索引字段名（originaltitle 或 sorttitle）。"""
-    return get_setting('search_field') or 'originaltitle'
+    """搜索索引固定使用 Kodi 支持筛选的原始标题字段。"""
+    return 'originaltitle'
 
 
 def get_filter_val(filters, key, default=None):

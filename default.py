@@ -843,8 +843,9 @@ def filter_list(reload_param):
 def set_vs10_mode(target_mode=None):
     try:
         raw_mode = xbmc.getInfoLabel("Player.Process(amlogic.vs10.mode.raw)")
-        if not raw_mode:
-            log("VS10 mode not available: amlogic.vs10.mode.raw is empty")
+        # 不支持该标签的构建可能返回标签原文，而不是空字符串。
+        if not raw_mode or not raw_mode.isdecimal():
+            log(f"VS10 mode not available: amlogic.vs10.mode.raw={raw_mode!r}")
             notification("VS10引擎未就绪或不受支持")
             return
         log(f"Current VS10 raw mode: {raw_mode}")

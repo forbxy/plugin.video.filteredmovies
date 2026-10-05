@@ -78,8 +78,13 @@ _SUBTITLE_NAME_REPLACEMENTS = [
 _AUDIO_NAME_CHANNEL_SUFFIX_RE = re.compile(r'\s+\d+\.\d+\s*$')
 
 
+def _base_language(lang_code):
+    """兼容 ISO 639 与 Kodi 22 的 BCP 47 语言码（如 zh-Hans、en-US）。"""
+    return (lang_code or '').lower().replace('_', '-').split('-', 1)[0]
+
+
 def _resolve_lang_name(lang_code):
-    name = _LANG_MAP.get(lang_code.lower())
+    name = _LANG_MAP.get(_base_language(lang_code))
     if not name:
         try:
             name = xbmc.convertLanguage(lang_code, xbmc.ENGLISH_NAME)
@@ -205,8 +210,8 @@ def get_subtitle_items(suppress_warning=False):
         except Exception:
             log("JSON-RPC subtitles exception, using fallback for streams")
             avail_streams = player.getAvailableSubtitleStreams()
-            for i, name in enumerate(avail_streams):
-                streams.append({"index": i, "name": name, "language": "unk"})
+            for i, language in enumerate(avail_streams):
+                streams.append({"index": i, "name": "", "language": language})
 
         for itm in streams:
             log(f"{itm['language']} {itm['name']}")
@@ -221,7 +226,7 @@ def get_subtitle_items(suppress_warning=False):
         raw_items = []
         for s in streams:
             idx = s.get('index')
-            lang_code = s.get('language', 'unk')
+            lang_code = s.get('language') or 'unk'
             name = s.get('name', '')
 
             language = _resolve_lang_name(lang_code)
@@ -256,7 +261,7 @@ def get_subtitle_items(suppress_warning=False):
             if extra_flags:
                 label += f" ({extra_flags})"
 
-            is_chinese = lang_code.lower() in ['chi', 'zho', 'zh', 'chn']
+            is_chinese = _base_language(lang_code) in ['chi', 'zho', 'zh', 'chn']
             is_external = '(external)' in name.lower() or '（外挂）' in name.lower()
 
             raw_items.append({
@@ -324,7 +329,7 @@ def get_audio_items(suppress_warning=False):
 
         for s in streams:
             idx = s.get('index')
-            lang_code = s.get('language', 'unk')
+            lang_code = s.get('language') or 'unk'
             name = s.get('name', '')
             channels = s.get('channels', 0)
             codec = s.get('codec', '')
@@ -367,9 +372,9 @@ def get_audio_items(suppress_warning=False):
             label = language_and_name + (f" - {' - '.join(details)}" if details else "")
 
             sort_priority = 2
-            if lang_code.lower() in ['chi', 'zho', 'zh', 'chn']:
+            if _base_language(lang_code) in ['chi', 'zho', 'zh', 'chn']:
                 sort_priority = 0
-            elif lang_code.lower() in ['eng', 'en']:
+            elif _base_language(lang_code) in ['eng', 'en']:
                 sort_priority = 1
 
             display_items.append({

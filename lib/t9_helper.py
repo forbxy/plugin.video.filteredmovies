@@ -54,8 +54,8 @@ class T9Helper:
         self._ensure_lock = threading.Lock()
 
     def _get_search_field(self):
-        """返回用户选择的搜索索引字段名（originaltitle 或 sorttitle）。"""
-        return get_setting('search_field', addon_id=self.ADDON_ID) or 'originaltitle'
+        """搜索索引固定使用原始标题，忽略旧版保存的字段选择。"""
+        return 'originaltitle'
 
     def _get_media_rpc_map(self):
         sf = self._get_search_field()
