@@ -61,6 +61,11 @@
                     <default>true</default>
                     <control type="toggle"/>
                 </setting>
+                <setting id="auto_load_iso_subtitles" type="boolean" label="32035" help="32036">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
                 <setting id="osd_selector_position" type="string" label="32026" help="32027">
                     <level>0</level>
                     <default>center</default>

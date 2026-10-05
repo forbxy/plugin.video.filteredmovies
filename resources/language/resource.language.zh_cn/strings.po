@@ -133,3 +133,11 @@ msgstr "字幕/音轨选择器背景不透明度"
 msgctxt "#32034"
 msgid "Adjust subtitle/audio selector background opacity (0-100)."
 msgstr "调整字幕/音轨选择器背景不透明度（0-100）。"
+
+msgctxt "#32035"
+msgid "Auto-load external subtitles for ISO files"
+msgstr "自动加载 ISO 外挂字幕"
+
+msgctxt "#32036"
+msgid "When enabled, automatically load matching external subtitles from the ISO file's folder when playback starts. Changes take effect the next time playback starts."
+msgstr "启用后，播放 ISO 视频时自动加载同目录下与 ISO 文件名匹配的外挂字幕。更改在下次开始播放时生效。"

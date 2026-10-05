@@ -133,3 +133,11 @@ msgstr ""
 msgctxt "#32034"
 msgid "Adjust subtitle/audio selector background opacity (0-100)."
 msgstr ""
+
+msgctxt "#32035"
+msgid "Auto-load external subtitles for ISO files"
+msgstr ""
+
+msgctxt "#32036"
+msgid "When enabled, automatically load matching external subtitles from the ISO file's folder when playback starts. Changes take effect the next time playback starts."
+msgstr ""

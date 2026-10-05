@@ -214,6 +214,8 @@ class PlayerMonitor(xbmc.Player):
                 log(f"Error during skip: {e}")
 
     def load_iso_subtitles(self):
+        if get_setting('auto_load_iso_subtitles') == 'false':
+            return
         log("Checking for ISO subtitles...")
         try:
             if not self.isPlayingVideo():
